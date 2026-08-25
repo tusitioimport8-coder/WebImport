@@ -1,0 +1,6 @@
+node_modules/
+
+.env
+
+# Contexto del agente (no se commitea, es solo para uso local del agente IA)
+agent.md
