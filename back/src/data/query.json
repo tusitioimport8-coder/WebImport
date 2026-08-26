@@ -1,0 +1,142 @@
+{
+  "getUsuarios": {
+    "query": "SELECT id, nombre_completo, correo, telefono, rol, fecha_creacion FROM usuarios ORDER BY fecha_creacion DESC",
+    "structure_params": {},
+    "orderArray": []
+  },
+  "getUsuarioPorId": {
+    "query": "SELECT id, nombre_completo, correo, telefono, rol, fecha_creacion FROM usuarios WHERE id = $1",
+    "structure_params": {
+      "id": "string"
+    },
+    "orderArray": ["id"]
+  },
+  "getUsuarioPorCorreo": {
+    "query": "SELECT id, nombre_completo, correo, telefono, password_hash, rol, fecha_creacion FROM usuarios WHERE correo = $1",
+    "structure_params": {
+      "correo": "string"
+    },
+    "orderArray": ["correo"]
+  },
+  "crearUsuario": {
+    "query": "INSERT INTO usuarios (nombre_completo, correo, telefono, password_hash, rol) VALUES ($1, $2, $3, $4, $5) RETURNING id, nombre_completo, correo, telefono, rol, fecha_creacion",
+    "structure_params": {
+      "nombre_completo": "string",
+      "correo": "string",
+      "telefono": "string",
+      "password_hash": "string",
+      "rol": "string"
+    },
+    "orderArray": [
+      "nombre_completo",
+      "correo",
+      "telefono",
+      "password_hash",
+      "rol"
+    ]
+  },
+  "actualizarUsuario": {
+    "query": "UPDATE usuarios SET nombre_completo = $1, correo = $2, telefono = $3 WHERE id = $4 RETURNING id, nombre_completo, correo, telefono, rol, fecha_creacion",
+    "structure_params": {
+      "nombre_completo": "string",
+      "correo": "string",
+      "telefono": "string",
+      "id": "string"
+    },
+    "orderArray": ["nombre_completo", "correo", "telefono", "id"]
+  },
+  "actualizarPassword": {
+    "query": "UPDATE usuarios SET password_hash = $1 WHERE id = $2",
+    "structure_params": {
+      "password_hash": "string",
+      "id": "string"
+    },
+    "orderArray": ["password_hash", "id"]
+  },
+  "eliminarUsuario": {
+    "query": "DELETE FROM usuarios WHERE id = $1",
+    "structure_params": {
+      "id": "string"
+    },
+    "orderArray": ["id"]
+  },
+
+  "getProductos": {
+    "query": "SELECT id, sku, nombre, descripcion, precio, descuento_porcentaje, imagen_url, stock, estado, creado_en, ROUND(precio * (1 - descuento_porcentaje / 100), 2) AS precio_final FROM productos WHERE estado = true ORDER BY creado_en DESC",
+    "structure_params": {},
+    "orderArray": []
+  },
+  "getProductoPorId": {
+    "query": "SELECT id, sku, nombre, descripcion, precio, descuento_porcentaje, imagen_url, stock, estado, creado_en, ROUND(precio * (1 - descuento_porcentaje / 100), 2) AS precio_final FROM productos WHERE id = $1",
+    "structure_params": {
+      "id": "string"
+    },
+    "orderArray": ["id"]
+  },
+  "crearProducto": {
+    "query": "INSERT INTO productos (sku, nombre, descripcion, precio, descuento_porcentaje, imagen_url, stock) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id, sku, nombre, precio, descuento_porcentaje, stock, estado",
+    "structure_params": {
+      "sku": "string",
+      "nombre": "string",
+      "descripcion": "string",
+      "precio": "number",
+      "descuento_porcentaje": "number",
+      "imagen_url": "string",
+      "stock": "number"
+    },
+    "orderArray": [
+      "sku",
+      "nombre",
+      "descripcion",
+      "precio",
+      "descuento_porcentaje",
+      "imagen_url",
+      "stock"
+    ]
+  },
+  "asociarCategoriaProducto": {
+    "query": "INSERT INTO producto_categorias (producto_id, categoria_id) VALUES ($1, $2) ON CONFLICT DO NOTHING",
+    "structure_params": {
+      "producto_id": "string",
+      "categoria_id": "number"
+    },
+    "orderArray": ["producto_id", "categoria_id"]
+  },
+  "desasociarCategoriasProducto": {
+    "query": "DELETE FROM producto_categorias WHERE producto_id = $1",
+    "structure_params": {
+      "producto_id": "string"
+    },
+    "orderArray": ["producto_id"]
+  },
+  "getCategoriasPorProducto": {
+    "query": "SELECT c.id, c.nombre, c.descripcion FROM categorias c JOIN producto_categorias pc ON c.id = pc.categoria_id WHERE pc.producto_id = $1",
+    "structure_params": {
+      "producto_id": "string"
+    },
+    "orderArray": ["producto_id"]
+  },
+  "agregarImagenGaleria": {
+    "query": "INSERT INTO producto_imagenes (producto_id, url, es_principal) VALUES ($1, $2, $3) RETURNING id, url, es_principal",
+    "structure_params": {
+      "producto_id": "string",
+      "url": "string",
+      "es_principal": "boolean"
+    },
+    "orderArray": ["producto_id", "url", "es_principal"]
+  },
+  "getGaleriaProducto": {
+    "query": "SELECT id, url, es_principal, creado_en FROM producto_imagenes WHERE producto_id = $1 ORDER BY es_principal DESC, creado_en ASC",
+    "structure_params": {
+      "producto_id": "string"
+    },
+    "orderArray": ["producto_id"]
+  },
+  "eliminarProducto": {
+    "query": "DELETE FROM productos WHERE id = $1",
+    "structure_params": {
+      "id": "string"
+    },
+    "orderArray": ["id"]
+  }
+}
