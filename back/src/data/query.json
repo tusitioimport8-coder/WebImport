@@ -138,5 +138,29 @@
       "id": "string"
     },
     "orderArray": ["id"]
+  },
+
+  "actualizarProducto": {
+    "query": "UPDATE productos SET nombre = COALESCE($2, nombre), descripcion = COALESCE($3, descripcion), precio = COALESCE($4, precio), descuento_porcentaje = COALESCE($5, descuento_porcentaje), imagen_url = COALESCE($6, imagen_url), stock = COALESCE($7, stock), estado = COALESCE($8, estado) WHERE id = $1 RETURNING id, sku, nombre, precio, descuento_porcentaje, stock, estado",
+    "structure_params": {
+      "id": "string",
+      "nombre": "string",
+      "descripcion": "string",
+      "precio": "number",
+      "descuento_porcentaje": "number",
+      "imagen_url": "string",
+      "stock": "number",
+      "estado": "boolean"
+    },
+    "orderArray": [
+      "id",
+      "nombre",
+      "descripcion",
+      "precio",
+      "descuento_porcentaje",
+      "imagen_url",
+      "stock",
+      "estado"
+    ]
   }
 }
