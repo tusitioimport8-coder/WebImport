@@ -1,4 +1,4 @@
-import Validator from "../utils/validator.js";
+import Validator from "../utils/productos.validator.js";
 import ProductRepository from "../repositories/ProductRepository.js";
 import { Request, Response } from "express";
 
@@ -85,7 +85,7 @@ class ProductController {
     // 2. Parsear tipos recibidos desde multipart/form-data
     const datos = {
       ...request.body,
-      precio: request.body.precio ? Number(request.body.precio) : undefined,
+      precios: request.body.precios ? JSON.parse(request.body.precios) : [],
       descuento_porcentaje: request.body.descuento_porcentaje
         ? Number(request.body.descuento_porcentaje)
         : undefined,
