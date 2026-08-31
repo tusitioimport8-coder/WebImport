@@ -725,7 +725,7 @@ Las imágenes enviadas mediante `galeria` se registran como imágenes secundaria
 | ---------------------- | -------------- | ---------------- | -------------------------------------------- |
 | `nombre`               | `string`       | Según validación | Nombre del producto.                         |
 | `descripcion`          | `string`       | Según validación | Descripción del producto.                    |
-| `precio`               | `number`       | Según validación | Precio del producto.                         |
+| `precios`              | `JSON / array` | Según validación | Precios del producto.                        |
 | `descuento_porcentaje` | `number`       | No               | Porcentaje de descuento aplicado.            |
 | `stock`                | `number`       | Según validación | Cantidad disponible.                         |
 | `categorias_ids`       | `JSON / array` | Según validación | IDs de las categorías asociadas al producto. |
@@ -737,7 +737,9 @@ Las imágenes enviadas mediante `galeria` se registran como imágenes secundaria
 ```text
 nombre: Camiseta deportiva
 descripcion: Camiseta deportiva de alta calidad
-precio: 29.99
+precios: [
+  {"tipo_precio": "Detal", "precio": 25.00}, {"tipo_precio": "Mayor", "precio": 20.00}, {"tipo_precio": "GranMayor", "precio": 18.00}
+  ]
 descuento_porcentaje: 10
 stock: 25
 categorias_ids: [1, 3]
@@ -1086,3 +1088,11 @@ router.get("/products", (req, res) => ProductController.getProductos(req, res));
 ```
 
 > **Nota:** Los campos obligatorios, tipos y restricciones específicas de los productos dependen de los esquemas utilizados por `Validator.validateProducto()` y `Validator.validateActualizarProducto()`.
+
+## Agregar otro campo al usuario sobre la fecha de nacimiento
+
+## Seguimiento del usuario por correo, como 3 al mes
+
+## Automatizacion de proceso sobre decuento de cumpleaños
+
+buscar con srm
