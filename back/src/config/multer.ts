@@ -25,6 +25,12 @@ export const upload = multer({
   storage,
   limits: { fileSize: 5 * 1024 * 1024 }, // Límite de 5MB
   fileFilter: (req, file, cb) => {
+    // console.log("========== MULTER ==========");
+    // console.log("fieldname:", file.fieldname);
+    // console.log("originalname:", file.originalname);
+    // console.log("mimetype:", file.mimetype);
+    // console.log("============================");
+
     if (file.mimetype.startsWith("image/")) {
       cb(null, true);
     } else {

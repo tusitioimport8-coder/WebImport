@@ -7,10 +7,27 @@ const precioSchema = zod.object({
 
 export const crearProductoSchema = zod.object({
   sku: zod.string().optional(),
-  nombre: zod.string().min(1, "El nombre es obligatorio"),
+
+  nombre: zod
+    .string({ message: "El nombre es requerido" })
+    .min(1, "El nombre no puede estar vacío"),
+
   descripcion: zod.string().optional(),
-  descuento_porcentaje: zod.number().min(0).max(100).optional(),
-  stock: zod.number().min(0).optional(),
+
+  precios: zod.array(precioSchema).min(1, "Debe incluir al menos un precio"),
+
+  descuento_porcentaje: zod
+    .number()
+    .min(0, "El descuento no puede ser menor a 0")
+    .max(100, "El descuento no puede ser mayor a 100")
+    .optional(),
+
+  stock: zod
+    .number()
+    .int("El stock debe ser un número entero")
+    .min(0, "El stock no puede ser negativo")
+    .optional(),
+
   categorias_ids: zod.array(zod.number()).optional(),
 });
 
