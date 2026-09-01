@@ -18,15 +18,23 @@ interface QueriesMap {
   [key: string]: QueryConfig;
 }
 
-export default class DB {
+class DB {
   // Propiedades de la clase declaradas con sus tipos
   private pool: pg.Pool | null;
   private queries: QueriesMap;
+  private static instance: DB | null = null;
 
   constructor() {
     this.pool = null;
     this.queries = {};
     this.init();
+  }
+
+  public static getInstance(): DB {
+    if (!DB.instance) {
+      DB.instance = new DB();
+    }
+    return DB.instance;
   }
 
   async init(): Promise<void> {
@@ -132,3 +140,5 @@ export default class DB {
     }
   }
 }
+
+export default DB.getInstance();

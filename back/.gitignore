@@ -1,5 +1,6 @@
 node_modules/
-
+catalogo.html
+principal.html
 .env
 
 # Contexto del agente (no se commitea, es solo para uso local del agente IA)

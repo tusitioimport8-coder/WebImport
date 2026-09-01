@@ -498,8 +498,6 @@ req.session?.user;
 }
 ```
 
----
-
 # Rutas
 
 Las rutas principales de autenticación se registran de la siguiente manera:
@@ -525,53 +523,6 @@ router.post("/logout", async (req, res) => {
 | `POST` | `/login`    | Inicia sesión de un usuario. |
 | `POST` | `/register` | Registra un nuevo usuario.   |
 | `POST` | `/logout`   | Cierra la sesión actual.     |
-
----
-
-# Dependencias utilizadas
-
-La clase `Auth` utiliza los siguientes componentes:
-
-### `Session`
-
-Gestiona las sesiones del usuario:
-
-```ts
-Session.createSession();
-Session.destroySession();
-Session.sessionExist();
-```
-
-### `Validator`
-
-Realiza validaciones de datos:
-
-```ts
-Validator.validateEmail();
-Validator.validatePassword();
-```
-
-### `LinkRepository`
-
-Gestiona las operaciones relacionadas con usuarios en la base de datos:
-
-```ts
-getUsuarioPorCorreo();
-crearUsuario();
-eliminarUsuario();
-actualizarPassword();
-actualizarUsuario();
-getUsuarios();
-```
-
-### `Bcrypt`
-
-Gestiona las contraseñas:
-
-```ts
-Bcrypt.hash();
-Bcrypt.compare();
-```
 
 ---
 
@@ -614,3 +565,534 @@ Cliente
   (id, email, nombre, tipo);
 }
 ```
+
+# Endpoints de productos
+
+## `GET /api/productos/products`
+
+Obtiene la lista completa de productos disponibles en el sistema.
+
+### Autenticación
+
+No requiere autenticación.
+
+### Request Body
+
+No recibe información en el `body`.
+
+### Parámetros
+
+No requiere parámetros.
+
+### Ejemplo de petición
+
+```http
+GET /api/productos/products
+```
+
+### Respuesta exitosa — `200 OK`
+
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": "1",
+      "nombre": "Producto de ejemplo",
+      "descripcion": "Descripción del producto",
+      "precio": 99.99,
+      "stock": 10,
+      "imagen_url": "http://localhost:3000/uploads/productos/producto.jpg"
+    }
+  ]
+}
+```
+
+### Error — `500 Internal Server Error`
+
+```json
+{
+  "success": false,
+  "message": "Error al obtener la lista de productos"
+}
+```
+
+---
+
+# `GET /api/productos/product/:id`
+
+Obtiene la información de un producto específico mediante su ID.
+
+### Autenticación
+
+No requiere autenticación.
+
+### Parámetros de URL
+
+| Parámetro | Tipo     | Obligatorio | Descripción                             |
+| --------- | -------- | ----------- | --------------------------------------- |
+| `id`      | `string` | Sí          | ID del producto que se desea consultar. |
+
+### Ejemplo
+
+```http
+GET /api/productos/product/1
+```
+
+### Respuesta exitosa — `200 OK`
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": "1",
+    "nombre": "Producto de ejemplo",
+    "descripcion": "Descripción del producto",
+    "precio": 99.99,
+    "stock": 10,
+    "imagen_url": "http://localhost:3000/uploads/productos/producto.jpg"
+  }
+}
+```
+
+### Errores
+
+#### `400 Bad Request`
+
+Cuando no se proporciona el ID:
+
+```json
+{
+  "success": false,
+  "message": "El parámetro ID es requerido"
+}
+```
+
+#### `404 Not Found`
+
+Cuando el producto no existe:
+
+```json
+{
+  "success": false,
+  "message": "Producto no encontrado"
+}
+```
+
+#### `500 Internal Server Error`
+
+```json
+{
+  "success": false,
+  "message": "Error al obtener el producto"
+}
+```
+
+---
+
+# `POST /api/productos/product`
+
+Crea un nuevo producto y permite subir una imagen de portada junto con imágenes adicionales para la galería.
+
+### Autenticación
+
+**Sí.** Requiere `authMiddleware`.
+
+### Content-Type
+
+La petición debe utilizar:
+
+```http
+Content-Type: multipart/form-data
+```
+
+### Archivos
+
+El endpoint utiliza dos campos para las imágenes:
+
+| Campo     | Tipo     | Obligatorio | Descripción                              |
+| --------- | -------- | ----------- | ---------------------------------------- |
+| `imagen`  | `File`   | Sí          | Imagen principal o portada del producto. |
+| `galeria` | `File[]` | No          | Imágenes adicionales del producto.       |
+
+La imagen principal se almacena como `imagen_url` del producto.
+
+Las imágenes enviadas mediante `galeria` se registran como imágenes secundarias.
+
+### Campos del producto
+
+| Campo                  | Tipo           | Obligatorio      | Descripción                                  |
+| ---------------------- | -------------- | ---------------- | -------------------------------------------- |
+| `nombre`               | `string`       | Según validación | Nombre del producto.                         |
+| `descripcion`          | `string`       | Según validación | Descripción del producto.                    |
+| `precios`              | `JSON / array` | Según validación | Precios del producto.                        |
+| `descuento_porcentaje` | `number`       | No               | Porcentaje de descuento aplicado.            |
+| `stock`                | `number`       | Según validación | Cantidad disponible.                         |
+| `categorias_ids`       | `JSON / array` | Según validación | IDs de las categorías asociadas al producto. |
+
+> Los campos exactos obligatorios y sus restricciones son determinados por `Validator.validateProducto()`.
+
+### Ejemplo con `form-data`
+
+```text
+nombre: Camiseta deportiva
+descripcion: Camiseta deportiva de alta calidad
+precios: [
+  {"tipo_precio": "Detal", "precio": 25.00}, {"tipo_precio": "Mayor", "precio": 20.00}, {"tipo_precio": "GranMayor", "precio": 18.00}
+  ]
+descuento_porcentaje: 10
+stock: 25
+categorias_ids: [1, 3]
+
+imagen: camiseta.jpg
+galeria: camiseta-frente.jpg
+galeria: camiseta-atras.jpg
+```
+
+### `categorias_ids`
+
+Este campo se recibe como texto JSON dentro de `multipart/form-data`.
+
+Ejemplo:
+
+```text
+categorias_ids: [1, 3, 5]
+```
+
+El controlador lo convierte a un array mediante:
+
+```ts
+JSON.parse(request.body.categorias_ids);
+```
+
+### Proceso
+
+1. Recibe los datos mediante `multipart/form-data`.
+2. Obtiene la imagen principal desde el campo `imagen`.
+3. Obtiene las imágenes secundarias desde `galeria`.
+4. Convierte `precio`, `descuento_porcentaje` y `stock` a números.
+5. Convierte `categorias_ids` desde JSON a un array.
+6. Valida los datos mediante `Validator.validateProducto()`.
+7. Construye la URL de la imagen principal.
+8. Crea el producto en la base de datos.
+9. Guarda las imágenes de la galería asociadas al producto.
+10. Devuelve el producto creado.
+
+### Respuesta exitosa — `201 Created`
+
+```json
+{
+  "success": true,
+  "message": "Producto creado exitosamente con su galería",
+  "data": {
+    "id": "1",
+    "nombre": "Camiseta deportiva",
+    "descripcion": "Camiseta deportiva de alta calidad",
+    "precio": 29.99,
+    "descuento_porcentaje": 10,
+    "stock": 25,
+    "imagen_url": "http://localhost:3000/uploads/productos/camiseta.jpg"
+  }
+}
+```
+
+### Errores
+
+#### `400 Bad Request` — Imagen obligatoria
+
+```json
+{
+  "success": false,
+  "message": "La imagen de portada es obligatoria"
+}
+```
+
+#### `400 Bad Request` — Error de validación
+
+```json
+{
+  "success": false,
+  "message": "Error de validación",
+  "error": [
+    {
+      "path": ["nombre"],
+      "message": "El nombre es requerido"
+    }
+  ]
+}
+```
+
+---
+
+# `PUT /api/productos/product/:id`
+
+Actualiza la información de un producto existente.
+
+También permite reemplazar la imagen de portada.
+
+### Autenticación
+
+**Sí.** Requiere `authMiddleware`.
+
+### Content-Type
+
+Si se actualiza la imagen, la petición debe utilizar:
+
+```http
+Content-Type: multipart/form-data
+```
+
+### Parámetros de URL
+
+| Parámetro | Tipo     | Obligatorio | Descripción                              |
+| --------- | -------- | ----------- | ---------------------------------------- |
+| `id`      | `string` | Sí          | ID del producto que se desea actualizar. |
+
+### Campos recibidos
+
+| Campo                  | Tipo      | Obligatorio | Descripción                    |
+| ---------------------- | --------- | ----------- | ------------------------------ |
+| `nombre`               | `string`  | si          | Nuevo nombre del producto.     |
+| `descripcion`          | `string`  | si          | Nueva descripción.             |
+| `precio`               | `number`  | si          | Nuevo precio.                  |
+| `descuento_porcentaje` | `number`  | si          | Nuevo porcentaje de descuento. |
+| `stock`                | `number`  | si          | Nuevo stock.                   |
+| `estado`               | `boolean` | si          | Estado del producto.           |
+| `imagen`               | `File`    | si          | Nueva imagen de portada.       |
+
+> Los campos disponibles y sus restricciones son validados mediante `Validator.validateActualizarProducto()`.
+
+### Ejemplo sin cambiar imagen
+
+```text
+PUT /api/productos/product/1
+```
+
+```text
+nombre: Camiseta deportiva premium
+precio: 34.99
+stock: 30
+estado: true
+```
+
+### Ejemplo cambiando imagen
+
+```text
+PUT /api/productos/product/1
+```
+
+```text
+nombre: Camiseta deportiva premium
+precio: 34.99
+imagen: camiseta-nueva.jpg
+```
+
+### Proceso
+
+1. Obtiene el ID desde los parámetros de la URL.
+2. Obtiene los datos enviados.
+3. Convierte los valores numéricos a `number`.
+4. Convierte `estado` a `boolean`.
+5. Valida los datos.
+6. Comprueba que el producto exista.
+7. Mantiene la imagen actual si no se envía una nueva.
+8. Genera una nueva URL si se proporciona una imagen.
+9. Actualiza el producto en la base de datos.
+10. Devuelve el producto actualizado.
+
+### Respuesta exitosa — `200 OK`
+
+```json
+{
+  "success": true,
+  "message": "Producto actualizado exitosamente",
+  "data": {
+    "id": "1",
+    "nombre": "Camiseta deportiva premium",
+    "precio": 34.99,
+    "stock": 30,
+    "imagen_url": "http://localhost:3000/uploads/productos/camiseta-nueva.jpg"
+  }
+}
+```
+
+### Errores
+
+#### `400 Bad Request`
+
+Error de validación:
+
+```json
+{
+  "success": false,
+  "message": "Error de validación",
+  "errors": {}
+}
+```
+
+#### `404 Not Found`
+
+Cuando el producto no existe:
+
+```json
+{
+  "success": false,
+  "message": "El producto a actualizar no existe"
+}
+```
+
+---
+
+# `DELETE /api/productos/product/:id`
+
+Elimina un producto existente.
+
+### Autenticación
+
+**Sí.** Requiere `authMiddleware`.
+
+### Parámetros de URL
+
+| Parámetro | Tipo     | Obligatorio | Descripción                            |
+| --------- | -------- | ----------- | -------------------------------------- |
+| `id`      | `string` | Sí          | ID del producto que se desea eliminar. |
+
+### Ejemplo
+
+```http
+DELETE /api/productos/product/1
+```
+
+### Proceso
+
+1. Obtiene el ID desde los parámetros de la URL.
+2. Comprueba que el ID haya sido proporcionado.
+3. Busca el producto en la base de datos.
+4. Verifica que el producto exista.
+5. Elimina el producto mediante `eliminarProducto()`.
+6. Devuelve una confirmación.
+
+### Respuesta exitosa — `200 OK`
+
+```json
+{
+  "success": true,
+  "message": "Producto eliminado exitosamente"
+}
+```
+
+### Errores
+
+#### `400 Bad Request`
+
+```json
+{
+  "success": false,
+  "message": "El parámetro ID es requerido"
+}
+```
+
+#### `404 Not Found`
+
+```json
+{
+  "success": false,
+  "message": "Producto no encontrado"
+}
+```
+
+#### `500 Internal Server Error`
+
+```json
+{
+  "success": false,
+  "message": "Error al eliminar el producto"
+}
+```
+
+---
+
+# Resumen de endpoints
+
+| Método   | Endpoint                     | Auth | Descripción                  |
+| -------- | ---------------------------- | ---: | ---------------------------- |
+| `GET`    | `/api/productos/products`    |   ❌ | Obtener todos los productos. |
+| `GET`    | `/api/productos/product/:id` |   ❌ | Obtener un producto por ID.  |
+| `POST`   | `/api/productos/product`     |   ✅ | Crear un producto.           |
+| `PUT`    | `/api/productos/product/:id` |   ✅ | Actualizar un producto.      |
+| `DELETE` | `/api/productos/product/:id` |   ✅ | Eliminar un producto.        |
+
+---
+
+# Middlewares utilizados
+
+## `authMiddleware`
+
+Se utiliza en las operaciones que modifican información:
+
+```ts
+router.post("/product", authMiddleware, ...);
+router.put("/product/:id", authMiddleware, ...);
+router.delete("/product/:id", authMiddleware, ...);
+```
+
+Su función es comprobar que el usuario tenga una sesión/autorización válida antes de realizar la operación.
+
+## `handleProductoUpload`
+
+Se utiliza en:
+
+```ts
+router.post("/product", authMiddleware, handleProductoUpload, ...);
+
+router.put("/product/:id", authMiddleware, handleProductoUpload, ...);
+```
+
+Permite procesar las imágenes enviadas mediante `multipart/form-data`.
+
+Los archivos se organizan en:
+
+```ts
+imagen;
+galeria;
+```
+
+Las imágenes se almacenan y posteriormente se construyen sus URLs utilizando:
+
+```text
+/uploads/productos/
+```
+
+---
+
+# Rutas completas
+
+```ts
+router.post("/product", authMiddleware, handleProductoUpload, (req, res) =>
+  ProductController.createProducto(req, res),
+);
+
+router.put("/product/:id", authMiddleware, handleProductoUpload, (req, res) =>
+  ProductController.updateProducto(req, res),
+);
+
+router.delete("/product/:id", authMiddleware, (req, res) =>
+  ProductController.deleteProducto(req, res),
+);
+
+router.get("/product/:id", (req, res) =>
+  ProductController.getProductoPorId(req, res),
+);
+
+router.get("/products", (req, res) => ProductController.getProductos(req, res));
+```
+
+> **Nota:** Los campos obligatorios, tipos y restricciones específicas de los productos dependen de los esquemas utilizados por `Validator.validateProducto()` y `Validator.validateActualizarProducto()`.
+
+## Agregar otro campo al usuario sobre la fecha de nacimiento
+
+## Seguimiento del usuario por correo, como 3 al mes
+
+## Automatizacion de proceso sobre decuento de cumpleaños
+
+buscar con srm

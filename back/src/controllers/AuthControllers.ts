@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import Session from "../components/session.js";
 import Validator from "../utils/validator.js";
-import LinkRepository from "./Repository.js";
+import userRepositoru from "../repositories/UserRepository.js";
 import Bcrypt from "../utils/bcrypt.js";
 import {
   Usuario,
@@ -14,7 +14,7 @@ class Auth {
   constructor(
     private readonly session = Session,
     private readonly validator = Validator,
-    private readonly repository = LinkRepository,
+    private readonly repository = userRepositoru,
     private readonly bcrypt = Bcrypt,
   ) {}
 

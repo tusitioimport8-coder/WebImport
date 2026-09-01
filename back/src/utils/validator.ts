@@ -42,37 +42,6 @@ class Validator {
       );
     return tokenSchema.safeParse(token);
   }
-
-  async validateProducto(producto: unknown) {
-    const productoSchema = zod.object({
-      nombre: zod
-        .string({ message: "El nombre es requerido" })
-        .min(1, "El nombre no puede estar vacío"),
-      precio: zod
-        .number({ message: "El precio es requerido y debe ser un número" })
-        .min(0, "El precio no puede ser negativo"),
-      descuento_porcentaje: zod
-        .number({ message: "El descuento debe ser un número" })
-        .min(0, "El descuento no puede ser menor a 0")
-        .max(100, "El descuento no puede ser mayor a 100")
-        .optional(),
-      stock: zod
-        .number({ message: "El stock debe ser un número" })
-        .int("El stock debe ser un número entero")
-        .min(0, "El stock no puede ser negativo")
-        .optional(),
-      sku: zod.string().optional(),
-      descripcion: zod.string().optional(),
-      imagen_url: zod
-        .string()
-        .url("La URL de la imagen no es válida")
-        .optional()
-        .nullable(),
-      categorias_ids: zod.array(zod.number()).optional(),
-    });
-
-    return productoSchema.safeParse(producto);
-  }
 }
 
 export default new Validator();
