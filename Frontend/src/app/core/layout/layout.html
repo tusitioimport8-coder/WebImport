@@ -34,6 +34,11 @@
       <tui-icon icon="@tui.layout-dashboard"></tui-icon>
       Catálogo
     </button>
+
+    <button tuiNavigationItem (click)="navegar('/inventario', 2)">
+  <tui-icon icon="@tui.box"></tui-icon>
+  Inventario
+</button>
   </nav>
 
   <main tuiNavigationMain>
@@ -41,6 +46,7 @@
       <tui-tabs [(activeItemIndex)]="activeItemIndex">
         <button tuiTab (click)="navegar('/inicio', 0)">Inicio</button>
         <button tuiTab (click)="navegar('/catalogo', 1)">Catálogo</button>
+        <button tuiTab (click)="navegar('/inventario', 2)">Inventario</button>
       </tui-tabs>
     </div>
     
