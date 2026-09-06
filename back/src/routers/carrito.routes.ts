@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { CarritoController } from "../controllers/CarritoControllers.js";
 import { authMiddleware } from "../middlewares/AuthMiddleware.js";
-
+import { generarLinkWhatsApp } from "../utils/Messenge.js";
 const router = Router();
 const carritoController = new CarritoController();
 
@@ -29,5 +29,7 @@ router.delete("/carrito/:productoId", authMiddleware, (req, res) =>
 router.delete("/carrito", authMiddleware, (req, res) =>
   carritoController.vaciarCarrito(req, res),
 );
+
+router.get("/carrito/whatsapp", (req, res) => generarLinkWhatsApp(req, res));
 
 export default router;
