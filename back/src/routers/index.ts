@@ -1,11 +1,12 @@
 import { Router } from "express";
 import authRoutes from "./auth.routes.js";
 import productoRoutes from "./producto.routes.js";
-
+import carritoRoutes from "./carrito.routes.js";
 const router = Router();
 
 // Asignas prefijos limpios
 router.use("/auth", authRoutes);
 router.use("/productos", productoRoutes);
+router.use("/carrito", carritoRoutes);
 
 export default router;

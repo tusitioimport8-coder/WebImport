@@ -1,6 +1,10 @@
 node_modules/
-
+catalogo.html
+principal.html
 .env
+../Excel/
+../Formato de control de actividades 2022A.doc
+uploads/
 
 # Contexto del agente (no se commitea, es solo para uso local del agente IA)
 agent.md

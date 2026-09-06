@@ -1,7 +1,7 @@
 // src/middlewares/uploadMiddleware.ts
 import { Request, Response, NextFunction } from "express";
 import multer from "multer";
-import { upload } from "./multer"; // Tu configuración actual
+import { upload } from "../config/multer"; // Tu configuración actual
 
 const uploadFields = upload.fields([
   { name: "imagen", maxCount: 1 },

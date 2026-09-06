@@ -47,12 +47,11 @@ class ProductRepository {
   }
 
   async crearProducto(datos: CrearProductoDTO): Promise<{ id: string }> {
-    // 1. Extraemos solo los campos que la consulta SQL "crearProducto" espera
+    // 1. Inserción de la entidad base 'productos'
     const payload = {
       sku: datos.sku ?? null,
       nombre: datos.nombre,
       descripcion: datos.descripcion ?? null,
-      precio: datos.precio,
       descuento_porcentaje: datos.descuento_porcentaje ?? 0,
       imagen_url: datos.imagen_url ?? null,
       stock: datos.stock ?? 0,
@@ -61,7 +60,20 @@ class ProductRepository {
     const result = await this.db.excecuteNameQuery("crearProducto", payload);
     const nuevoProducto = result?.[0] || result;
 
-    // 2. Asociar categorías en paralelo si se proporcionaron
+    // 2. Inserción de Precios (Detal, Mayor, GranMayor) en precios_productos
+    if (datos.precios && datos.precios.length > 0) {
+      await Promise.all(
+        datos.precios.map((precioItem) =>
+          this.db.excecuteNameQuery("agregarPrecioProducto", {
+            id_producto: nuevoProducto.id,
+            tipo_precio: precioItem.tipo_precio,
+            precio: precioItem.precio,
+          }),
+        ),
+      );
+    }
+
+    // 3. Inserción de Categorías asociadas
     if (datos.categorias_ids && datos.categorias_ids.length > 0) {
       await Promise.all(
         datos.categorias_ids.map((categoriaId) =>
@@ -93,22 +105,43 @@ class ProductRepository {
   async actualizarProducto(
     datos: ActualizarProductoDTO,
   ): Promise<ProductoConDetallesDTO | undefined> {
+    // 1. Extraer payload sin el campo 'precio' para la tabla 'productos'
     const payload = {
       id: datos.id,
+      sku: datos.sku ?? null,
       nombre: datos.nombre ?? null,
       descripcion: datos.descripcion ?? null,
-      precio: datos.precio ?? null,
       descuento_porcentaje: datos.descuento_porcentaje ?? null,
       imagen_url: datos.imagen_url ?? null,
       stock: datos.stock ?? null,
       estado: datos.estado ?? null,
     };
 
+    // 2. Ejecutar la actualización de la entidad base
     const result = await this.db.excecuteNameQuery(
       "actualizarProducto",
       payload,
     );
-    return result?.[0];
+    const productoActualizado = result?.[0];
+
+    if (!productoActualizado) {
+      return undefined;
+    }
+
+    // 3. Si se enviaron precios para actualizar, procesarlos en precios_productos
+    if (datos.precios && datos.precios.length > 0) {
+      await Promise.all(
+        datos.precios.map((precioItem) =>
+          this.db.excecuteNameQuery("upsertPrecioProducto", {
+            id_producto: datos.id,
+            tipo_precio: precioItem.tipo_precio,
+            precio: precioItem.precio,
+          }),
+        ),
+      );
+    }
+
+    return productoActualizado;
   }
 
   async eliminarProducto(id: string): Promise<void> {

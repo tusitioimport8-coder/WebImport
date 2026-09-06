@@ -1,9 +1,16 @@
 import multer from "multer";
 import path from "path";
 import { v4 as uuidv4 } from "uuid";
+import fs from "fs";
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
+    const uploadPath = "uploads/productos";
+
+    // Si la carpeta no existe, la crea de forma recursiva
+    if (!fs.existsSync(uploadPath)) {
+      fs.mkdirSync(uploadPath, { recursive: true });
+    }
     // Carpeta donde se guardarán físicamente las imágenes
     cb(null, "uploads/productos");
   },
@@ -18,6 +25,12 @@ export const upload = multer({
   storage,
   limits: { fileSize: 5 * 1024 * 1024 }, // Límite de 5MB
   fileFilter: (req, file, cb) => {
+    // console.log("========== MULTER ==========");
+    // console.log("fieldname:", file.fieldname);
+    // console.log("originalname:", file.originalname);
+    // console.log("mimetype:", file.mimetype);
+    // console.log("============================");
+
     if (file.mimetype.startsWith("image/")) {
       cb(null, true);
     } else {

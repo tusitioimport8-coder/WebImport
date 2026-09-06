@@ -27,7 +27,7 @@ app.use(
   }),
 );
 
-app.use("/uploads", express.static(path.resolve("src/uploads")));
+app.use("/uploads", express.static(path.resolve("uploads")));
 
 // JSON
 app.use(express.json());

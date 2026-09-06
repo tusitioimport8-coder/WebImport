@@ -62,24 +62,23 @@
   },
 
   "getProductos": {
-    "query": "SELECT id, sku, nombre, descripcion, precio, descuento_porcentaje, imagen_url, stock, estado, creado_en, ROUND(precio * (1 - descuento_porcentaje / 100), 2) AS precio_final FROM productos WHERE estado = true ORDER BY creado_en DESC",
+    "query": "SELECT p.id, p.sku, p.nombre, p.descripcion, p.descuento_porcentaje, p.imagen_url, p.stock, p.estado, p.creado_en, COALESCE(json_agg(json_build_object('id_precio', pr.id_precio, 'tipo_precio', pr.tipo_precio, 'precio', pr.precio, 'precio_final', ROUND(pr.precio * (1 - p.descuento_porcentaje / 100), 2))) FILTER (WHERE pr.id_precio IS NOT NULL), '[]') AS precios FROM productos p LEFT JOIN precios_productos pr ON p.id = pr.id_producto WHERE p.estado = true GROUP BY p.id ORDER BY p.creado_en DESC",
     "structure_params": {},
     "orderArray": []
   },
   "getProductoPorId": {
-    "query": "SELECT id, sku, nombre, descripcion, precio, descuento_porcentaje, imagen_url, stock, estado, creado_en, ROUND(precio * (1 - descuento_porcentaje / 100), 2) AS precio_final FROM productos WHERE id = $1",
+    "query": "SELECT p.id, p.sku, p.nombre, p.descripcion, p.descuento_porcentaje, p.imagen_url, p.stock, p.estado, p.creado_en, COALESCE(json_agg(json_build_object('id_precio', pr.id_precio, 'tipo_precio', pr.tipo_precio, 'precio', pr.precio, 'precio_final', ROUND(pr.precio * (1 - p.descuento_porcentaje / 100), 2))) FILTER (WHERE pr.id_precio IS NOT NULL), '[]') AS precios FROM productos p LEFT JOIN precios_productos pr ON p.id = pr.id_producto WHERE p.id = $1 GROUP BY p.id",
     "structure_params": {
       "id": "string"
     },
     "orderArray": ["id"]
   },
   "crearProducto": {
-    "query": "INSERT INTO productos (sku, nombre, descripcion, precio, descuento_porcentaje, imagen_url, stock) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id, sku, nombre, precio, descuento_porcentaje, stock, estado",
+    "query": "INSERT INTO productos (sku, nombre, descripcion, descuento_porcentaje, imagen_url, stock) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id, sku, nombre, descuento_porcentaje, stock, estado",
     "structure_params": {
       "sku": "string",
       "nombre": "string",
       "descripcion": "string",
-      "precio": "number",
       "descuento_porcentaje": "number",
       "imagen_url": "string",
       "stock": "number"
@@ -88,11 +87,19 @@
       "sku",
       "nombre",
       "descripcion",
-      "precio",
       "descuento_porcentaje",
       "imagen_url",
       "stock"
     ]
+  },
+  "agregarPrecioProducto": {
+    "query": "INSERT INTO precios_productos (id_producto, tipo_precio, precio) VALUES ($1, $2, $3) RETURNING id_precio, tipo_precio, precio",
+    "structure_params": {
+      "id_producto": "string",
+      "tipo_precio": "string",
+      "precio": "number"
+    },
+    "orderArray": ["id_producto", "tipo_precio", "precio"]
   },
   "asociarCategoriaProducto": {
     "query": "INSERT INTO producto_categorias (producto_id, categoria_id) VALUES ($1, $2) ON CONFLICT DO NOTHING",
@@ -141,12 +148,12 @@
   },
 
   "actualizarProducto": {
-    "query": "UPDATE productos SET nombre = COALESCE($2, nombre), descripcion = COALESCE($3, descripcion), precio = COALESCE($4, precio), descuento_porcentaje = COALESCE($5, descuento_porcentaje), imagen_url = COALESCE($6, imagen_url), stock = COALESCE($7, stock), estado = COALESCE($8, estado) WHERE id = $1 RETURNING id, sku, nombre, precio, descuento_porcentaje, stock, estado",
+    "query": "UPDATE productos SET sku = COALESCE($2, sku), nombre = COALESCE($3, nombre), descripcion = COALESCE($4, descripcion), descuento_porcentaje = COALESCE($5, descuento_porcentaje), imagen_url = COALESCE($6, imagen_url), stock = COALESCE($7, stock), estado = COALESCE($8, estado) WHERE id = $1 RETURNING *",
     "structure_params": {
       "id": "string",
+      "sku": "string",
       "nombre": "string",
       "descripcion": "string",
-      "precio": "number",
       "descuento_porcentaje": "number",
       "imagen_url": "string",
       "stock": "number",
@@ -154,13 +161,76 @@
     },
     "orderArray": [
       "id",
+      "sku",
       "nombre",
       "descripcion",
-      "precio",
       "descuento_porcentaje",
       "imagen_url",
       "stock",
       "estado"
     ]
+  },
+  "upsertPrecioProducto": {
+    "query": "INSERT INTO precios_productos (id_producto, tipo_precio, precio) VALUES ($1, $2, $3) ON CONFLICT (id_producto, tipo_precio) DO UPDATE SET precio = EXCLUDED.precio",
+    "structure_params": {
+      "id_producto": "string",
+      "tipo_precio": "string",
+      "precio": "number"
+    },
+    "orderArray": ["id_producto", "tipo_precio", "precio"]
+  },
+  "crearCarrito": {
+    "query": "INSERT INTO carritos (usuario_id, estado) VALUES ($1, 'activo') RETURNING id, usuario_id, estado, creado_en",
+    "structure_params": {
+      "usuario_id": "string"
+    },
+    "orderArray": ["usuario_id"]
+  },
+  "obtenerOCrearCarritoActivo": {
+    "query": "WITH carrito AS (INSERT INTO carritos (usuario_id, estado) VALUES ($1, 'activo') ON CONFLICT (usuario_id, estado) DO NOTHING RETURNING id, usuario_id, estado) SELECT id, usuario_id, estado FROM carrito WHERE usuario_id = $1 UNION ALL SELECT id, usuario_id, estado FROM carritos WHERE usuario_id = $1 AND estado = 'activo' LIMIT 1",
+    "structure_params": {
+      "usuario_id": "string"
+    },
+    "orderArray": ["usuario_id"]
+  },
+  "obtenerProductosCarritoRaw": {
+    "query": "SELECT ci.id AS item_id, p.id AS producto_id, p.nombre, p.imagen_url, p.descuento_porcentaje, ci.cantidad, p_detal.precio AS precio_detal, p_mayor.precio AS precio_mayor, p_gmayor.precio AS precio_gran_mayor FROM carrito_items ci JOIN productos p ON ci.producto_id = p.id JOIN carritos c ON ci.carrito_id = c.id LEFT JOIN precios_productos p_detal ON (p.id = p_detal.id_producto AND p_detal.tipo_precio = 'Detal') LEFT JOIN precios_productos p_mayor ON (p.id = p_mayor.id_producto AND p_mayor.tipo_precio = 'Mayor') LEFT JOIN precios_productos p_gmayor ON (p.id = p_gmayor.id_producto AND p_gmayor.tipo_precio = 'GranMayor') WHERE c.usuario_id = $1 AND c.estado = 'activo'",
+    "structure_params": {
+      "usuario_id": "string"
+    },
+    "orderArray": ["usuario_id"]
+  },
+  "upsertItemCarritoSimple": {
+    "query": "INSERT INTO carrito_items (carrito_id, producto_id, cantidad) VALUES ($1, $2, $3) ON CONFLICT (carrito_id, producto_id) DO UPDATE SET cantidad = carrito_items.cantidad + EXCLUDED.cantidad RETURNING id, carrito_id, producto_id, cantidad",
+    "structure_params": {
+      "carrito_id": "string",
+      "producto_id": "string",
+      "cantidad": "number"
+    },
+    "orderArray": ["carrito_id", "producto_id", "cantidad"]
+  },
+  "actualizarCantidadItemCarrito": {
+    "query": "UPDATE carrito_items SET cantidad = $3 WHERE carrito_id = $1 AND producto_id = $2 RETURNING id, carrito_id, producto_id, cantidad",
+    "structure_params": {
+      "carrito_id": "string",
+      "producto_id": "string",
+      "cantidad": "number"
+    },
+    "orderArray": ["carrito_id", "producto_id", "cantidad"]
+  },
+  "eliminarItemCarrito": {
+    "query": "DELETE FROM carrito_items WHERE carrito_id = $1 AND producto_id = $2",
+    "structure_params": {
+      "carrito_id": "string",
+      "producto_id": "string"
+    },
+    "orderArray": ["carrito_id", "producto_id"]
+  },
+  "vaciarCarrito": {
+    "query": "DELETE FROM carrito_items WHERE carrito_id = $1",
+    "structure_params": {
+      "carrito_id": "string"
+    },
+    "orderArray": ["carrito_id"]
   }
 }
