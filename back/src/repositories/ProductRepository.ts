@@ -49,7 +49,6 @@ class ProductRepository {
   async crearProducto(datos: CrearProductoDTO): Promise<{ id: string }> {
     // 1. Inserción de la entidad base 'productos'
     const payload = {
-      sku: datos.sku ?? null,
       nombre: datos.nombre,
       descripcion: datos.descripcion ?? null,
       descuento_porcentaje: datos.descuento_porcentaje ?? 0,
@@ -108,7 +107,6 @@ class ProductRepository {
     // 1. Extraer payload sin el campo 'precio' para la tabla 'productos'
     const payload = {
       id: datos.id,
-      sku: datos.sku ?? null,
       nombre: datos.nombre ?? null,
       descripcion: datos.descripcion ?? null,
       descuento_porcentaje: datos.descuento_porcentaje ?? null,

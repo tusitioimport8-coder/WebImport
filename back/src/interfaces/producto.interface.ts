@@ -17,7 +17,6 @@ export interface PrecioProducto {
 
 export interface Producto {
   id: string; // UUID
-  sku?: string;
   nombre: string;
   descripcion?: string;
   descuento_porcentaje: number;
@@ -43,7 +42,6 @@ export interface PrecioInputDTO {
   precio: number;
 }
 export interface CrearProductoDTO {
-  sku?: string;
   nombre: string;
   descripcion?: string;
   precios: PrecioInputDTO[]; // Exiges los precios (ej. Detal, Mayor, GranMayor)
@@ -55,7 +53,6 @@ export interface CrearProductoDTO {
 
 export interface ActualizarProductoDTO {
   id: string;
-  sku?: string;
   nombre?: string;
   descripcion?: string;
   precios?: PrecioInputDTO[];
