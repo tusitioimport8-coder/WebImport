@@ -60,23 +60,21 @@
     },
     "orderArray": ["id"]
   },
-
   "getProductos": {
-    "query": "SELECT p.id, p.sku, p.nombre, p.descripcion, p.descuento_porcentaje, p.imagen_url, p.stock, p.estado, p.creado_en, COALESCE(json_agg(json_build_object('id_precio', pr.id_precio, 'tipo_precio', pr.tipo_precio, 'precio', pr.precio, 'precio_final', ROUND(pr.precio * (1 - p.descuento_porcentaje / 100), 2))) FILTER (WHERE pr.id_precio IS NOT NULL), '[]') AS precios FROM productos p LEFT JOIN precios_productos pr ON p.id = pr.id_producto WHERE p.estado = true GROUP BY p.id ORDER BY p.creado_en DESC",
+    "query": "SELECT p.id, p.nombre, p.descripcion, p.descuento_porcentaje, p.imagen_url, p.stock, p.estado, p.creado_en, COALESCE(json_agg(json_build_object('id_precio', pr.id_precio, 'tipo_precio', pr.tipo_precio, 'precio', pr.precio, 'precio_final', ROUND(pr.precio * (1 - p.descuento_porcentaje / 100), 2))) FILTER (WHERE pr.id_precio IS NOT NULL), '[]') AS precios FROM productos p LEFT JOIN precios_productos pr ON p.id = pr.id_producto WHERE p.estado = true GROUP BY p.id ORDER BY p.creado_en DESC",
     "structure_params": {},
     "orderArray": []
   },
   "getProductoPorId": {
-    "query": "SELECT p.id, p.sku, p.nombre, p.descripcion, p.descuento_porcentaje, p.imagen_url, p.stock, p.estado, p.creado_en, COALESCE(json_agg(json_build_object('id_precio', pr.id_precio, 'tipo_precio', pr.tipo_precio, 'precio', pr.precio, 'precio_final', ROUND(pr.precio * (1 - p.descuento_porcentaje / 100), 2))) FILTER (WHERE pr.id_precio IS NOT NULL), '[]') AS precios FROM productos p LEFT JOIN precios_productos pr ON p.id = pr.id_producto WHERE p.id = $1 GROUP BY p.id",
+    "query": "SELECT p.id, p.nombre, p.descripcion, p.descuento_porcentaje, p.imagen_url, p.stock, p.estado, p.creado_en, COALESCE(json_agg(json_build_object('id_precio', pr.id_precio, 'tipo_precio', pr.tipo_precio, 'precio', pr.precio, 'precio_final', ROUND(pr.precio * (1 - p.descuento_porcentaje / 100), 2))) FILTER (WHERE pr.id_precio IS NOT NULL), '[]') AS precios FROM productos p LEFT JOIN precios_productos pr ON p.id = pr.id_producto WHERE p.id = $1 GROUP BY p.id",
     "structure_params": {
       "id": "string"
     },
     "orderArray": ["id"]
   },
   "crearProducto": {
-    "query": "INSERT INTO productos (sku, nombre, descripcion, descuento_porcentaje, imagen_url, stock) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id, sku, nombre, descuento_porcentaje, stock, estado",
+    "query": "INSERT INTO productos (nombre, descripcion, descuento_porcentaje, imagen_url, stock) VALUES ($1, $2, $3, $4, $5) RETURNING id, nombre, descuento_porcentaje, stock, estado",
     "structure_params": {
-      "sku": "string",
       "nombre": "string",
       "descripcion": "string",
       "descuento_porcentaje": "number",
@@ -84,7 +82,6 @@
       "stock": "number"
     },
     "orderArray": [
-      "sku",
       "nombre",
       "descripcion",
       "descuento_porcentaje",
@@ -148,10 +145,9 @@
   },
 
   "actualizarProducto": {
-    "query": "UPDATE productos SET sku = COALESCE($2, sku), nombre = COALESCE($3, nombre), descripcion = COALESCE($4, descripcion), descuento_porcentaje = COALESCE($5, descuento_porcentaje), imagen_url = COALESCE($6, imagen_url), stock = COALESCE($7, stock), estado = COALESCE($8, estado) WHERE id = $1 RETURNING *",
+    "query": "UPDATE productos SET nombre = COALESCE($2, nombre), descripcion = COALESCE($3, descripcion), descuento_porcentaje = COALESCE($4, descuento_porcentaje), imagen_url = COALESCE($5, imagen_url), stock = COALESCE($6, stock), estado = COALESCE($7, estado) WHERE id = $1 RETURNING *",
     "structure_params": {
       "id": "string",
-      "sku": "string",
       "nombre": "string",
       "descripcion": "string",
       "descuento_porcentaje": "number",
@@ -161,7 +157,6 @@
     },
     "orderArray": [
       "id",
-      "sku",
       "nombre",
       "descripcion",
       "descuento_porcentaje",
@@ -232,5 +227,41 @@
       "carrito_id": "string"
     },
     "orderArray": ["carrito_id"]
+  },
+  "crearCategoria": {
+    "query": "INSERT INTO categorias (nombre, descripcion) VALUES ($1, $2) RETURNING id, nombre, descripcion",
+    "structure_params": {
+      "nombre": "string",
+      "descripcion": "string"
+    },
+    "orderArray": ["nombre", "descripcion"]
+  },
+  "obtenerCategorias": {
+    "query": "SELECT id, nombre, descripcion FROM categorias ORDER BY nombre ASC",
+    "structure_params": {},
+    "orderArray": []
+  },
+  "obtenerCategoriaPorId": {
+    "query": "SELECT id, nombre, descripcion FROM categorias WHERE id = $1",
+    "structure_params": {
+      "id": "string"
+    },
+    "orderArray": ["id"]
+  },
+  "actualizarCategoria": {
+    "query": "UPDATE categorias SET nombre = COALESCE($2, nombre), descripcion = COALESCE($3, descripcion) WHERE id = $1 RETURNING id, nombre, descripcion",
+    "structure_params": {
+      "id": "string",
+      "nombre": "string",
+      "descripcion": "string"
+    },
+    "orderArray": ["id", "nombre", "descripcion"]
+  },
+  "eliminarCategoria": {
+    "query": "DELETE FROM categorias WHERE id = $1",
+    "structure_params": {
+      "id": "string"
+    },
+    "orderArray": ["id"]
   }
 }
