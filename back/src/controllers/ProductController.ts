@@ -96,7 +96,7 @@ class ProductController {
     };
 
     // 3. Validar con Zod
-    const validation = await this.validator.validateProducto(datos);
+    const validation = await this.validator.validateCrearProducto(datos);
     if (!validation.success) {
       return response.status(400).json({
         success: false,
