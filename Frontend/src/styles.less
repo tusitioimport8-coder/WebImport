@@ -1,3 +1,24 @@
 @import '@taiga-ui/styles/taiga-ui-theme.less';
 @import '@taiga-ui/styles/taiga-ui-fonts.less';
 @import "primeicons/primeicons.css";
+
+tui-dialog[data-appearance~='inventory-dialog'] > button[tuiButtonX]::before {
+  content: '×' !important;
+  display: grid !important;
+  place-items: center !important;
+
+  width: 1em !important;
+  height: 1em !important;
+
+  background: none !important;
+
+  -webkit-mask: none !important;
+  mask: none !important;
+
+  font-family: Arial, sans-serif !important;
+  font-size: 1.5rem !important;
+  font-weight: 400 !important;
+  line-height: 1 !important;
+
+  color: var(--tui-text-primary) !important;
+}

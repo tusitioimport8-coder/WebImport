@@ -15,7 +15,7 @@
     ></button>
   </header>
 
-  <nav tuiNavigationAside>
+  <nav tuiNavigationAside [attr.data-expanded]="expanded()">
     <button
       appearance="icon"
       tuiButton
@@ -25,20 +25,20 @@
     
     <hr />
 
-    <button tuiNavigationItem (click)="navegar('/inicio', 0)">
+    <button tuiNavigationItem (click)="navegar('/inicio', 0)" [attr.data-active]="activeItemIndex === 0">
       <tui-icon icon="@tui.home"></tui-icon>
       Inicio
     </button>
     
-    <button tuiNavigationItem (click)="navegar('/catalogo', 1)">
+    <button tuiNavigationItem (click)="navegar('/catalogo', 1)" [attr.data-active]="activeItemIndex === 1">
       <tui-icon icon="@tui.layout-dashboard"></tui-icon>
       Catálogo
     </button>
 
-    <button tuiNavigationItem (click)="navegar('/inventario', 2)">
-  <tui-icon icon="@tui.box"></tui-icon>
-  Inventario
-</button>
+    <button tuiNavigationItem (click)="navegar('/inventario', 2)" [attr.data-active]="activeItemIndex === 2">
+      <tui-icon icon="@tui.box"></tui-icon>
+      Inventario
+    </button>
   </nav>
 
   <main tuiNavigationMain>

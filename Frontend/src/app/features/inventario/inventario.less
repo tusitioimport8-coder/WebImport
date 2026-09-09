@@ -266,6 +266,42 @@ th {
   border: 0;
 }
 
+/* Imagen del producto */
+.product-image {
+  display: block;
+  width: 4rem;
+  height: 4rem;
+  min-width: 4rem;
+  flex: 0 0 4rem;
+
+  border-radius: 0.75rem;
+  border: 1px solid var(--tui-border-normal);
+
+  object-fit: cover;
+}
+
+/* Vista previa de la imagen */
+.product-image-preview {
+  display: block;
+  width: 9rem;
+  height: 9rem;
+
+  margin-top: 0.5rem;
+
+  border-radius: 0.75rem;
+  border: 1px solid var(--tui-border-normal);
+
+  object-fit: cover;
+}
+
+/*
+ * El diálogo de Taiga se crea fuera de :host.
+ * Por eso aquí NO se usa :host.
+ * Conservamos el botón original y solo sustituimos
+ * visualmente su icono por una X.
+ */
+
+
 @media (max-width: 1100px) {
   .summary-grid,
   .filters-grid {

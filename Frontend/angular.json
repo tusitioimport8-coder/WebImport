@@ -23,12 +23,17 @@
             "browser": "src/main.ts",
             "tsConfig": "tsconfig.app.json",
             "inlineStyleLanguage": "less",
-            "assets": [
-              {
-                "glob": "**/*",
-                "input": "public"
-              }
-            ],
+          "assets": [
+  {
+    "glob": "**/*",
+    "input": "public"
+  },
+  {
+    "glob": "**/*",
+    "input": "node_modules/@taiga-ui/icons/src",
+    "output": "assets/taiga-ui/icons"
+  }
+],
             "styles": [
               "src/styles.less"
             ],

@@ -21,6 +21,7 @@
       <span class="summary-icon summary-icon_total" aria-hidden="true">
         <tui-icon icon="@tui.box" />
       </span>
+
       <div>
         <p>Total de productos</p>
         <strong>{{ summary().totalProducts }}</strong>
@@ -32,6 +33,7 @@
       <span class="summary-icon summary-icon_warning" aria-hidden="true">
         <tui-icon icon="@tui.triangle-alert" />
       </span>
+
       <div>
         <p>Productos con poco stock</p>
         <strong>{{ summary().lowStockProducts }}</strong>
@@ -43,6 +45,7 @@
       <span class="summary-icon summary-icon_danger" aria-hidden="true">
         <tui-icon icon="@tui.circle-x" />
       </span>
+
       <div>
         <p>Productos agotados</p>
         <strong>{{ summary().outOfStockProducts }}</strong>
@@ -54,15 +57,23 @@
       <span class="summary-icon summary-icon_value" aria-hidden="true">
         <tui-icon icon="@tui.wallet" />
       </span>
+
       <div>
         <p>Valor estimado</p>
-        <strong>{{ summary().estimatedValue | currency: 'USD' : 'symbol' : '1.2-2' }}</strong>
+        <strong>
+          {{ summary().estimatedValue | currency: 'USD' : 'symbol' : '1.2-2' }}
+        </strong>
         <span>Precio por existencias</span>
       </div>
     </article>
   </section>
 
-  <section appearance="floating" tuiCardLarge class="filters-panel" aria-labelledby="filters-title">
+  <section
+    appearance="floating"
+    tuiCardLarge
+    class="filters-panel"
+    aria-labelledby="filters-title"
+  >
     <div class="filters-heading">
       <div>
         <h2 id="filters-title">Productos</h2>
@@ -86,12 +97,13 @@
     <div class="filters-grid">
       <div class="filter-field filter-field_search">
         <label for="inventory-search">Buscar producto</label>
+
         <tui-textfield iconStart="@tui.search">
           <input
             id="inventory-search"
             tuiInput
             type="search"
-            placeholder="Nombre, SKU o categoría"
+            placeholder="Nombre o categoría"
             autocomplete="off"
             [value]="searchTerm()"
             (input)="onSearch($event)"
@@ -101,6 +113,7 @@
 
       <div class="filter-field">
         <label for="inventory-category">Categoría</label>
+
         <select
           id="inventory-category"
           class="select-control"
@@ -108,6 +121,7 @@
           (change)="onCategoryChange($event)"
         >
           <option value="Todas">Todas las categorías</option>
+
           @for (category of categories; track category) {
             <option [value]="category">{{ category }}</option>
           }
@@ -116,6 +130,7 @@
 
       <div class="filter-field">
         <label for="inventory-status">Estado</label>
+
         <select
           id="inventory-status"
           class="select-control"
@@ -130,6 +145,7 @@
 
       <div class="filter-field">
         <label for="inventory-sort">Ordenar por</label>
+
         <select
           id="inventory-sort"
           class="select-control"
@@ -144,7 +160,11 @@
     </div>
   </section>
 
-  <section class="inventory-content" aria-live="polite" aria-busy="{{ loading() }}">
+  <section
+    class="inventory-content"
+    aria-live="polite"
+    aria-busy="{{ loading() }}"
+  >
     @switch (viewState()) {
       @case ('loading') {
         <div class="state-card" role="status">
@@ -156,10 +176,19 @@
 
       @case ('error') {
         <div class="state-card state-card_error" role="alert">
-          <span class="state-icon" aria-hidden="true"><tui-icon icon="@tui.server-off" /></span>
+          <span class="state-icon" aria-hidden="true">
+            <tui-icon icon="@tui.server-off" />
+          </span>
+
           <h2>No pudimos cargar el inventario</h2>
           <p>{{ errorMessage() }}</p>
-          <button tuiButton type="button" appearance="secondary" (click)="retry()">
+
+          <button
+            tuiButton
+            type="button"
+            appearance="secondary"
+            (click)="retry()"
+          >
             Intentar nuevamente
           </button>
         </div>
@@ -167,9 +196,16 @@
 
       @case ('empty') {
         <div class="state-card" role="status">
-          <span class="state-icon" aria-hidden="true"><tui-icon icon="@tui.package-open" /></span>
+          <span class="state-icon" aria-hidden="true">
+            <tui-icon icon="@tui.package-open" />
+          </span>
+
           <h2>Tu inventario está vacío</h2>
-          <p>Agrega el primer producto para comenzar a controlar tus existencias.</p>
+
+          <p>
+            Agrega el primer producto para comenzar a controlar tus existencias.
+          </p>
+
           <button tuiButton type="button" (click)="openCreate()">
             <i class="pi pi-plus" aria-hidden="true"></i>
             <span>Agregar producto</span>
@@ -179,10 +215,19 @@
 
       @case ('no-results') {
         <div class="state-card" role="status">
-          <span class="state-icon" aria-hidden="true"><tui-icon icon="@tui.search-x" /></span>
+          <span class="state-icon" aria-hidden="true">
+            <tui-icon icon="@tui.search-x" />
+          </span>
+
           <h2>No encontramos productos</h2>
-          <p>Prueba con otro nombre, SKU, categoría o estado.</p>
-          <button tuiButton type="button" appearance="secondary" (click)="clearFilters()">
+          <p>Prueba con otro nombre, categoría o estado.</p>
+
+          <button
+            tuiButton
+            type="button"
+            appearance="secondary"
+            (click)="clearFilters()"
+          >
             Limpiar filtros
           </button>
         </div>
@@ -195,76 +240,110 @@
               <caption class="visually-hidden">
                 Productos registrados en el inventario
               </caption>
+
               <thead>
                 <tr>
                   <th scope="col">Producto</th>
-                  <th scope="col">SKU</th>
                   <th scope="col">Categoría</th>
-                  <th scope="col" class="number-column">Precio</th>
+                  <th scope="col" class="number-column">Precio detal</th>
+                  <th scope="col" class="number-column">Precio mayor</th>
+                  <th scope="col" class="number-column">Precio gran mayor</th>
                   <th scope="col" class="number-column">Disponible</th>
                   <th scope="col" class="number-column">Mínimo</th>
                   <th scope="col">Estado</th>
                   <th scope="col" class="actions-column">Acciones</th>
                 </tr>
               </thead>
+
               <tbody>
                 @for (product of visibleProducts(); track product.id) {
                   <tr>
                     <td>
-                    <div class="product-cell">
-  <div>
-    <strong>{{ product.name }}</strong>
-    <span>{{ product.description || 'Sin descripción' }}</span>
-  </div>
-</div>
+                      <div class="product-cell">
+                        @if (product.imageUrl) {
+                          <img
+                            class="product-image"
+                            [src]="product.imageUrl"
+                            [alt]="product.name"
+                          />
+                        }
+
+                        <div>
+                          <strong>{{ product.name }}</strong>
+                          <span>
+                            {{ product.description || 'Sin descripción' }}
+                          </span>
+                        </div>
+                      </div>
                     </td>
-                    <td>
-                      <span class="sku">{{ product.sku }}</span>
-                    </td>
+
                     <td>{{ product.category }}</td>
+
                     <td class="number-column">
                       {{ product.price | currency: 'USD' : 'symbol' : '1.2-2' }}
                     </td>
-                    <td class="number-column stock-value">{{ product.quantity }}</td>
-                    <td class="number-column">{{ product.minimumStock }}</td>
+
+                    <td class="number-column">
+                      {{
+                        product.wholesalePrice
+                          | currency: 'USD' : 'symbol' : '1.2-2'
+                      }}
+                    </td>
+
+                    <td class="number-column">
+                      {{
+                        product.bulkPrice
+                          | currency: 'USD' : 'symbol' : '1.2-2'
+                      }}
+                    </td>
+
+                    <td class="number-column stock-value">
+                      {{ product.quantity }}
+                    </td>
+
+                    <td class="number-column">
+                      {{ product.minimumStock }}
+                    </td>
+
                     <td>
                       <p-tag
                         [value]="statusLabel(product.status)"
                         [severity]="statusSeverity(product.status)"
                       />
                     </td>
-                    <td>
-                  <div class="table-actions">
-  <button
-    appearance="flat"
-    tuiIconButton
-    type="button"
-    size="s"
-    title="Ver producto"
-    [attr.aria-label]="'Ver ' + product.name"
-    (click)="openView(product)"
-  >
-    <i
-      class="pi pi-eye action-icon"
-      aria-hidden="true"
-    ></i>
-  </button>
 
-  <button
-    appearance="flat"
-    tuiIconButton
-    type="button"
-    size="s"
-    title="Editar producto"
-    [attr.aria-label]="'Editar ' + product.name"
-    (click)="openEdit(product)"
-  >
-    <i
-      class="pi pi-pencil action-icon"
-      aria-hidden="true"
-    ></i>
-  </button>
-</div>
+                    <td>
+                      <div class="table-actions">
+                        <button
+                          appearance="flat"
+                          tuiIconButton
+                          type="button"
+                          size="s"
+                          title="Ver producto"
+                          [attr.aria-label]="'Ver ' + product.name"
+                          (click)="openView(product)"
+                        >
+                          <i
+                            class="pi pi-eye action-icon"
+                            aria-hidden="true"
+                          ></i>
+                        </button>
+
+                        <button
+                          appearance="flat"
+                          tuiIconButton
+                          type="button"
+                          size="s"
+                          title="Editar producto"
+                          [attr.aria-label]="'Editar ' + product.name"
+                          (click)="openEdit(product)"
+                        >
+                          <i
+                            class="pi pi-pencil action-icon"
+                            aria-hidden="true"
+                          ></i>
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 }
@@ -276,12 +355,20 @@
             @for (product of visibleProducts(); track product.id) {
               <article class="product-card">
                 <header>
-                 <div class="product-cell">
-  <div>
-    <strong>{{ product.name }}</strong>
-    <span class="sku">{{ product.sku }}</span>
-  </div>
-</div>
+                  <div class="product-cell">
+                    @if (product.imageUrl) {
+                      <img
+                        class="product-image"
+                        [src]="product.imageUrl"
+                        [alt]="product.name"
+                      />
+                    }
+
+                    <div>
+                      <strong>{{ product.name }}</strong>
+                    </div>
+                  </div>
+
                   <p-tag
                     [value]="statusLabel(product.status)"
                     [severity]="statusSeverity(product.status)"
@@ -293,43 +380,68 @@
                     <dt>Categoría</dt>
                     <dd>{{ product.category }}</dd>
                   </div>
+
                   <div>
-                    <dt>Precio</dt>
-                    <dd>{{ product.price | currency: 'USD' : 'symbol' : '1.2-2' }}</dd>
+                    <dt>Precio detal</dt>
+                    <dd>
+                      {{ product.price | currency: 'USD' : 'symbol' : '1.2-2' }}
+                    </dd>
                   </div>
+
+                  <div>
+                    <dt>Precio mayor</dt>
+                    <dd>
+                      {{
+                        product.wholesalePrice
+                          | currency: 'USD' : 'symbol' : '1.2-2'
+                      }}
+                    </dd>
+                  </div>
+
+                  <div>
+                    <dt>Precio gran mayor</dt>
+                    <dd>
+                      {{
+                        product.bulkPrice
+                          | currency: 'USD' : 'symbol' : '1.2-2'
+                      }}
+                    </dd>
+                  </div>
+
                   <div>
                     <dt>Disponible</dt>
                     <dd>{{ product.quantity }}</dd>
                   </div>
+
                   <div>
                     <dt>Stock mínimo</dt>
                     <dd>{{ product.minimumStock }}</dd>
                   </div>
                 </dl>
 
-               <footer>
-  <button
-    appearance="flat"
-    tuiButton
-    type="button"
-    size="s"
-    (click)="openView(product)"
-  >
-    <i class="pi pi-eye" aria-hidden="true"></i>
-    <span>Ver</span>
-  </button>
+                <footer>
+                  <button
+                    appearance="flat"
+                    tuiButton
+                    type="button"
+                    size="s"
+                    (click)="openView(product)"
+                  >
+                    <i class="pi pi-eye" aria-hidden="true"></i>
+                    <span>Ver</span>
+                  </button>
 
-  <button
-    appearance="secondary"
-    tuiButton
-    type="button"
-    size="s"
-    (click)="openEdit(product)"
-  >
-    <i class="pi pi-pencil" aria-hidden="true"></i>
-    <span>Editar</span>
-  </button>
-</footer>
+                  <button
+                    appearance="secondary"
+                    tuiButton
+                    type="button"
+                    size="s"
+                    (click)="openEdit(product)"
+                  >
+                    <i class="pi pi-pencil" aria-hidden="true"></i>
+                    <span>Editar</span>
+                  </button>
+                </footer>
               </article>
             }
           </div>
@@ -339,6 +451,7 @@
               Mostrando {{ pageRangeStart() }}–{{ pageRangeEnd() }} de
               {{ filteredProducts().length }} productos
             </p>
+
             @if (pageCount() > 1) {
               <tui-pagination
                 size="m"
@@ -355,10 +468,21 @@
 </section>
 
 <ng-template
-  [tuiDialogOptions]="{ label: editorTitle(), size: 'l', dismissible: true }"
+  [tuiDialogOptions]="{
+    label: editorTitle(),
+    size: 'l',
+    closable: true,
+    dismissible: false,
+    appearance: 'taiga inventory-dialog'
+  }"
   [(tuiDialog)]="editorOpen"
 >
-  <form class="product-form" [formGroup]="productForm" novalidate (ngSubmit)="saveProduct()">
+  <form
+    class="product-form"
+    [formGroup]="productForm"
+    novalidate
+    (ngSubmit)="saveProduct()"
+  >
     <p class="form-introduction">
       @if (editorReadOnly()) {
         Consulta la información y el estado actual de esta referencia.
@@ -369,7 +493,10 @@
 
     <div class="form-grid">
       <div class="form-field form-field_wide">
-        <label for="product-name">Nombre <span aria-hidden="true">*</span></label>
+        <label for="product-name">
+          Nombre <span aria-hidden="true">*</span>
+        </label>
+
         <tui-textfield [invalid]="isFieldInvalid('name')">
           <input
             id="product-name"
@@ -378,52 +505,76 @@
             formControlName="name"
             autocomplete="off"
             [attr.aria-invalid]="isFieldInvalid('name')"
-            [attr.aria-describedby]="isFieldInvalid('name') ? 'product-name-error' : null"
-          />
-        </tui-textfield>
-        @if (hasFieldError('name', 'required') || hasFieldError('name', 'pattern')) {
-          <small id="product-name-error" class="field-error">Ingresa el nombre del producto.</small>
-        } @else if (hasFieldError('name', 'maxlength')) {
-          <small id="product-name-error" class="field-error">Usa 80 caracteres o menos.</small>
-        }
-      </div>
-
-      <div class="form-field">
-        <label for="product-sku">SKU <span aria-hidden="true">*</span></label>
-        <tui-textfield [invalid]="isFieldInvalid('sku') || skuConflict()">
-          <input
-            id="product-sku"
-            tuiInput
-            type="text"
-            formControlName="sku"
-            autocomplete="off"
-            [attr.aria-invalid]="isFieldInvalid('sku') || skuConflict()"
             [attr.aria-describedby]="
-              isFieldInvalid('sku') || skuConflict() ? 'product-sku-error' : null
+              isFieldInvalid('name') ? 'product-name-error' : null
             "
           />
         </tui-textfield>
-        @if (skuConflict()) {
-          <small id="product-sku-error" class="field-error">Este SKU ya está registrado.</small>
-        } @else if (hasFieldError('sku', 'required') || hasFieldError('sku', 'pattern')) {
-          <small id="product-sku-error" class="field-error">Ingresa un SKU válido.</small>
-        } @else if (hasFieldError('sku', 'maxlength')) {
-          <small id="product-sku-error" class="field-error">Usa 30 caracteres o menos.</small>
+
+        @if (
+          hasFieldError('name', 'required') ||
+          hasFieldError('name', 'pattern')
+        ) {
+          <small id="product-name-error" class="field-error">
+            Ingresa el nombre del producto.
+          </small>
+        } @else if (hasFieldError('name', 'maxlength')) {
+          <small id="product-name-error" class="field-error">
+            Usa 80 caracteres o menos.
+          </small>
+        }
+      </div>
+
+      <div class="form-field form-field_wide">
+        <label for="product-image">
+          Imagen <span>(opcional)</span>
+        </label>
+
+        @if (!editorReadOnly()) {
+          <input
+            id="product-image"
+            type="file"
+            accept="image/*"
+            (change)="onImageSelected($event)"
+          />
+        }
+
+        @if (selectedImage()) {
+          <img
+            class="product-image-preview"
+            [src]="selectedImage()"
+            alt="Vista previa del producto"
+          />
         }
       </div>
 
       <div class="form-field">
-        <label for="product-category">Categoría <span aria-hidden="true">*</span></label>
-        <select id="product-category" class="select-control" formControlName="category">
+        <label for="product-category">
+          Categoría <span aria-hidden="true">*</span>
+        </label>
+
+        <select
+          id="product-category"
+          class="select-control"
+          formControlName="category"
+        >
           @for (category of categories; track category) {
-            <option [value]="category">{{ category }}</option>
+            <option [value]="category">
+              {{ category }}
+            </option>
           }
         </select>
       </div>
 
       <div class="form-field">
-        <label for="product-price">Precio <span aria-hidden="true">*</span></label>
-        <tui-textfield [invalid]="isFieldInvalid('price')" iconStart="@tui.dollar-sign">
+        <label for="product-price">
+          Precio detal <span aria-hidden="true">*</span>
+        </label>
+
+        <tui-textfield
+          [invalid]="isFieldInvalid('price')"
+          iconStart="@tui.dollar-sign"
+        >
           <input
             id="product-price"
             tuiInput
@@ -433,18 +584,80 @@
             inputmode="decimal"
             formControlName="price"
             [attr.aria-invalid]="isFieldInvalid('price')"
-            [attr.aria-describedby]="isFieldInvalid('price') ? 'product-price-error' : null"
+            [attr.aria-describedby]="
+              isFieldInvalid('price') ? 'product-price-error' : null
+            "
           />
         </tui-textfield>
+
         @if (isFieldInvalid('price')) {
-          <small id="product-price-error" class="field-error"
-            >Ingresa un precio igual o mayor que cero.</small
-          >
+          <small id="product-price-error" class="field-error">
+            Ingresa un precio igual o mayor que cero.
+          </small>
         }
       </div>
 
       <div class="form-field">
-        <label for="product-quantity">Cantidad <span aria-hidden="true">*</span></label>
+        <label for="product-wholesale-price">
+          Precio mayor <span aria-hidden="true">*</span>
+        </label>
+
+        <tui-textfield
+          [invalid]="isFieldInvalid('wholesalePrice')"
+          iconStart="@tui.dollar-sign"
+        >
+          <input
+            id="product-wholesale-price"
+            tuiInput
+            type="number"
+            min="0"
+            step="0.01"
+            inputmode="decimal"
+            formControlName="wholesalePrice"
+            [attr.aria-invalid]="isFieldInvalid('wholesalePrice')"
+          />
+        </tui-textfield>
+
+        @if (isFieldInvalid('wholesalePrice')) {
+          <small class="field-error">
+            Ingresa un precio igual o mayor que cero.
+          </small>
+        }
+      </div>
+
+      <div class="form-field">
+        <label for="product-bulk-price">
+          Precio gran mayor <span aria-hidden="true">*</span>
+        </label>
+
+        <tui-textfield
+          [invalid]="isFieldInvalid('bulkPrice')"
+          iconStart="@tui.dollar-sign"
+        >
+          <input
+            id="product-bulk-price"
+            tuiInput
+            type="number"
+            min="0"
+            step="0.01"
+            inputmode="decimal"
+            formControlName="bulkPrice"
+            [attr.aria-invalid]="isFieldInvalid('bulkPrice')"
+          />
+        </tui-textfield>
+
+        @if (isFieldInvalid('bulkPrice')) {
+          <small class="field-error">
+            Ingresa un precio igual o mayor que cero.
+          </small>
+        }
+      </div>
+
+      <div class="form-field">
+        <label for="product-quantity">
+          Cantidad <span aria-hidden="true">*</span>
+        </label>
+
         <tui-textfield [invalid]="isFieldInvalid('quantity')">
           <input
             id="product-quantity"
@@ -455,18 +668,26 @@
             inputmode="numeric"
             formControlName="quantity"
             [attr.aria-invalid]="isFieldInvalid('quantity')"
-            [attr.aria-describedby]="isFieldInvalid('quantity') ? 'product-quantity-error' : null"
+            [attr.aria-describedby]="
+              isFieldInvalid('quantity')
+                ? 'product-quantity-error'
+                : null
+            "
           />
         </tui-textfield>
+
         @if (isFieldInvalid('quantity')) {
-          <small id="product-quantity-error" class="field-error"
-            >Ingresa una cantidad igual o mayor que cero.</small
-          >
+          <small id="product-quantity-error" class="field-error">
+            Ingresa una cantidad igual o mayor que cero.
+          </small>
         }
       </div>
 
       <div class="form-field">
-        <label for="product-minimum-stock">Stock mínimo <span aria-hidden="true">*</span></label>
+        <label for="product-minimum-stock">
+          Stock mínimo <span aria-hidden="true">*</span>
+        </label>
+
         <tui-textfield [invalid]="isFieldInvalid('minimumStock')">
           <input
             id="product-minimum-stock"
@@ -478,10 +699,13 @@
             formControlName="minimumStock"
             [attr.aria-invalid]="isFieldInvalid('minimumStock')"
             [attr.aria-describedby]="
-              isFieldInvalid('minimumStock') ? 'product-minimum-stock-error' : null
+              isFieldInvalid('minimumStock')
+                ? 'product-minimum-stock-error'
+                : null
             "
           />
         </tui-textfield>
+
         @if (isFieldInvalid('minimumStock')) {
           <small id="product-minimum-stock-error" class="field-error">
             Ingresa un stock mínimo igual o mayor que cero.
@@ -491,17 +715,24 @@
 
       <div class="form-field">
         <span class="field-label">Estado</span>
-        <div class="status-preview" role="status" aria-live="polite">
+
+        <div
+          class="status-preview"
+          role="status"
+          aria-live="polite"
+        >
           <p-tag
             [value]="statusLabel(previewStatus())"
             [severity]="statusSeverity(previewStatus())"
           />
-         
         </div>
       </div>
 
       <div class="form-field form-field_wide">
-        <label for="product-description">Descripción <span>(opcional)</span></label>
+        <label for="product-description">
+          Descripción <span>(opcional)</span>
+        </label>
+
         <tui-textfield [invalid]="isFieldInvalid('description')">
           <textarea
             id="product-description"
@@ -510,10 +741,13 @@
             formControlName="description"
             [attr.aria-invalid]="isFieldInvalid('description')"
             [attr.aria-describedby]="
-              isFieldInvalid('description') ? 'product-description-error' : null
+              isFieldInvalid('description')
+                ? 'product-description-error'
+                : null
             "
           ></textarea>
         </tui-textfield>
+
         @if (hasFieldError('description', 'maxlength')) {
           <small id="product-description-error" class="field-error">
             Usa 300 caracteres o menos.
@@ -523,11 +757,23 @@
     </div>
 
     <footer class="form-actions">
-      <button appearance="secondary" tuiButton type="button" (click)="closeEditor()">
+      <button
+        appearance="secondary"
+        tuiButton
+        type="button"
+        (click)="closeEditor()"
+      >
         {{ editorReadOnly() ? 'Cerrar' : 'Cancelar' }}
       </button>
+
       @if (!editorReadOnly()) {
-        <button tuiButton type="submit" iconStart="@tui.check">Guardar producto</button>
+        <button
+          tuiButton
+          type="submit"
+          iconStart="@tui.check"
+        >
+          Guardar producto
+        </button>
       }
     </footer>
   </form>

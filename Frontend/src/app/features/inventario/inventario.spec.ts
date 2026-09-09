@@ -25,8 +25,8 @@ describe('Inventario', () => {
     expect(component.summary().estimatedValue).toBeGreaterThan(0);
   });
 
-  it('should filter products by SKU', () => {
-    component.searchTerm.set('CAM-003');
+  it('should filter products by name', () => {
+    component.searchTerm.set('Cámara web');
 
     expect(component.filteredProducts()).toHaveLength(1);
     expect(component.filteredProducts()[0]?.name).toBe('Cámara web Full HD');
@@ -36,9 +36,10 @@ describe('Inventario', () => {
     component.openCreate();
     component.productForm.setValue({
       name: 'Soporte para portátil',
-      sku: 'ACC-SOP-011',
       category: 'Accesorios',
       price: 25,
+      wholesalePrice: 22,
+      bulkPrice: 20,
       quantity: 2,
       minimumStock: 3,
       description: 'Soporte ajustable de prueba.',
@@ -46,7 +47,7 @@ describe('Inventario', () => {
 
     component.saveProduct();
 
-    const created = component.products().find((product) => product.sku === 'ACC-SOP-011');
+    const created = component.products().find((product) => product.name === 'Soporte para portátil');
     expect(component.products()).toHaveLength(11);
     expect(created?.status).toBe('low-stock');
   });
@@ -73,8 +74,9 @@ describe('Inventario', () => {
     component.openCreate();
     component.productForm.patchValue({
       name: 'Producto inválido',
-      sku: 'INVALID-001',
       price: -1,
+      wholesalePrice: -1,
+      bulkPrice: -1,
       quantity: -1,
       minimumStock: -1,
     });

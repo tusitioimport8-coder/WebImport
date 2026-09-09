@@ -31,8 +31,20 @@ export class Layout {
     this.expanded.set(!this.expanded());
   }
 
-  navegar(ruta: string, tabIndex: number): void {
-    this.activeItemIndex = tabIndex;
-    this.router.navigateByUrl(ruta);
+ async navegar(ruta: string, tabIndex: number): Promise<void> {
+  console.log('Intentando navegar a:', ruta);
+
+  try {
+    const resultado = await this.router.navigateByUrl(ruta);
+
+    console.log('Resultado:', resultado);
+    console.log('URL actual:', this.router.url);
+
+    if (resultado) {
+      this.activeItemIndex = tabIndex;
+    }
+  } catch (error) {
+    console.error('ERROR DE NAVEGACIÓN:', error);
   }
+}
 }

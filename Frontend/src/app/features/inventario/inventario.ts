@@ -82,16 +82,17 @@ export class Inventario {
   readonly editorMode = signal<InventoryEditorMode>('create');
   readonly editingProductId = signal<string | null>(null);
   readonly submitted = signal(false);
-  readonly skuConflict = signal(false);
+  readonly selectedImage = signal<string | null>(null);
   readonly previewStatus = signal<InventoryStatus>('out-of-stock');
 
   editorOpen = false;
 
   readonly productForm = this.formBuilder.group({
     name: ['', [Validators.required, Validators.pattern(/\S/), Validators.maxLength(80)]],
-    sku: ['', [Validators.required, Validators.pattern(/\S/), Validators.maxLength(30)]],
     category: this.formBuilder.control<InventoryCategory>('Electrónica', Validators.required),
     price: [0, [Validators.required, Validators.min(0)]],
+    wholesalePrice: [0, [Validators.required, Validators.min(0)]],
+    bulkPrice: [0, [Validators.required, Validators.min(0)]],
     quantity: [0, [Validators.required, Validators.min(0)]],
     minimumStock: [0, [Validators.required, Validators.min(0)]],
     description: ['', Validators.maxLength(300)],
@@ -124,7 +125,7 @@ export class Inventario {
     const filtered = this.products().filter((product) => {
       const matchesSearch =
         !query ||
-        [product.name, product.sku, product.category].some((value) =>
+        [product.name, product.category].some((value) =>
           this.normalizeText(value).includes(query),
         );
       const matchesCategory = filters.category === 'Todas' || product.category === filters.category;
@@ -191,7 +192,6 @@ export class Inventario {
       this.previewStatus.set(
         this.resolveStatus(Number(value.quantity ?? 0), Number(value.minimumStock ?? 0)),
       );
-      this.skuConflict.set(false);
     });
   }
 
@@ -239,17 +239,32 @@ export class Inventario {
     this.pageIndex.set(Math.max(0, Math.min(index, this.pageCount() - 1)));
   }
 
+  onImageSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+
+    if (!file) {
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => this.selectedImage.set(reader.result as string);
+    reader.readAsDataURL(file);
+  }
+
   openCreate(): void {
     this.prepareEditor('create');
     this.productForm.reset({
       name: '',
-      sku: '',
       category: 'Electrónica',
       price: 0,
+      wholesalePrice: 0,
+      bulkPrice: 0,
       quantity: 0,
       minimumStock: 0,
       description: '',
     });
+    this.selectedImage.set(null);
     this.previewStatus.set('out-of-stock');
     this.editorOpen = true;
   }
@@ -270,7 +285,6 @@ export class Inventario {
   closeEditor(): void {
     this.editorOpen = false;
     this.submitted.set(false);
-    this.skuConflict.set(false);
   }
 
   saveProduct(): void {
@@ -286,18 +300,6 @@ export class Inventario {
     }
 
     const value = this.productForm.getRawValue();
-    const normalizedSku = value.sku.trim().toLocaleLowerCase('es');
-    const duplicateSku = this.products().some(
-      (product) =>
-        product.id !== this.editingProductId() &&
-        product.sku.trim().toLocaleLowerCase('es') === normalizedSku,
-    );
-
-    if (duplicateSku) {
-      this.skuConflict.set(true);
-      return;
-    }
-
     const productData = this.toProductData(value);
     const editingId = this.editingProductId();
 
@@ -368,19 +370,20 @@ export class Inventario {
     this.editorMode.set(mode);
     this.editingProductId.set(product?.id ?? null);
     this.submitted.set(false);
-    this.skuConflict.set(false);
   }
 
   private populateForm(product: InventoryProduct): void {
     this.productForm.reset({
       name: product.name,
-      sku: product.sku,
       category: product.category,
       price: product.price,
+      wholesalePrice: product.wholesalePrice,
+      bulkPrice: product.bulkPrice,
       quantity: product.quantity,
       minimumStock: product.minimumStock,
       description: product.description,
     });
+    this.selectedImage.set(product.imageUrl ?? null);
     this.previewStatus.set(product.status);
   }
 
@@ -390,13 +393,15 @@ export class Inventario {
 
     return {
       name: value.name.trim(),
-      sku: value.sku.trim().toLocaleUpperCase('es'),
       category: value.category,
       price: Number(value.price),
+      wholesalePrice: Number(value.wholesalePrice),
+      bulkPrice: Number(value.bulkPrice),
       quantity,
       minimumStock,
       status: this.resolveStatus(quantity, minimumStock),
       description: value.description.trim(),
+      ...(this.selectedImage() ? { imageUrl: this.selectedImage()! } : {}),
     };
   }
 

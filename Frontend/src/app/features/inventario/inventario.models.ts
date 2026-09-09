@@ -16,9 +16,11 @@ export type InventoryEditorMode = 'create' | 'edit' | 'view';
 export interface InventoryProduct {
   id: string;
   name: string;
-  sku: string;
   category: InventoryCategory;
   price: number;
+  wholesalePrice: number;
+  bulkPrice: number;
+  imageUrl?: string;
   quantity: number;
   minimumStock: number;
   status: InventoryStatus;
@@ -41,9 +43,10 @@ export interface InventorySummary {
 
 export interface InventoryFormValue {
   name: string;
-  sku: string;
   category: InventoryCategory;
   price: number;
+  wholesalePrice: number;
+  bulkPrice: number;
   quantity: number;
   minimumStock: number;
   description: string;
