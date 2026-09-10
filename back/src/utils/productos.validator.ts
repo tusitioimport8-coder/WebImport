@@ -6,8 +6,6 @@ const precioSchema = zod.object({
 });
 
 export const crearProductoSchema = zod.object({
-  sku: zod.string().optional(),
-
   nombre: zod
     .string({ message: "El nombre es requerido" })
     .min(1, "El nombre no puede estar vacío"),
@@ -57,7 +55,7 @@ class ProductosValidator {
         .int("El stock debe ser un número entero")
         .min(0, "El stock no puede ser negativo")
         .optional(),
-      sku: zod.string().optional(),
+
       descripcion: zod.string().optional(),
       imagen_url: zod
         .string()
@@ -79,7 +77,6 @@ class ProductosValidator {
       precio: zod.number().min(0, "El precio no puede ser negativo").optional(),
       descuento_porcentaje: zod.number().min(0).max(100).optional(),
       stock: zod.number().int().min(0).optional(),
-      sku: zod.string().optional(),
       descripcion: zod.string().optional(),
       imagen_url: zod
         .string()
