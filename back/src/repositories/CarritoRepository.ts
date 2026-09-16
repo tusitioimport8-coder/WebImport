@@ -43,7 +43,7 @@ class CarritoRepository {
    * Inserta un nuevo producto o suma la cantidad si ya existe (UPSERT).
    */
   async agregarOIncrementarItem(input: CarritoItemInput): Promise<any> {
-    const result = await this.db.excecuteNameQuery("upsertItemCarritoSimple", {
+    const result = await this.db.excecuteNameQuery("agregarItemCarrito", {
       carrito_id: input.carrito_id,
       producto_id: input.producto_id,
       cantidad: input.cantidad,
