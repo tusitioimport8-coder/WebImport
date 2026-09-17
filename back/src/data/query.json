@@ -281,5 +281,38 @@
       "limite": "number"
     },
     "orderArray": ["usuario_id", "limite"]
+  },
+
+  "obtenerOCrearListaUsuario": {
+    "query": "WITH lista_existente AS (SELECT * FROM listas_deseos WHERE usuario_id = $1), nueva_lista AS (INSERT INTO listas_deseos (usuario_id) SELECT $1 WHERE NOT EXISTS (SELECT 1 FROM lista_existente) RETURNING *) SELECT * FROM lista_existente UNION ALL SELECT * FROM nueva_lista;",
+    "structure_params": { "usuario_id": "string" },
+    "orderArray": ["usuario_id"]
+  },
+  "obtenerListaPorToken": {
+    "query": "SELECT l.id AS lista_id, l.nombre, l.token_compartir, l.usuario_id, COALESCE(json_agg(json_build_object('item_id', i.id, 'producto_id', p.id, 'nombre', p.nombre, 'descripcion', p.descripcion, 'imagen_url', p.imagen_url, 'cantidad_deseada', i.cantidad_deseada, 'comprado', i.comprado, 'comprado_por_nombre', i.comprado_por_nombre)) FILTER (WHERE i.id IS NOT NULL), '[]') AS items FROM listas_deseos l LEFT JOIN lista_deseos_items i ON l.id = i.lista_id LEFT JOIN productos p ON i.producto_id = p.id WHERE l.token_compartir = $1 GROUP BY l.id;",
+    "structure_params": { "token": "string" },
+    "orderArray": ["token"]
+  },
+  "agregarItemLista": {
+    "query": "INSERT INTO lista_deseos_items (lista_id, producto_id, cantidad_deseada) VALUES ($1, $2, $3) ON CONFLICT (lista_id, producto_id) DO UPDATE SET cantidad_deseada = EXCLUDED.cantidad_deseada RETURNING *;",
+    "structure_params": {
+      "lista_id": "string",
+      "producto_id": "string",
+      "cantidad_deseada": "number"
+    },
+    "orderArray": ["lista_id", "producto_id", "cantidad_deseada"]
+  },
+  "eliminarItemLista": {
+    "query": "DELETE FROM lista_deseos_items WHERE lista_id = $1 AND producto_id = $2;",
+    "structure_params": { "lista_id": "string", "producto_id": "string" },
+    "orderArray": ["lista_id", "producto_id"]
+  },
+  "marcarItemComprado": {
+    "query": "UPDATE lista_deseos_items SET comprado = true, comprado_por_nombre = $1 WHERE id = $2 RETURNING *;",
+    "structure_params": {
+      "comprado_por_nombre": "string",
+      "item_id": "string"
+    },
+    "orderArray": ["comprado_por_nombre", "item_id"]
   }
 }
