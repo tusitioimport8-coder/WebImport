@@ -36,6 +36,12 @@ Registro de interacciones del usuario con los productos y generación de recomen
 
 ➡️ [Ver documentación de Sugerencias](./sugerencias.md)
 
+### 📝 Lista de Deseos
+
+Gestión de listas de deseos, incluyendo creación, actualización y eliminación.
+
+➡️ [Ver documentación de Lista de Deseos](./listaDeseos.md)
+
 ### ⚙️ Configuración
 
 Información general sobre la organización técnica y puntos de configuración documentados del sistema.
@@ -54,6 +60,7 @@ docs/
 ├── carrito.md
 ├── categorias.md
 ├── sugerencias.md
+├── listaDeseos.md
 └── auth/
     ├── README.md
     ├── endpoints.md
@@ -71,4 +78,5 @@ docs/
 | [Carrito](./carrito.md)             | Carrito y precios dinámicos        |
 | [Categorías](./categorias.md)       | Gestión de categorías              |
 | [Sugerencias](./sugerencias.md)     | Recomendaciones de productos       |
+| [Lista de Deseos](./listaDeseos.md) | Gestión de listas de deseos        |
 | [Configuración](./configuracion.md) | Información técnica general        |
