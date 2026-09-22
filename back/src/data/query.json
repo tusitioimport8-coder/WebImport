@@ -73,9 +73,8 @@
     "orderArray": ["id"]
   },
   "crearProducto": {
-    "query": "INSERT INTO productos (sku, nombre, descripcion, descuento_porcentaje, imagen_url, stock) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id, sku, nombre, descuento_porcentaje, stock, estado",
+    "query": "INSERT INTO productos (nombre, descripcion, descuento_porcentaje, imagen_url, stock) VALUES ($1, $2, $3, $4, $5) RETURNING id, nombre, descuento_porcentaje, stock, estado",
     "structure_params": {
-      "sku": "string",
       "nombre": "string",
       "descripcion": "string",
       "descuento_porcentaje": "number",
@@ -83,7 +82,6 @@
       "stock": "number"
     },
     "orderArray": [
-      "sku",
       "nombre",
       "descripcion",
       "descuento_porcentaje",
@@ -146,10 +144,9 @@
     "orderArray": ["id"]
   },
   "actualizarProducto": {
-    "query": "UPDATE productos SET sku = COALESCE($2, sku), nombre = COALESCE($3, nombre), descripcion = COALESCE($4, descripcion), descuento_porcentaje = COALESCE($5, descuento_porcentaje), imagen_url = COALESCE($6, imagen_url), stock = COALESCE($7, stock), estado = COALESCE($8, estado) WHERE id = $1 RETURNING *",
+    "query": "UPDATE productos SET nombre = COALESCE($2, nombre), descripcion = COALESCE($3, descripcion), descuento_porcentaje = COALESCE($4, descuento_porcentaje), imagen_url = COALESCE($5, imagen_url), stock = COALESCE($6, stock), estado = COALESCE($7, estado) WHERE id = $1 RETURNING *",
     "structure_params": {
       "id": "string",
-      "sku": "string",
       "nombre": "string",
       "descripcion": "string",
       "descuento_porcentaje": "number",
@@ -159,7 +156,6 @@
     },
     "orderArray": [
       "id",
-      "sku",
       "nombre",
       "descripcion",
       "descuento_porcentaje",
@@ -198,7 +194,7 @@
     },
     "orderArray": ["usuario_id"]
   },
-  "upsertItemCarritoSimple": {
+  "agregarItemCarrito": {
     "query": "INSERT INTO carrito_items (carrito_id, producto_id, cantidad) VALUES ($1, $2, $3) ON CONFLICT (carrito_id, producto_id) DO UPDATE SET cantidad = carrito_items.cantidad + EXCLUDED.cantidad RETURNING id, carrito_id, producto_id, cantidad",
     "structure_params": {
       "carrito_id": "string",
@@ -230,5 +226,92 @@
       "carrito_id": "string"
     },
     "orderArray": ["carrito_id"]
+  },
+  "crearCategoria": {
+    "query": "INSERT INTO categorias (nombre, descripcion) VALUES ($1, $2) RETURNING id, nombre, descripcion",
+    "structure_params": {
+      "nombre": "string",
+      "descripcion": "string"
+    },
+    "orderArray": ["nombre", "descripcion"]
+  },
+  "obtenerCategorias": {
+    "query": "SELECT id, nombre, descripcion FROM categorias ORDER BY nombre ASC",
+    "structure_params": {},
+    "orderArray": []
+  },
+  "obtenerCategoriaPorId": {
+    "query": "SELECT id, nombre, descripcion FROM categorias WHERE id = $1",
+    "structure_params": {
+      "id": "string"
+    },
+    "orderArray": ["id"]
+  },
+  "actualizarCategoria": {
+    "query": "UPDATE categorias SET nombre = COALESCE($2, nombre), descripcion = COALESCE($3, descripcion) WHERE id = $1 RETURNING id, nombre, descripcion",
+    "structure_params": {
+      "id": "string",
+      "nombre": "string",
+      "descripcion": "string"
+    },
+    "orderArray": ["id", "nombre", "descripcion"]
+  },
+  "eliminarCategoria": {
+    "query": "DELETE FROM categorias WHERE id = $1",
+    "structure_params": {
+      "id": "string"
+    },
+    "orderArray": ["id"]
+  },
+  "agregarSugerencia": {
+    "query": "INSERT INTO interacciones_usuario (usuario_id, producto_id, categoria_id, tipo_evento, peso) SELECT $1, $2, p.categoria_id, $3, $4 FROM productos p WHERE p.id = $2",
+    "structure_params": {
+      "usuario_id": "string",
+      "producto_id": "string",
+      "tipo_evento": "string",
+      "peso": "number"
+    },
+    "orderArray": ["usuario_id", "producto_id", "tipo_evento", "peso"]
+  },
+  "obtenerSugerencias": {
+    "query": "WITH interes_reciente AS (SELECT categoria_id, SUM(peso) AS score_categoria FROM interacciones_usuario WHERE usuario_id = $1 AND creado_en >= NOW() - INTERVAL '30 days' GROUP BY categoria_id) SELECT p.id, p.nombre, p.descripcion, p.descuento_porcentaje, p.imagen_url, p.stock, p.estado, p.creado_en, COALESCE(SUM(ir.score_categoria), 0) AS relevancia, COALESCE(json_agg(json_build_object('id_precio', pr.id_precio, 'tipo_precio', pr.tipo_precio, 'precio', pr.precio, 'precio_final', ROUND(pr.precio * (1 - p.descuento_porcentaje / 100), 2))) FILTER (WHERE pr.id_precio IS NOT NULL), '[]') AS precios FROM productos p LEFT JOIN producto_categorias pc ON pc.producto_id = p.id LEFT JOIN interes_reciente ir ON ir.categoria_id = pc.categoria_id LEFT JOIN precios_productos pr ON p.id = pr.id_producto WHERE p.estado = true GROUP BY p.id ORDER BY relevancia DESC, RANDOM() LIMIT $2",
+    "structure_params": {
+      "usuario_id": "string",
+      "limite": "number"
+    },
+    "orderArray": ["usuario_id", "limite"]
+  },
+
+  "obtenerOCrearListaUsuario": {
+    "query": "WITH lista_existente AS (SELECT * FROM listas_deseos WHERE usuario_id = $1), nueva_lista AS (INSERT INTO listas_deseos (usuario_id) SELECT $1 WHERE NOT EXISTS (SELECT 1 FROM lista_existente) RETURNING *) SELECT * FROM lista_existente UNION ALL SELECT * FROM nueva_lista;",
+    "structure_params": { "usuario_id": "string" },
+    "orderArray": ["usuario_id"]
+  },
+  "obtenerListaPorToken": {
+    "query": "SELECT l.id AS lista_id, l.nombre, l.token_compartir, l.usuario_id, COALESCE(json_agg(json_build_object('item_id', i.id, 'producto_id', p.id, 'nombre', p.nombre, 'descripcion', p.descripcion, 'imagen_url', p.imagen_url, 'cantidad_deseada', i.cantidad_deseada, 'comprado', i.comprado, 'comprado_por_nombre', i.comprado_por_nombre)) FILTER (WHERE i.id IS NOT NULL), '[]') AS items FROM listas_deseos l LEFT JOIN lista_deseos_items i ON l.id = i.lista_id LEFT JOIN productos p ON i.producto_id = p.id WHERE l.token_compartir = $1 GROUP BY l.id;",
+    "structure_params": { "token": "string" },
+    "orderArray": ["token"]
+  },
+  "agregarItemLista": {
+    "query": "INSERT INTO lista_deseos_items (lista_id, producto_id, cantidad_deseada) VALUES ($1, $2, $3) ON CONFLICT (lista_id, producto_id) DO UPDATE SET cantidad_deseada = EXCLUDED.cantidad_deseada RETURNING *;",
+    "structure_params": {
+      "lista_id": "string",
+      "producto_id": "string",
+      "cantidad_deseada": "number"
+    },
+    "orderArray": ["lista_id", "producto_id", "cantidad_deseada"]
+  },
+  "eliminarItemLista": {
+    "query": "DELETE FROM lista_deseos_items WHERE lista_id = $1 AND producto_id = $2;",
+    "structure_params": { "lista_id": "string", "producto_id": "string" },
+    "orderArray": ["lista_id", "producto_id"]
+  },
+  "marcarItemComprado": {
+    "query": "UPDATE lista_deseos_items SET comprado = true, comprado_por_nombre = $1 WHERE id = $2 RETURNING *;",
+    "structure_params": {
+      "comprado_por_nombre": "string",
+      "item_id": "string"
+    },
+    "orderArray": ["comprado_por_nombre", "item_id"]
   }
 }

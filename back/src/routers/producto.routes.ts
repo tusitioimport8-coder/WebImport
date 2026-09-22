@@ -6,7 +6,7 @@ import { handleProductoUpload } from "../middlewares/uploadMiddleware.js";
 const router = Router();
 
 // Endpoint: POST /api/productos/product
-router.post("/product", authMiddleware, handleProductoUpload, (req, res) =>
+router.post("/product", handleProductoUpload, (req, res) =>
   ProductController.createProducto(req, res),
 );
 
