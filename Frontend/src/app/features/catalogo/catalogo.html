@@ -1,54 +1,84 @@
 <div class="catalog">
 
-  <!-- CABECERA -->
+  <!-- ======================================================
+       CABECERA
+       ====================================================== -->
+
   <header class="catalog-header">
+
     <div class="header-titles">
+
       <p class="eyebrow">
         Tienda
       </p>
+
 
       <h1>
         Catálogo de Productos
       </h1>
 
+
       <p class="catalog-description">
         Descubre nuestras últimas novedades
       </p>
+
     </div>
+
+
+    <!-- CARRITO -->
 
     <button
       type="button"
       class="cart-summary"
       aria-label="Ver carrito"
+      (click)="openCart()"
     >
-      <tui-icon icon="@tui.shopping-cart" />
 
-      @if (cartTotalItems() > 0) {
+      <tui-icon
+        icon="@tui.shopping-cart"
+      />
+
+
+      @if (
+        cartTotalItems() > 0
+      ) {
+
         <span class="cart-badge">
+
           {{ cartTotalItems() }}
+
         </span>
+
       }
+
     </button>
+
   </header>
 
 
-  <!-- FILTROS -->
+  <!-- ======================================================
+       FILTROS
+       ====================================================== -->
+
   <section
     class="filters-bar"
     aria-label="Filtros del catálogo"
   >
 
     <!-- BUSCADOR -->
+
     <div class="search-field">
 
       <label for="catalog-search">
         Buscar
       </label>
 
+
       <tui-textfield
         class="search-control"
         iconStart="@tui.search"
       >
+
         <input
           id="catalog-search"
           tuiInput
@@ -56,8 +86,11 @@
           autocomplete="off"
           placeholder="Ej. Auriculares inalámbricos..."
           [ngModel]="searchTerm()"
-          (ngModelChange)="onSearchChange($event)"
+          (ngModelChange)="
+            onSearchChange($event)
+          "
         />
+
       </tui-textfield>
 
     </div>
@@ -66,104 +99,157 @@
     <div class="filter-group">
 
       <!-- CATEGORÍA -->
+
       <div class="filter-field">
 
         <label for="catalog-category">
           Categoría
         </label>
 
+
         <select
           id="catalog-category"
           class="select-control"
           [ngModel]="selectedCategory()"
-          (ngModelChange)="onCategoryChange($event)"
+          (ngModelChange)="
+            onCategoryChange($event)
+          "
         >
-          @for (category of categories(); track category) {
-            <option [value]="category">
+
+          @for (
+            category of categories();
+            track category
+          ) {
+
+            <option
+              [value]="category"
+            >
+
               {{ category }}
+
             </option>
+
           }
+
         </select>
 
       </div>
 
 
       <!-- ORDENAMIENTO -->
+
       <div class="filter-field">
 
         <label for="catalog-sort">
           Ordenar por
         </label>
 
+
         <select
           id="catalog-sort"
           class="select-control"
           [ngModel]="selectedSort()"
-          (ngModelChange)="onSortChange($event)"
+          (ngModelChange)="
+            onSortChange($event)
+          "
         >
-          @for (option of sortOptions; track option.value) {
-            <option [value]="option.value">
+
+          @for (
+            option of sortOptions;
+            track option.value
+          ) {
+
+            <option
+              [value]="option.value"
+            >
+
               {{ option.label }}
+
             </option>
+
           }
+
         </select>
 
       </div>
 
     </div>
+
   </section>
 
 
-  <!-- ESTADOS DEL CATÁLOGO -->
-  @switch (viewState()) {
+  <!-- ======================================================
+       ESTADOS
+       ====================================================== -->
+
+  @switch (
+    viewState()
+  ) {
+
 
     <!-- CARGANDO -->
+
     @case ('loading') {
 
       <section
         class="state-card"
         aria-live="polite"
       >
-        <tui-loader size="xl" />
+
+        <tui-loader
+          size="xl"
+        />
+
 
         <h2>
           Cargando catálogo
         </h2>
 
+
         <p>
           Estamos obteniendo los productos disponibles.
         </p>
+
       </section>
 
     }
 
 
     <!-- ERROR -->
+
     @case ('error') {
 
       <section
-        class="state-card state-card_error"
+        class="
+          state-card
+          state-card_error
+        "
         role="alert"
       >
+
         <tui-icon
           class="state-icon"
           icon="@tui.triangle-alert"
         />
 
+
         <h2>
           Ups, algo salió mal
         </h2>
+
 
         <p>
           No pudimos cargar los productos.
           Por favor, intenta de nuevo.
         </p>
+
       </section>
 
     }
 
 
     <!-- SIN PRODUCTOS -->
+
     @case ('empty') {
 
       <section class="state-card">
@@ -173,9 +259,11 @@
           icon="@tui.package-open"
         />
 
+
         <h2>
           Próximamente
         </h2>
+
 
         <p>
           Aún no hay productos disponibles
@@ -188,6 +276,7 @@
 
 
     <!-- SIN RESULTADOS -->
+
     @case ('no-results') {
 
       <section class="state-card">
@@ -197,9 +286,11 @@
           icon="@tui.search-x"
         />
 
+
         <h2>
           Sin resultados
         </h2>
+
 
         <p>
           No encontramos productos que coincidan
@@ -211,7 +302,10 @@
     }
 
 
-    <!-- PRODUCTOS -->
+    <!-- ====================================================
+         PRODUCTOS
+         ==================================================== -->
+
     @case ('content') {
 
       <section
@@ -227,26 +321,53 @@
           <article class="product-card">
 
             <!-- IMAGEN -->
+
             <div class="product-image-wrapper">
 
-              @if (product.imageUrl) {
+              <a
+                class="product-image-link"
+                routerLink="/detalle-producto"
+                [state]="{
+                  productId: product.id
+                }"
+                [attr.aria-label]="
+                  'Ver detalle de ' +
+                  product.name
+                "
+              >
 
-                <img
-                  class="product-image"
-                  [src]="product.imageUrl"
-                  [alt]="product.name"
-                />
+                @if (
+                  product.imageUrl
+                ) {
 
-              } @else {
+                  <img
+                    class="product-image"
+                    [src]="product.imageUrl"
+                    [alt]="product.name"
+                    loading="lazy"
+                    decoding="async"
+                  />
 
-                <div class="product-image-placeholder">
-                  <tui-icon icon="@tui.image" />
-                </div>
+                } @else {
 
-              }
+                  <div
+                    class="product-image-placeholder"
+                  >
+
+                    <tui-icon
+                      icon="@tui.image"
+                    />
+
+                  </div>
+
+                }
+
+              </a>
 
 
-              @if (product.quantity <= 5) {
+              @if (
+                product.quantity <= 5
+              ) {
 
                 <span
                   tuiBadge
@@ -254,7 +375,11 @@
                   size="s"
                   class="stock-badge"
                 >
-                  Últimas {{ product.quantity }} unidades
+
+                  Últimas
+                  {{ product.quantity }}
+                  unidades
+
                 </span>
 
               }
@@ -263,29 +388,55 @@
 
 
             <!-- INFORMACIÓN -->
+
             <div class="product-content">
 
               <span class="product-category">
+
                 {{ product.category }}
+
               </span>
 
-              <h2 class="product-title">
-                {{ product.name }}
-              </h2>
+
+              <a
+                class="product-title-link"
+                routerLink="/detalle-producto"
+                [state]="{
+                  productId: product.id
+                }"
+              >
+
+                <h2 class="product-title">
+
+                  {{ product.name }}
+
+                </h2>
+
+              </a>
+
 
               <p class="product-description">
+
                 {{ product.description }}
+
               </p>
 
+
               <p class="product-price">
+
                 {{
                   product.price
-                    | currency:'USD':'symbol':'1.2-2'
+                    | currency:
+                      'USD':
+                      'symbol':
+                      '1.2-2'
                 }}
+
               </p>
 
 
               <!-- AGREGAR AL CARRITO -->
+
               <button
                 tuiButton
                 type="button"
@@ -293,16 +444,26 @@
                 iconStart="@tui.plus"
                 class="add-to-cart-btn"
                 [disabled]="
-                  getQuantityInCart(product.id)
-                  >= product.quantity
+                  getQuantityInCart(
+                    product.id
+                  ) >=
+                  product.quantity
                 "
-                (click)="addToCart(product)"
+                (click)="
+                  addToCart(
+                    product
+                  )
+                "
               >
+
                 {{
-                  getQuantityInCart(product.id) > 0
+                  getQuantityInCart(
+                    product.id
+                  ) > 0
                     ? 'Agregar otro'
                     : 'Agregar al carrito'
                 }}
+
               </button>
 
             </div>
@@ -314,23 +475,37 @@
       </section>
 
 
-      <!-- PAGINACIÓN -->
-      @if (pageCount() > 1) {
+      <!-- ==================================================
+           PAGINACIÓN
+           ================================================== -->
+
+      @if (
+        pageCount() > 1
+      ) {
 
         <footer class="pagination-bar">
 
           <p class="results-text">
+
             Mostrando
+
             {{ visibleProducts().length }}
+
             de
+
             {{ filteredProducts().length }}
+
             productos
+
           </p>
+
 
           <tui-pagination
             [length]="pageCount()"
             [index]="currentPageIndex()"
-            (indexChange)="onPageChange($event)"
+            (indexChange)="
+              onPageChange($event)
+            "
           />
 
         </footer>
@@ -340,5 +515,12 @@
     }
 
   }
+
+
+  <!-- ======================================================
+       CARRITO REUTILIZABLE
+       ====================================================== -->
+
+  <app-carrito></app-carrito>
 
 </div>

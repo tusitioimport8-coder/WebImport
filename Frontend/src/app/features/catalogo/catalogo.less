@@ -310,6 +310,22 @@
   overflow: hidden;
 }
 
+.product-image-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 100%;
+  height: 100%;
+
+  color: inherit;
+  text-decoration: none;
+
+  cursor: pointer;
+
+  overflow: hidden;
+}
+
 .product-image {
   display: block;
 
@@ -317,6 +333,12 @@
   height: 100%;
 
   object-fit: cover;
+
+  transition: transform 180ms ease;
+}
+
+.product-image-link:hover .product-image {
+  transform: scale(1.035);
 }
 
 .product-image-placeholder {
@@ -369,10 +391,25 @@
   letter-spacing: 0.06em;
 }
 
+.product-title-link {
+  display: block;
+
+  color: inherit;
+  text-decoration: none;
+
+  cursor: pointer;
+}
+
+.product-title-link:hover .product-title {
+  opacity: 0.72;
+}
+
 .product-title {
   margin: 0;
 
   color: var(--tui-text-primary);
+
+  transition: opacity 150ms ease;
 
   font-size: 1.05rem;
   font-weight: 700;

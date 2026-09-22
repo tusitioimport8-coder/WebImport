@@ -1,57 +1,5 @@
 <tui-root>
-  <header tuiNavigationHeader>
-    <div tuiNavigationLogo>
-      <tui-icon icon="@tui.box" style="font-size: 2rem; margin-right: 0.5rem;"></tui-icon>
-      <strong>TuSitio Import</strong>
-    </div>
 
-    <button
-      appearance="icon"
-      tuiButton
-      tuiNavigationDrawer
-      iconStart="@tui.menu"
-      [attr.data-drawer]="open"
-      (click)="open = !open"
-    ></button>
-  </header>
+  <router-outlet></router-outlet>
 
-  <nav tuiNavigationAside [attr.data-expanded]="expanded()">
-    <button
-      appearance="icon"
-      tuiButton
-      iconStart="@tui.menu"
-      (click)="handleToggle()"
-    ></button>
-    
-    <hr />
-
-    <button tuiNavigationItem (click)="navegar('/inicio', 0)" [attr.data-active]="activeItemIndex === 0">
-      <tui-icon icon="@tui.home"></tui-icon>
-      Inicio
-    </button>
-    
-    <button tuiNavigationItem (click)="navegar('/catalogo', 1)" [attr.data-active]="activeItemIndex === 1">
-      <tui-icon icon="@tui.layout-dashboard"></tui-icon>
-      Catálogo
-    </button>
-
-    <button tuiNavigationItem (click)="navegar('/inventario', 2)" [attr.data-active]="activeItemIndex === 2">
-      <tui-icon icon="@tui.box"></tui-icon>
-      Inventario
-    </button>
-  </nav>
-
-  <main tuiNavigationMain>
-    <div tuiSubheader>
-      <tui-tabs [(activeItemIndex)]="activeItemIndex">
-        <button tuiTab (click)="navegar('/inicio', 0)">Inicio</button>
-        <button tuiTab (click)="navegar('/catalogo', 1)">Catálogo</button>
-        <button tuiTab (click)="navegar('/inventario', 2)">Inventario</button>
-      </tui-tabs>
-    </div>
-    
-    <div style="padding: 1.5rem;">
-      <router-outlet></router-outlet>
-    </div>
-  </main>
 </tui-root>
