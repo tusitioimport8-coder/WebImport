@@ -3,6 +3,7 @@ import { Layout } from './core/layout/layout';
 import { Inicio } from './features/inicio/inicio';
 import { Catalogo } from './features/catalogo/catalogo';
 import { Inventario } from './features/inventario/inventario';
+import { DetalleProducto } from './features/detalle-producto/detalle-producto';
 
 export const routes: Routes = [
   {
@@ -12,7 +13,9 @@ export const routes: Routes = [
       { path: 'inicio', component: Inicio },
       { path: 'catalogo', component: Catalogo },
       { path: 'inventario', component: Inventario },
+      { path: 'detalle-producto', component: DetalleProducto},
       { path: '', redirectTo: 'inicio', pathMatch: 'full' }
+
     ]
   },
   { path: '**', redirectTo: 'inicio' }

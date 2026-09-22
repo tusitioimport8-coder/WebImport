@@ -24,6 +24,24 @@ Gestión del carrito de compras, cantidades, precios por nivel, descuentos y not
 
 ➡️ [Ver documentación del Carrito](./carrito.md)
 
+### 🏷️ Categorías
+
+Gestión de categorías de productos, incluyendo creación, actualización y eliminación.
+
+➡️ [Ver documentación de Categorías](./categorias.md)
+
+### 💡 Sugerencias
+
+Registro de interacciones del usuario con los productos y generación de recomendaciones basadas en sus intereses recientes
+
+➡️ [Ver documentación de Sugerencias](./sugerencias.md)
+
+### 📝 Lista de Deseos
+
+Gestión de listas de deseos, incluyendo creación, actualización y eliminación.
+
+➡️ [Ver documentación de Lista de Deseos](./listaDeseos.md)
+
 ### ⚙️ Configuración
 
 Información general sobre la organización técnica y puntos de configuración documentados del sistema.
@@ -40,6 +58,9 @@ docs/
 ├── configuracion.md
 ├── productos.md
 ├── carrito.md
+├── categorias.md
+├── sugerencias.md
+├── listaDeseos.md
 └── auth/
     ├── README.md
     ├── endpoints.md
@@ -50,9 +71,12 @@ docs/
 
 ## 🔎 Navegación rápida
 
-| Módulo | Descripción |
-|---|---|
-| [Auth](./auth/README.md) | Usuarios, autenticación y sesiones |
-| [Productos](./productos.md) | CRUD de productos |
-| [Carrito](./carrito.md) | Carrito y precios dinámicos |
-| [Configuración](./configuracion.md) | Información técnica general |
+| Módulo                              | Descripción                        |
+| ----------------------------------- | ---------------------------------- |
+| [Auth](./auth/README.md)            | Usuarios, autenticación y sesiones |
+| [Productos](./productos.md)         | CRUD de productos                  |
+| [Carrito](./carrito.md)             | Carrito y precios dinámicos        |
+| [Categorías](./categorias.md)       | Gestión de categorías              |
+| [Sugerencias](./sugerencias.md)     | Recomendaciones de productos       |
+| [Lista de Deseos](./listaDeseos.md) | Gestión de listas de deseos        |
+| [Configuración](./configuracion.md) | Información técnica general        |
