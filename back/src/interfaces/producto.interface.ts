@@ -47,6 +47,7 @@ export interface CrearProductoDTO {
   precios: PrecioInputDTO[]; // Exiges los precios (ej. Detal, Mayor, GranMayor)
   descuento_porcentaje?: number;
   imagen_url?: string;
+  video_url?: string;
   stock?: number;
   categorias_ids?: number[];
 }
@@ -58,6 +59,7 @@ export interface ActualizarProductoDTO {
   precios?: PrecioInputDTO[];
   descuento_porcentaje?: number;
   imagen_url?: string;
+  video_url?: string;
   stock?: number;
   estado?: boolean;
 }
