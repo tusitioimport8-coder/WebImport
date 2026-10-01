@@ -5,6 +5,10 @@ principal.html
 ../Excel/
 ../Formato de control de actividades 2022A.doc
 uploads/
+src/test/
+Costos.md
 
 # Contexto del agente (no se commitea, es solo para uso local del agente IA)
 agent.md
+
+src/utils/Migration/

@@ -62,6 +62,12 @@ class ProductosValidator {
         .url("La URL de la imagen no es válida")
         .optional()
         .nullable(),
+      video_url: zod
+        .string()
+        .url("La URL del video no es válida")
+        .optional()
+        .nullable(),
+      estado: zod.boolean().optional(),
       categorias_ids: zod.array(zod.number()).optional(),
     });
 
@@ -81,6 +87,11 @@ class ProductosValidator {
       imagen_url: zod
         .string()
         .url({ message: "La URL de la imagen no es válida" })
+        .optional()
+        .nullable(),
+      video_url: zod
+        .string()
+        .url({ message: "La URL del video no es válida" })
         .optional()
         .nullable(),
       estado: zod.boolean().optional(),
