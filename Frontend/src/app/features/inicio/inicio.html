@@ -1,488 +1,793 @@
 <div class="home-page">
 
+<div classs="store-notice">
+  <i class="pi pi-truck"></i>
+  Envíos a todo el país | Pagos en USD y Bolívares (Tasa Oficial BCV)
+</div>
   <!-- ======================================================
+
        BARRA SUPERIOR
+
        ====================================================== -->
+
 
   <section class="shop-toolbar">
 
+
     <div class="shop-brand">
 
+
       <span class="shop-brand-icon">
+
         <i class="pi pi-shopping-bag"></i>
+
       </span>
 
+
       <div>
+
         <strong>
+
           Tu Sitio Import
+
         </strong>
 
+
         <small>
+
           Tu Sitio Favorito
+
         </small>
+
       </div>
+
 
     </div>
 
 
     <!-- BUSCADOR -->
 
+
     <div class="search-wrapper">
 
+
       <tui-textfield
+
         class="search-control"
+
         iconStart="@tui.search"
+
       >
 
+
         <input
+
           tuiInput
+
           type="search"
+
           autocomplete="off"
+
           placeholder="Buscar productos..."
+
           [ngModel]="searchTerm()"
+
           (ngModelChange)="
+
             onSearchChange($event)
+
           "
+
         />
 
+
       </tui-textfield>
+
 
     </div>
 
 
     <!-- ACCIONES -->
 
+
     <div class="toolbar-actions">
+
 
       <!-- DESEOS -->
 
-      <button
-        type="button"
-        class="toolbar-action"
-        aria-label="Lista de deseos"
-      >
+
+     <button
+  type="button"
+  class="toolbar-action"
+  aria-label="Lista de deseos"
+  (click)="openWishlist()"
+>
+
 
         <span class="action-icon">
+
 
           <i class="pi pi-heart"></i>
 
 
           @if (
+
             wishlistTotalItems() > 0
+
           ) {
 
+
             <span class="action-badge">
+
               {{ wishlistTotalItems() }}
+
             </span>
 
+
           }
+
 
         </span>
 
 
         <span class="action-text">
 
+
           <small>
+
             Guardados
+
           </small>
 
+
           <strong>
+
             Deseos
+
           </strong>
 
+
         </span>
+
 
       </button>
 
 
       <!-- CARRITO -->
 
+
       <button
+
         type="button"
+
         class="toolbar-action"
+
         aria-label="Carrito"
+
         (click)="openCart()"
+
       >
 
+
         <span class="action-icon">
+
 
           <i class="pi pi-shopping-cart"></i>
 
 
           @if (
+
             cartTotalItems() > 0
+
           ) {
 
+
             <span class="action-badge">
+
               {{ cartTotalItems() }}
+
             </span>
 
+
           }
+
 
         </span>
 
 
         <span class="action-text">
 
+
           <small>
+
             Tu compra
+
           </small>
 
+
           <strong>
+
             Carrito
+
           </strong>
 
+
         </span>
+
 
       </button>
 
 
       <!-- CUENTA -->
 
+
       <button
+
         type="button"
+
         class="toolbar-action"
+
         aria-label="Mi cuenta"
+
       >
 
+
         <span class="action-icon">
+
           <i class="pi pi-user"></i>
+
         </span>
 
 
         <span class="action-text">
 
+
           <small>
+
             Bienvenido
+
           </small>
 
+
           <strong>
+
             Mi cuenta
+
           </strong>
+
 
         </span>
 
+
       </button>
 
+
     </div>
+
 
   </section>
 
 
   <!-- ======================================================
+
        PROMOCIONES PRINCIPALES
+
        ====================================================== -->
 
+
   <section
+
     class="promo-grid"
+
     aria-label="Promociones"
+
   >
+
 
     <!-- PROMOCIÓN 1 -->
 
-    <article
-      class="
-        promo-card
-        promo-card_primary
-      "
-    >
+
+   <article
+  class="promo-card promo-card_primary"
+  [style.background-image]="promoImage1() ? 'url(' + promoImage1() + ')' : null"
+>
+  <button
+    type="button"
+    class="promo-edit-button"
+    aria-label="Cambiar imagen del banner"
+    (click)="promoFile1.click()"
+  >
+    <i class="pi pi-bars"></i>
+  </button>
+
+  <input
+    #promoFile1
+    type="file"
+    accept="image/*"
+    hidden
+    (change)="onPromoImageChange($event, 1)"
+  >
+
 
       <div class="promo-content">
 
+
         <span class="promo-eyebrow">
+
           Descubre algo nuevo
+
         </span>
 
 
         <h1>
+
           Productos para cada momento
+
         </h1>
 
 
         <p>
+
           Explora nuestras novedades y encuentra
+
           opciones para tu hogar, oficina y día a día.
+
         </p>
 
 
         <a
+
           tuiButton
+
           routerLink="/catalogo"
+
           class="promo-button"
+
         >
+
 
           Ver catálogo
 
+
           <i class="pi pi-arrow-right"></i>
 
+
         </a>
+
 
       </div>
 
 
       <div
+
         class="promo-decoration"
+
         aria-hidden="true"
+
       >
+
 
         <i class="pi pi-shopping-bag"></i>
 
+
       </div>
+
 
     </article>
 
 
     <!-- PROMOCIÓN 2 -->
 
-    <article
-      class="
-        promo-card
-        promo-card_secondary
-      "
-    >
+<article
+  class="promo-card promo-card_secondary"
+  [style.background-image]="promoImage2() ? 'url(' + promoImage2() + ')' : null"
+>
+  <button
+    type="button"
+    class="promo-edit-button"
+    aria-label="Cambiar imagen del banner"
+    (click)="promoFile2.click()"
+  >
+    <i class="pi pi-bars"></i>
+  </button>
+
+  <input
+    #promoFile2
+    type="file"
+    accept="image/*"
+    hidden
+    (change)="onPromoImageChange($event, 2)"
+  >
+
 
       <div class="promo-content">
 
+
         <span class="promo-eyebrow">
+
           Compra más, aprovecha más
+
         </span>
 
 
         <h2>
+
           Precios especiales por volumen
+
         </h2>
 
 
         <p>
+
           Encuentra alternativas para compras
+
           individuales y pedidos de mayor cantidad.
+
         </p>
 
 
         <a
+
           tuiButton
+
           appearance="secondary"
+
           routerLink="/catalogo"
+
           class="promo-button"
+
         >
+
 
           Explorar productos
 
+
         </a>
+
 
       </div>
 
 
       <div
+
         class="promo-decoration"
+
         aria-hidden="true"
+
       >
+
 
         <i class="pi pi-box"></i>
 
+
       </div>
 
+
     </article>
+
 
   </section>
 
 
   <!-- ======================================================
+
        ESTADO DE CARGA
+
        ====================================================== -->
+
 
   @if (loading()) {
 
+
     <section
+
       class="
+
         home-section
+
         home-loading-section
+
       "
+
       aria-live="polite"
+
     >
+
 
       <header class="section-header">
 
+
         <div>
 
+
           <span class="section-eyebrow">
+
             Selección destacada
+
           </span>
 
 
           <h2>
+
             Para ti
+
           </h2>
 
 
           <p>
+
             Estamos preparando los productos.
+
           </p>
 
+
         </div>
+
 
       </header>
 
 
       <div
+
         class="skeleton-carousel"
+
         aria-hidden="true"
+
       >
 
+
         <article class="product-skeleton">
+
 
           <div class="skeleton-image"></div>
 
+
           <div
+
             class="
+
               skeleton-line
+
               skeleton-line_title
+
             "
+
           ></div>
+
 
           <div class="skeleton-line"></div>
 
+
           <div
+
             class="
+
               skeleton-line
+
               skeleton-line_short
+
             "
+
           ></div>
+
 
         </article>
 
 
         <article class="product-skeleton">
 
+
           <div class="skeleton-image"></div>
 
+
           <div
+
             class="
+
               skeleton-line
+
               skeleton-line_title
+
             "
+
           ></div>
+
 
           <div class="skeleton-line"></div>
 
+
           <div
+
             class="
+
               skeleton-line
+
               skeleton-line_short
+
             "
+
           ></div>
+
 
         </article>
 
 
         <article class="product-skeleton">
 
+
           <div class="skeleton-image"></div>
 
+
           <div
+
             class="
+
               skeleton-line
+
               skeleton-line_title
+
             "
+
           ></div>
+
 
           <div class="skeleton-line"></div>
 
+
           <div
+
             class="
+
               skeleton-line
+
               skeleton-line_short
+
             "
+
           ></div>
+
 
         </article>
 
 
         <article class="product-skeleton">
 
+
           <div class="skeleton-image"></div>
 
+
           <div
+
             class="
+
               skeleton-line
+
               skeleton-line_title
+
             "
+
           ></div>
+
 
           <div class="skeleton-line"></div>
 
+
           <div
+
             class="
+
               skeleton-line
+
               skeleton-line_short
+
             "
+
           ></div>
+
 
         </article>
 
 
         <article class="product-skeleton">
 
+
           <div class="skeleton-image"></div>
 
+
           <div
+
             class="
+
               skeleton-line
+
               skeleton-line_title
+
             "
+
           ></div>
+
 
           <div class="skeleton-line"></div>
 
+
           <div
+
             class="
+
               skeleton-line
+
               skeleton-line_short
+
             "
+
           ></div>
 
+
         </article>
+
 
       </div>
+
 
     </section>
 
 
   } @else if (errorMessage()) {
 
+
     <!-- ERROR -->
 
+
     <section
+
       class="
+
         home-state
+
         home-state_error
+
       "
+
     >
 
+
       <tui-icon
+
         icon="@tui.triangle-alert"
+
       />
 
 
       <h2>
+
         Ups, algo salió mal
+
       </h2>
 
 
       <p>
+
         {{ errorMessage() }}
+
       </p>
 
 
       <button
+
         tuiButton
+
         type="button"
+
         (click)="loadProducts()"
+
       >
+
 
         Intentar nuevamente
 
+
       </button>
+
 
     </section>
 
@@ -491,1080 +796,1801 @@
 
 
     <!-- ====================================================
+
          CARRUSEL PARA TI
+
          ==================================================== -->
 
-    <section class="home-section">
+
+  <section class="home-section featured-section">
+
 
       <header class="section-header">
 
+
         <div>
 
+
           <span class="section-eyebrow">
+
             Selección destacada
+
           </span>
 
 
           <h2>
+
             Para ti
+
           </h2>
 
 
           <p>
+
             Productos seleccionados para comenzar.
+
           </p>
+
 
         </div>
 
 
         <a
+
           routerLink="/catalogo"
+
           class="section-link"
+
         >
+
 
           Ver todos
 
+
           <i class="pi pi-arrow-right"></i>
 
+
         </a>
+
 
       </header>
 
 
       @if (
+
         featuredProducts().length > 0
+
       ) {
+
 
         <div class="carousel-shell">
 
+
           <!-- ANTERIOR -->
 
+
           <button
+
             type="button"
+
             class="
+
               carousel-arrow
+
               carousel-arrow_prev
+
             "
+
             aria-label="Productos anteriores"
+
             (click)="
+
               scrollCarousel(
+
                 featuredCarousel,
+
                 -1
+
               )
+
             "
+
           >
 
+
             <i class="pi pi-chevron-left"></i>
+
 
           </button>
 
 
           <!-- PRODUCTOS -->
 
+
           <div
+
             #featuredCarousel
+
             class="product-carousel"
+
           >
 
+
             @for (
+
               product of featuredProducts();
+
               track product.id
+
             ) {
 
+
              <article
+
   tuiCardLarge
+
   class="home-product-card"
+
   (mouseenter)="stopAutoplay()"
+
   (mouseleave)="startAutoplay()"
+
 >
+
 
                 <!-- IMAGEN -->
 
+
                 <div class="product-image-area">
 
+
                   <a
+
                     class="product-image-link"
+
                     routerLink="/detalle-producto"
+
                     [state]="{
+
                       productId: product.id
+
                     }"
+
                     [attr.aria-label]="
+
                       'Ver detalle de ' +
+
                       product.name
+
                     "
+
                   >
 
+
                     @if (
+
                       product.imageUrl
+
                     ) {
 
+
                       <img
+
                         class="product-image"
+
                         [src]="product.imageUrl"
+
                         [alt]="product.name"
+
                         loading="lazy"
+
                         decoding="async"
+
                       />
+
 
                     } @else {
 
+
                       <div class="image-placeholder">
 
+
                         <tui-icon
+
                           icon="@tui.image"
+
                         />
+
 
                       </div>
 
+
                     }
+
 
                   </a>
 
 
                   <!-- DESEOS -->
 
+
                   <button
+
                     type="button"
+
                     class="wishlist-button"
+
                     [class.wishlist-button_active]="
+
                       isInWishlist(
+
                         product.id
+
                       )
+
                     "
+
                     [attr.aria-label]="
+
                       isInWishlist(
+
                         product.id
+
                       )
+
                         ? 'Quitar de deseos'
+
                         : 'Agregar a deseos'
+
                     "
+
                     (click)="
+
                       toggleWishlist(
+
                         product.id
+
                       )
+
                     "
+
                   >
 
+
                     <i class="pi pi-heart"></i>
+
 
                   </button>
 
 
                   <!-- STOCK -->
 
+
                   <p-tag
+
                     class="product-stock"
+
                     [value]="
+
                       getStockLabel(
+
                         product
+
                       )
+
                     "
+
                     [severity]="
+
                       getSeverity(
+
                         product
+
                       )
+
                     "
+
                   />
+
 
                 </div>
 
 
                 <!-- INFORMACIÓN -->
 
+
                 <div class="product-info">
 
+
                   <a
+
                     class="product-name-link"
+
                     routerLink="/detalle-producto"
+
                     [state]="{
+
                       productId: product.id
+
                     }"
+
                   >
 
+
                     <h3>
+
                       {{ product.name }}
+
                     </h3>
+
 
                   </a>
 
 
                   <p class="product-description">
+
                     {{ product.description }}
+
                   </p>
 
 
                   <div class="product-footer">
 
+
                     <strong class="product-price">
 
+
                       {{
+
                         product.price
+
                           | currency:
+
                             'USD':
+
                             'symbol':
+
                             '1.2-2'
+
                       }}
+
 
                     </strong>
 
 
                     <button
+
                       tuiButton
+
                       type="button"
+
                       size="s"
+
                       iconStart="@tui.plus"
+
                       [disabled]="
+
                         product.quantity <= 0
+
                       "
+
                       (click)="
+
                         addToCart(
+
                           product
+
                         )
+
                       "
+
                     >
+
 
                       Agregar
 
+
                     </button>
+
 
                   </div>
 
+
                 </div>
+
 
               </article>
 
+
             }
+
 
           </div>
 
 
           <!-- SIGUIENTE -->
 
+
           <button
+
             type="button"
+
             class="
+
               carousel-arrow
+
               carousel-arrow_next
+
             "
+
             aria-label="Productos siguientes"
+
             (click)="
+
               scrollCarousel(
+
                 featuredCarousel,
+
                 1
+
               )
+
             "
+
           >
+
 
             <i class="pi pi-chevron-right"></i>
 
+
           </button>
+
 
         </div>
 
 
       } @else {
 
+
         <div class="empty-products">
+
 
           No encontramos productos para mostrar.
 
+
         </div>
+
 
       }
 
-    </section>
-
-
-    <!-- ====================================================
-         CARRUSEL VISUAL DE CATEGORÍAS
-         ==================================================== -->
-
-    <section
-      class="
-        home-section
-        visual-categories
-      "
-    >
-
-      <header class="section-header">
-
-        <div>
-
-          <span class="section-eyebrow">
-            Encuentra lo que buscas
-          </span>
-
-
-          <h2>
-            Explora por categoría
-          </h2>
-
-
-          <p>
-            Una forma más visual de descubrir la tienda.
-          </p>
-
-        </div>
-
-      </header>
-
-
-      <div class="carousel-shell">
-
-        <button
-          type="button"
-          class="
-            carousel-arrow
-            carousel-arrow_prev
-          "
-          aria-label="Categorías anteriores"
-          (click)="
-            scrollCarousel(
-              categoryCarousel,
-              -1
-            )
-          "
-        >
-
-          <i class="pi pi-chevron-left"></i>
-
-        </button>
-
-
-        <div
-          #categoryCarousel
-          class="category-carousel"
-        >
-
-          @for (
-            category of categories;
-            track category.label
-          ) {
-
-            <a
-              class="visual-category-card"
-              routerLink="/catalogo"
-              [queryParams]="{
-                categoria: category.label
-              }"
-            >
-
-              <img
-                [src]="category.image"
-                [alt]="category.label"
-                loading="lazy"
-                decoding="async"
-              />
-
-
-              <div class="visual-category-overlay">
-
-                <span class="visual-category-icon">
-
-                  <i
-                    [class]="
-                      category.icon
-                    "
-                  ></i>
-
-                </span>
-
-
-                <div>
-
-                  <span>
-                    Explorar
-                  </span>
-
-                  <h3>
-                    {{ category.label }}
-                  </h3>
-
-                </div>
-
-
-                <i class="pi pi-arrow-right"></i>
-
-              </div>
-
-            </a>
-
-          }
-
-        </div>
-
-
-        <button
-          type="button"
-          class="
-            carousel-arrow
-            carousel-arrow_next
-          "
-          aria-label="Categorías siguientes"
-          (click)="
-            scrollCarousel(
-              categoryCarousel,
-              1
-            )
-          "
-        >
-
-          <i class="pi pi-chevron-right"></i>
-
-        </button>
-
-      </div>
 
     </section>
 
 
     <!-- ====================================================
+
          CATEGORÍAS
+
          ==================================================== -->
 
+
     <section
+
       class="
+
         home-section
+
         category-section
+
       "
+
     >
+
 
       <header class="section-header">
 
+
         <div>
 
+
           <span class="section-eyebrow">
+
             Explora fácilmente
+
           </span>
 
 
           <h2>
+
             Compra por categoría
+
           </h2>
 
 
           <p>
+
             Elige una sección y encuentra lo que buscas.
+
           </p>
 
+
         </div>
+
 
       </header>
 
 
       <div class="category-grid">
 
+
         @for (
+
           category of categories;
+
           track category.label
+
         ) {
 
+
           <a
+
             class="category-card"
+
             routerLink="/catalogo"
+
             [queryParams]="{
+
               categoria: category.label
+
             }"
+
           >
+
 
             <span class="category-icon">
 
+
               <i
+
                 [class]="
+
                   category.icon
+
                 "
+
               ></i>
+
 
             </span>
 
 
             <span class="category-name">
+
               {{ category.label }}
+
             </span>
 
 
             <i
+
               class="
+
                 pi
+
                 pi-chevron-right
+
                 category-arrow
+
               "
+
             ></i>
+
 
           </a>
 
+
         }
 
+
       </div>
+
 
     </section>
 
 
     <!-- ====================================================
+
          NOVEDADES
+
          OCULTO TEMPORALMENTE
+
          ==================================================== -->
+
 
     @if (false) {
 
+
       <section
+
         class="
+
           home-section
+
           compact-section
+
         "
+
       >
+
 
         <header class="section-header">
 
+
           <div>
 
+
             <span class="section-eyebrow">
+
               Recién agregados
+
             </span>
 
 
             <h2>
+
               Novedades
+
             </h2>
 
+
           </div>
+
 
         </header>
 
 
         <div
+
           class="
+
             carousel-shell
+
             compact-carousel
+
           "
+
         >
 
+
           <button
+
             type="button"
+
             class="
+
               carousel-arrow
+
               carousel-arrow_prev
+
             "
+
             (click)="
+
               scrollCarousel(
+
                 newestCarousel,
+
                 -1
+
               )
+
             "
+
           >
 
+
             <i class="pi pi-chevron-left"></i>
+
 
           </button>
 
 
           <div
+
             #newestCarousel
+
             class="product-carousel"
+
           >
 
+
             @for (
+
               product of newestProducts();
+
               track product.id
+
             ) {
 
+
              <article
+
   class="mini-product-card"
+
   (mouseenter)="stopAutoplay()"
+
   (mouseleave)="startAutoplay()"
+
 >
 
+
                 <a
+
                   class="
+
                     mini-image
+
                     mini-product-link
+
                   "
+
                   routerLink="/detalle-producto"
+
                   [state]="{
+
                     productId: product.id
+
                   }"
+
                   [attr.aria-label]="
+
                     'Ver detalle de ' +
+
                     product.name
+
                   "
+
                 >
 
+
                   @if (
+
                     product.imageUrl
+
                   ) {
 
+
                     <img
+
                       [src]="product.imageUrl"
+
                       [alt]="product.name"
+
                       loading="lazy"
+
                       decoding="async"
+
                     />
+
 
                   } @else {
 
+
                     <tui-icon
+
                       icon="@tui.image"
+
                     />
 
+
                   }
+
 
                 </a>
 
 
                 <div class="mini-content">
 
+
                   <a
+
                     class="mini-name-link"
+
                     routerLink="/detalle-producto"
+
                     [state]="{
+
                       productId: product.id
+
                     }"
+
                   >
 
+
                     <h3>
+
                       {{ product.name }}
+
                     </h3>
+
 
                   </a>
 
 
                   <strong>
 
+
                     {{
+
                       product.price
+
                         | currency:
+
                           'USD':
+
                           'symbol':
+
                           '1.2-2'
+
                     }}
+
 
                   </strong>
 
 
                   <button
+
                     type="button"
+
                     class="mini-cart-button"
+
                     [disabled]="
+
                       product.quantity <= 0
+
                     "
+
                     (click)="
+
                       addToCart(
+
                         product
+
                       )
+
                     "
+
                   >
+
 
                     <i class="pi pi-shopping-cart"></i>
 
+
                   </button>
+
 
                 </div>
 
+
               </article>
 
+
             }
+
 
           </div>
 
 
           <button
+
             type="button"
+
             class="
+
               carousel-arrow
+
               carousel-arrow_next
+
             "
+
             (click)="
+
               scrollCarousel(
+
                 newestCarousel,
+
                 1
+
               )
+
             "
+
           >
+
 
             <i class="pi pi-chevron-right"></i>
 
+
           </button>
+
 
         </div>
 
+
       </section>
+
 
     }
 
 
     <!-- ====================================================
+
          RECOMENDADOS
+
          ==================================================== -->
 
+
     <section
+
       class="
+
         home-section
+
         compact-section
+
       "
+
     >
+
 
       <header class="section-header">
 
+
         <div>
 
+
           <span class="section-eyebrow">
+
             Más para descubrir
+
           </span>
 
 
           <h2>
+
             Recomendados para ti
+
           </h2>
 
+
         </div>
+
 
       </header>
 
 
       <div
+
         class="
+
           carousel-shell
+
           compact-carousel
+
         "
+
       >
 
+
         <button
+
           type="button"
+
           class="
+
             carousel-arrow
+
             carousel-arrow_prev
+
           "
+
           (click)="
+
             scrollCarousel(
+
               recommendedCarousel,
+
               -1
+
             )
+
           "
+
         >
 
+
           <i class="pi pi-chevron-left"></i>
+
 
         </button>
 
 
         <div
+
           #recommendedCarousel
+
           class="product-carousel"
+
         >
 
+
           @for (
+
             product of recommendedProducts();
+
             track product.id
+
           ) {
+
 
             <article class="mini-product-card">
 
+
               <!-- IMAGEN -->
 
+
               <a
+
                 class="
+
                   mini-image
+
                   mini-product-link
+
                 "
+
                 routerLink="/detalle-producto"
+
                 [state]="{
+
                   productId: product.id
+
                 }"
+
                 [attr.aria-label]="
+
                   'Ver detalle de ' +
+
                   product.name
+
                 "
+
               >
 
+
                 @if (
+
                   product.imageUrl
+
                 ) {
 
+
                   <img
+
                     [src]="product.imageUrl"
+
                     [alt]="product.name"
+
                     loading="lazy"
+
                     decoding="async"
+
                   />
+
 
                 } @else {
 
+
                   <tui-icon
+
                     icon="@tui.image"
+
                   />
 
+
                 }
+
 
               </a>
 
 
               <!-- INFO -->
 
+
               <div class="mini-content">
 
+
                 <a
+
                   class="mini-name-link"
+
                   routerLink="/detalle-producto"
+
                   [state]="{
+
                     productId: product.id
+
                   }"
+
                 >
 
+
                   <h3>
+
                     {{ product.name }}
+
                   </h3>
+
 
                 </a>
 
 
                 <strong>
 
+
                   {{
+
                     product.price
+
                       | currency:
+
                         'USD':
+
                         'symbol':
+
                         '1.2-2'
+
                   }}
+
 
                 </strong>
 
 
                 <button
+
                   type="button"
+
                   class="mini-cart-button"
+
                   [disabled]="
+
                     product.quantity <= 0
+
                   "
+
                   (click)="
+
                     addToCart(
+
                       product
+
                     )
+
                   "
+
                 >
+
 
                   <i class="pi pi-shopping-cart"></i>
 
+
                 </button>
+
 
               </div>
 
+
             </article>
 
+
           }
+
 
         </div>
 
 
         <button
+
           type="button"
+
           class="
+
             carousel-arrow
+
             carousel-arrow_next
+
           "
+
           (click)="
+
             scrollCarousel(
+
               recommendedCarousel,
+
               1
+
             )
+
           "
+
         >
+
 
           <i class="pi pi-chevron-right"></i>
 
+
         </button>
 
+
       </div>
+
 
     </section>
 
 
     <!-- ====================================================
+
          OPCIONES PARA DESCUBRIR
+
          ==================================================== -->
 
+
     <section
+
       class="
+
         home-section
+
         compact-section
+
       "
+
     >
+
 
       <header class="section-header">
 
+
         <div>
 
+
           <span class="section-eyebrow">
+
             También puede interesarte
+
           </span>
 
 
           <h2>
+
             Opciones para descubrir
+
           </h2>
 
+
         </div>
+
 
       </header>
 
 
       <div
+
         class="
+
           carousel-shell
+
           compact-carousel
+
         "
+
       >
 
+
         <button
+
           type="button"
+
           class="
+
             carousel-arrow
+
             carousel-arrow_prev
+
           "
+
           (click)="
+
             scrollCarousel(
+
               valueCarousel,
+
               -1
+
             )
+
           "
+
         >
 
+
           <i class="pi pi-chevron-left"></i>
+
 
         </button>
 
 
         <div
+
           #valueCarousel
+
           class="product-carousel"
+
         >
 
+
           @for (
+
             product of valueProducts();
+
             track product.id
+
           ) {
+
 
             <article class="mini-product-card">
 
+
               <a
+
                 class="
+
                   mini-image
+
                   mini-product-link
+
                 "
+
                 routerLink="/detalle-producto"
+
                 [state]="{
+
                   productId: product.id
+
                 }"
+
                 [attr.aria-label]="
+
                   'Ver detalle de ' +
+
                   product.name
+
                 "
+
               >
 
+
                 @if (
+
                   product.imageUrl
+
                 ) {
 
+
                   <img
+
                     [src]="product.imageUrl"
+
                     [alt]="product.name"
+
                     loading="lazy"
+
                     decoding="async"
+
                   />
+
 
                 } @else {
 
+
                   <tui-icon
+
                     icon="@tui.image"
+
                   />
 
+
                 }
+
 
               </a>
 
 
               <div class="mini-content">
 
+
                 <a
+
                   class="mini-name-link"
+
                   routerLink="/detalle-producto"
+
                   [state]="{
+
                     productId: product.id
+
                   }"
+
                 >
 
+
                   <h3>
+
                     {{ product.name }}
+
                   </h3>
+
 
                 </a>
 
 
                 <strong>
 
+
                   {{
+
                     product.price
+
                       | currency:
+
                         'USD':
+
                         'symbol':
+
                         '1.2-2'
+
                   }}
+
 
                 </strong>
 
 
                 <button
+
                   type="button"
+
                   class="mini-cart-button"
+
                   [disabled]="
+
                     product.quantity <= 0
+
                   "
+
                   (click)="
+
                     addToCart(
+
                       product
+
                     )
+
                   "
+
                 >
+
 
                   <i class="pi pi-shopping-cart"></i>
 
+
                 </button>
+
 
               </div>
 
+
             </article>
 
+
           }
+
 
         </div>
 
 
         <button
+
           type="button"
+
           class="
+
             carousel-arrow
+
             carousel-arrow_next
+
           "
+
           (click)="
+
             scrollCarousel(
+
               valueCarousel,
+
               1
+
             )
+
           "
+
         >
+
 
           <i class="pi pi-chevron-right"></i>
 
+
         </button>
+
 
       </div>
 
+
     </section>
 
+
+<!-- ====================================================
+
+         CARRUSEL VISUAL DE CATEGORÍAS
+
+         ==================================================== -->
+
+
+    <section
+
+      class="
+
+        home-section
+
+        visual-categories
+
+      "
+
+    >
+
+
+      <header class="section-header">
+
+
+        <div>
+
+
+          <span class="section-eyebrow">
+
+            Encuentra lo que buscas
+
+          </span>
+
+
+          <h2>
+
+            Explora por categoría
+
+          </h2>
+
+
+          <p>
+
+            Una forma más visual de descubrir la tienda.
+
+          </p>
+
+
+        </div>
+
+
+      </header>
+
+
+      <div class="carousel-shell">
+
+
+        <button
+
+          type="button"
+
+          class="
+
+            carousel-arrow
+
+            carousel-arrow_prev
+
+          "
+
+          aria-label="Categorías anteriores"
+
+          (click)="
+
+            scrollCarousel(
+
+              categoryCarousel,
+
+              -1
+
+            )
+
+          "
+
+        >
+
+
+          <i class="pi pi-chevron-left"></i>
+
+
+        </button>
+
+
+        <div
+
+          #categoryCarousel
+
+          class="category-carousel"
+
+        >
+
+
+          @for (
+
+            category of categories;
+
+            track category.label
+
+          ) {
+
+
+            <a
+
+              class="visual-category-card"
+
+              routerLink="/catalogo"
+
+              [queryParams]="{
+
+                categoria: category.label
+
+              }"
+
+            >
+
+
+              <img
+
+                [src]="category.image"
+
+                [alt]="category.label"
+
+                loading="lazy"
+
+                decoding="async"
+
+              />
+
+
+              <div class="visual-category-overlay">
+
+
+                <span class="visual-category-icon">
+
+
+                  <i
+
+                    [class]="
+
+                      category.icon
+
+                    "
+
+                  ></i>
+
+
+                </span>
+
+
+                <div>
+
+
+                  <span>
+
+                    Explorar
+
+                  </span>
+
+
+                  <h3>
+
+                    {{ category.label }}
+
+                  </h3>
+
+
+                </div>
+
+
+                <i class="pi pi-arrow-right"></i>
+
+
+              </div>
+
+
+            </a>
+
+
+          }
+
+
+        </div>
+
+
+        <button
+
+          type="button"
+
+          class="
+
+            carousel-arrow
+
+            carousel-arrow_next
+
+          "
+
+          aria-label="Categorías siguientes"
+
+          (click)="
+
+            scrollCarousel(
+
+              categoryCarousel,
+
+              1
+
+            )
+
+          "
+
+        >
+
+
+          <i class="pi pi-chevron-right"></i>
+
+
+        </button>
+
+
+      </div>
+
+
+    </section>
   }
 
 
+ <app-wishlist
+  [items]="wishlistProducts()"
+  [isOpen]="wishlistOpen()"
+  (closeRequested)="closeWishlist()"
+  (removeRequested)="removeFromWishlist($event)"
+></app-wishlist>
 
-  <app-carrito></app-carrito>
+<app-carrito></app-carrito>
+
+
+
 
 </div>

@@ -217,9 +217,10 @@
                   selectedPriceType() ===
                   option.type
                 "
-                [disabled]="
-                  !option.available
-                "
+               [disabled]="
+  option.type !== 'Detal' ||
+  !option.available
+"
                 (click)="
                   selectPrice(
                     option.type

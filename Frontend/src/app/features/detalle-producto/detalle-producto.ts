@@ -105,7 +105,7 @@ export class DetalleProducto
 
   readonly selectedPriceType =
     signal<ProductPriceType>(
-      'Mayor',
+      'Detal',
     );
 
 
@@ -477,37 +477,9 @@ export class DetalleProducto
      * Mayor es la selección preferida.
      */
 
-    const mayorExists =
-      product.precios.some(
-        (price) =>
-          price.tipo_precio ===
-          'Mayor',
-      );
-
-
-    if (
-      mayorExists
-    ) {
-
-      this.selectedPriceType.set(
-        'Mayor',
-      );
-
-    } else {
-
-      const firstPrice =
-        product.precios[0];
-
-
-      if (
-        firstPrice
-      ) {
-
-        this.selectedPriceType.set(
-          firstPrice.tipo_precio,
-        );
-      }
-    }
+ this.selectedPriceType.set(
+  'Detal',
+);
 
 
     /*

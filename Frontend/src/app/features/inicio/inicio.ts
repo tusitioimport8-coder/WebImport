@@ -5,6 +5,7 @@ import {
   computed,
   ElementRef,
   inject,
+  effect,
   OnDestroy,
   OnInit,
   signal,
@@ -37,6 +38,11 @@ import {
 import {
   Carrito,
 } from '../../shared/components/carrito/carrito';
+
+import {
+  Wishlist,
+  WishlistProduct,
+} from '../../shared/components/wishlist/wishlist';
 
 
 export interface HomeProduct {
@@ -72,6 +78,7 @@ export interface HomeCategory {
     TuiIcon,
     TuiInput,
     TuiTextfield,
+    Wishlist,
 
     Carrito,
   ],
@@ -153,6 +160,39 @@ export class Inicio
   readonly searchTerm =
     signal('');
 
+    readonly promoImage1 = signal<string | null>(null);
+readonly promoImage2 = signal<string | null>(null);
+
+onPromoImageChange(event: Event, promo: 1 | 2): void {
+  const input = event.target as HTMLInputElement;
+  const file = input.files?.[0];
+
+  if (!file) return;
+
+  const reader = new FileReader();
+
+  reader.onload = () => {
+    const image = reader.result as string;
+
+    if (promo === 1) {
+      this.promoImage1.set(image);
+    } else {
+      this.promoImage2.set(image);
+    }
+  };
+
+  reader.readAsDataURL(file);
+}
+
+constructor() {
+  effect(() => {
+    const overlayOpen = this.wishlistOpen() || this.cartService.isOpen();
+
+    document.documentElement.classList.toggle('overlay-open', overlayOpen);
+    document.body.classList.toggle('overlay-open', overlayOpen);
+  });
+}
+
 
   /*
    * Wishlist sigue siendo local por ahora.
@@ -165,6 +205,23 @@ export class Inicio
     signal<Set<string>>(
       new Set(),
     );
+
+    readonly wishlistOpen = signal(false);
+
+readonly wishlistProducts = computed<WishlistProduct[]>(() => {
+  const ids = this.wishlist();
+
+  return this.products()
+    .filter((product) => ids.has(product.id))
+    .map((product) => ({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      stock: product.quantity,
+      imageUrl: product.imageUrl,
+      priceType: 'Mayor',
+    }));
+});
 
 
   /*
@@ -557,6 +614,20 @@ export class Inicio
    * ========================================
    */
 
+  openWishlist(): void {
+  this.wishlistOpen.set(true);
+}
+
+closeWishlist(): void {
+  this.wishlistOpen.set(false);
+}
+
+removeFromWishlist(productId: string): void {
+  if (this.isInWishlist(productId)) {
+    this.toggleWishlist(productId);
+  }
+}
+
   toggleWishlist(
     productId: string,
   ): void {
@@ -590,6 +661,8 @@ export class Inicio
       },
     );
   }
+
+  
 
 
   isInWishlist(

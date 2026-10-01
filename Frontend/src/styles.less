@@ -21,4 +21,10 @@ tui-dialog[data-appearance~='inventory-dialog'] > button[tuiButtonX]::before {
   line-height: 1 !important;
 
   color: var(--tui-text-primary) !important;
+
+  html.overlay-open,
+body.overlay-open {
+  overflow: hidden !important;
+  height: 100%;
+}
 }
