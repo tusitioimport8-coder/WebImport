@@ -52,6 +52,39 @@ class UserRepository {
   async eliminarUsuario(id: string): Promise<void> {
     await this.db.excecuteNameQuery("eliminarUsuario", { id });
   }
+
+  // Si tu método crearUsuario estándar no acepta google_id / avatar_url, puedes crear un método dedicado:
+  async crearUsuarioGoogle(datos: {
+    nombre_completo: string;
+    correo: string;
+    id_google: string;
+    avatar_url?: string;
+    rol?: string;
+  }) {
+    // Ejecuta la consulta "crearUsuarioGoogle" de query.json
+    const result = await this.db.excecuteNameQuery("crearUsuarioGoogle", [
+      datos.nombre_completo,
+      datos.correo,
+      datos.id_google,
+      datos.avatar_url ?? null,
+      datos.rol,
+    ]);
+    return result?.[0] || result;
+  }
+
+  async vincularGoogleId(
+    id: string,
+    googleId: string,
+    avatarUrl: string | null,
+  ) {
+    // Ejecuta la consulta "vincularGoogleId" de query.json
+    const result = await this.db.excecuteNameQuery("vincularGoogleId", {
+      id,
+      googleId,
+      avatarUrl,
+    });
+    return result?.[0] || result;
+  }
 }
 
 export default new UserRepository();

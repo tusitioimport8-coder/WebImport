@@ -318,5 +318,35 @@
       "item_id": "string"
     },
     "orderArray": ["comprado_por_nombre", "item_id"]
+  },
+
+  "obtenerUsuarioPorEmail": {
+    "query": "SELECT id, nombre, email, password, google_id, avatar_url, estado, creado_en FROM usuarios WHERE email = $1",
+    "structure_params": { "email": "string" },
+    "orderArray": ["email"]
+  },
+  "obtenerUsuarioPorGoogleId": {
+    "query": "SELECT id, nombre, email, google_id, avatar_url, estado, creado_en FROM usuarios WHERE google_id = $1",
+    "structure_params": { "google_id": "string" },
+    "orderArray": ["google_id"]
+  },
+  "crearUsuarioGoogle": {
+    "query": "INSERT INTO usuarios (nombre, email, google_id, avatar_url) VALUES ($1, $2, $3, $4) RETURNING id, nombre, email, avatar_url, estado, creado_en",
+    "structure_params": {
+      "nombre": "string",
+      "email": "string",
+      "google_id": "string",
+      "avatar_url": "string"
+    },
+    "orderArray": ["nombre", "email", "google_id", "avatar_url"]
+  },
+  "vincularGoogleId": {
+    "query": "UPDATE usuarios SET google_id = $2, avatar_url = COALESCE(avatar_url, $3) WHERE id = $1 RETURNING id, nombre, email, google_id, avatar_url",
+    "structure_params": {
+      "id": "string",
+      "google_id": "string",
+      "avatar_url": "string"
+    },
+    "orderArray": ["id", "google_id", "avatar_url"]
   }
 }

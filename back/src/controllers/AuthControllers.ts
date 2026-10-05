@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import Session from "../components/session.js";
 import Validator from "../utils/validator.js";
 import userRepositoru from "../repositories/UserRepository.js";
+import { OAuth2Client } from "google-auth-library";
 import Bcrypt from "../utils/bcrypt.js";
 import {
   Usuario,
@@ -16,6 +17,9 @@ class Auth {
     private readonly validator = Validator,
     private readonly repository = userRepositoru,
     private readonly bcrypt = Bcrypt,
+    private readonly googleClient = new OAuth2Client(
+      process.env.GOOGLE_CLIENT_ID,
+    ),
   ) {}
 
   /**
@@ -310,6 +314,99 @@ class Auth {
       success: false,
       message: "Usuario no autenticado",
     });
+  }
+
+  async googleAuth(req: Request, res: Response): Promise<Response> {
+    try {
+      const { idToken } = req.body;
+
+      if (!idToken || typeof idToken !== "string") {
+        return res.status(400).json({
+          success: false,
+          message: "El parámetro idToken es requerido",
+        });
+      }
+
+      // 1. Verificar el Token enviado por el Frontend con los servidores de Google
+      const ticket = await this.googleClient.verifyIdToken({
+        idToken,
+        audience: process.env.GOOGLE_CLIENT_ID,
+      });
+
+      const payload = ticket.getPayload();
+      if (!payload || !payload.email) {
+        return res.status(401).json({
+          success: false,
+          message: "Token de Google no válido o sin correo asociado",
+        });
+      }
+
+      const googleId = payload.sub;
+      const correo = payload.email.toLowerCase().trim();
+      const nombreCompleto = payload.name || "Usuario de Google";
+      const avatarUrl = payload.picture || null;
+
+      // 2. Buscar si el usuario ya existe por correo
+      let userBD: Usuario | undefined =
+        await this.repository.getUsuarioPorCorreo(correo);
+
+      if (!userBD) {
+        // 3A. Si NO existe -> REGISTRO AUTOMÁTICO
+        const newUserPayload = {
+          nombre_completo: nombreCompleto,
+          correo: correo,
+          password_hash: "",
+          rol: "cliente", // TS deduce que es de tipo string
+          id_google: googleId,
+          avatar_url: avatarUrl ?? undefined,
+        };
+
+        const result = await this.repository.crearUsuarioGoogle(newUserPayload);
+
+        userBD = await this.repository.getUsuarioPorCorreo(correo);
+      } else if (!userBD.id_google && this.repository.vincularGoogleId) {
+        // 3B. Si ya existía por correo tradicional pero no tenía google_id -> VINCULAR
+        await this.repository.vincularGoogleId(userBD.id, googleId, avatarUrl);
+      }
+
+      if (!userBD) {
+        return res.status(500).json({
+          success: false,
+          message: "Error al procesar el usuario de Google en la base de datos",
+        });
+      }
+
+      // 4. Formatear la sesión idéntica a tu método login()
+      const sessionUser: SessionUser = {
+        id: userBD.id,
+        email: userBD.correo,
+        nombre: userBD.nombre_completo,
+        tipo: userBD.rol,
+      };
+
+      console.log(
+        "[Auth Google] Usuario autenticado vía Google:",
+        sessionUser.email,
+        "ID:",
+        sessionUser.id,
+      );
+
+      // 5. Crear la sesión en Express-Session mediante tu componente Session.ts
+      await this.session.createSession({ request: req, response: res }, [
+        sessionUser,
+      ]);
+
+      return res;
+    } catch (error) {
+      console.error("[Auth Google Error]:", error);
+      if (res.headersSent) {
+        return res;
+      }
+      return res.status(401).json({
+        success: false,
+        message: "Error al autenticar con Google o token expirado",
+      });
+    }
   }
 }
 

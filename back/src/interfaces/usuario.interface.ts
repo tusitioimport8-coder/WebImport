@@ -3,6 +3,7 @@ export type RolUsuario = "admin" | "cliente";
 
 export interface Usuario {
   id: string; // UUID de PostgreSQL
+  id_google?: string; // ID de Google (opcional)
   nombre_completo: string;
   correo: string;
   telefono?: string;
