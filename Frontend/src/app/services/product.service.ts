@@ -47,8 +47,8 @@ export class ProductService {
     'http://localhost:5000/api/productos';
 
   getProducts(): Observable<ProductsResponse> {
-    return this.http.get<ProductsResponse>(
-      `${this.apiUrl}/products`,
-    );
-  }
+  return this.http.get<ProductsResponse>(
+    this.apiUrl,
+  );
+}
 }
