@@ -25,21 +25,14 @@ class Auth {
   /**
    * Extrae el ID del usuario desde la sesión, body, query o params.
    */
-  async resolveUserId(req: Request): Promise<string | null> {
-    const candidate =
-      req.session?.user?.id ??
-      req.body?.id_usuario ??
-      req.body?.usuarioId ??
-      req.query?.usuarioId ??
-      req.params?.usuarioId;
-
-    return candidate ? String(candidate) : null;
+  resolveUserId(req: Request): string | null {
+    return req.session?.user?.id ? String(req.session.user.id) : null;
   }
 
   async login(req: Request, res: Response): Promise<Response> {
     try {
       const { email, correo, password, contrasena } = req.body;
-      const normalizedEmail = (correo ?? email ?? "").trim();
+      const normalizedEmail = (correo ?? email ?? "").trim().toLowerCase();
       const rawPassword = password ?? contrasena;
 
       if (!normalizedEmail || !rawPassword) {
@@ -97,12 +90,12 @@ class Auth {
         tipo: userBD.rol,
       };
 
-      console.log(
-        "[Auth] Usuario autenticado:",
-        sessionUser.email,
-        "ID:",
-        sessionUser.id,
-      );
+      // console.log(
+      //   "[Auth] Usuario autenticado:",
+      //   sessionUser.email,
+      //   "ID:",
+      //   sessionUser.id,
+      // );
 
       // 4. Delegar la creación de sesión a Session.ts
       await this.session.createSession({ request: req, response: res }, [
@@ -123,7 +116,7 @@ class Auth {
 
   async register(req: Request, res: Response): Promise<Response> {
     try {
-      const { nombre_completo, correo, password, contrasena, telefono, rol } =
+      const { nombre_completo, correo, password, contrasena, telefono } =
         req.body;
 
       const normalizedEmail = (correo ?? "").trim();
@@ -176,7 +169,7 @@ class Auth {
         correo: normalizedEmail,
         password_hash: hashedPassword,
         telefono: telefono ?? undefined,
-        rol: rol ?? "cliente",
+        rol: "cliente",
       };
 
       const result = await this.repository.crearUsuario(newUserPayload);
@@ -334,7 +327,12 @@ class Auth {
       });
 
       const payload = ticket.getPayload();
-      if (!payload || !payload.email) {
+      if (
+        !payload ||
+        !payload.email ||
+        !payload.email_verified ||
+        payload.email_verified !== true
+      ) {
         return res.status(401).json({
           success: false,
           message: "Token de Google no válido o sin correo asociado",

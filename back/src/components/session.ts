@@ -35,7 +35,6 @@ class Session {
     sessionObject.response.json({
       success: true,
       message: "Se ha iniciado sesión correctamente",
-      sid: sessionObject.request.sessionID,
       user: sessionObject.request.session.user,
     });
   }
@@ -53,6 +52,12 @@ class Session {
         });
         return;
       }
+
+      sessionObject.response.clearCookie("connect.sid", {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      });
 
       sessionObject.response.json({
         success: true,
