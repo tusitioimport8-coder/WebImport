@@ -348,5 +348,62 @@
       "avatar_url": "string"
     },
     "orderArray": ["id", "google_id", "avatar_url"]
+  },
+  "crearPedido": {
+    "query": "INSERT INTO pedidos (id_usuario, nombre_completo, telefono, correo, sede, direccion_base, tipo_entrega, datos_entrega, metodo_pago, total, estado) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, 'pendiente') RETURNING id, creado_en",
+    "structure_params": {
+      "id_usuario": "string",
+      "nombre_completo": "string",
+      "telefono": "string",
+      "correo": "string",
+      "sede": "string",
+      "direccion_base": "string",
+      "tipo_entrega": "string",
+      "datos_entrega": "string",
+      "metodo_pago": "string",
+      "total": "number"
+    },
+    "orderArray": [
+      "id_usuario",
+      "nombre_completo",
+      "telefono",
+      "correo",
+      "sede",
+      "direccion_base",
+      "tipo_entrega",
+      "datos_entrega",
+      "metodo_pago",
+      "total"
+    ]
+  },
+  "crearDetallePedido": {
+    "query": "INSERT INTO detalles_pedido (id_pedido, id_producto, cantidad, precio_unitario) VALUES ($1, $2, $3, $4)",
+    "structure_params": {
+      "id_pedido": "string",
+      "id_producto": "string",
+      "cantidad": "number",
+      "precio_unitario": "number"
+    },
+    "orderArray": ["id_pedido", "id_producto", "cantidad", "precio_unitario"]
+  },
+  "obtenerPedidos": {
+    "query": "SELECT id, nombre_completo, telefono, correo, sede, tipo_entrega, metodo_pago, total, estado, creado_en FROM pedidos ORDER BY creado_en DESC",
+    "structure_params": {},
+    "orderArray": []
+  },
+  "obtenerPedidoPorId": {
+    "query": "SELECT p.id, p.nombre_completo, p.telefono, p.correo, p.sede, p.direccion_base, p.tipo_entrega, p.datos_entrega, p.metodo_pago, p.total, p.estado, p.creado_en, COALESCE(json_agg(json_build_object('id_producto', dp.id_producto, 'cantidad', dp.cantidad, 'precio_unitario', dp.precio_unitario, 'subtotal', ROUND(dp.cantidad * dp.precio_unitario, 2))) FILTER (WHERE dp.id IS NOT NULL), '[]') AS items FROM pedidos p LEFT JOIN detalles_pedido dp ON p.id = dp.id_pedido WHERE p.id = $1 GROUP BY p.id",
+    "structure_params": {
+      "id": "string"
+    },
+    "orderArray": ["id"]
+  },
+  "actualizarEstadoPedido": {
+    "query": "UPDATE pedidos SET estado = $2, actualizado_en = CURRENT_TIMESTAMP WHERE id = $1 RETURNING *",
+    "structure_params": {
+      "id": "string",
+      "estado": "string"
+    },
+    "orderArray": ["id", "estado"]
   }
 }
