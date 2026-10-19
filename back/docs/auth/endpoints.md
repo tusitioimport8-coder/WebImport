@@ -620,6 +620,338 @@ Cuando no existe una sesión autenticada:
 
 ---
 
+# Recuperación de contraseña
+
+## 1. Descripción general
+
+Este módulo permite a los usuarios recuperar el acceso a su cuenta mediante un código de verificación enviado a su correo electrónico y posteriormente establecer una nueva contraseña.
+
+El proceso consta de dos endpoints:
+
+| Método | Endpoint           | Descripción                                                |
+| ------ | ------------------ | ---------------------------------------------------------- |
+| POST   | `/forgot-password` | Solicita un código de recuperación por correo electrónico. |
+| POST   | `/reset-password`  | Verifica el código y actualiza la contraseña del usuario.  |
+
+**Tecnologías y componentes involucrados:**
+
+- Express para gestionar las solicitudes HTTP.
+- `Auth` para la lógica de autenticación.
+- `UserRepository` para las operaciones con la base de datos.
+- Servicio de correo electrónico para enviar el código.
+- Servicio de validación de contraseñas.
+- Servicio de hash para almacenar la contraseña de forma segura.
+
+---
+
+## 2. Endpoint: Solicitar recuperación de contraseña
+
+### `POST /forgot-password`
+
+**Descripción:** Permite solicitar un código de recuperación de contraseña mediante el correo electrónico registrado en el sistema.
+
+### Request
+
+**Headers**
+
+| Campo          | Valor              |
+| -------------- | ------------------ |
+| `Content-Type` | `application/json` |
+
+**Body**
+
+```json
+{
+  "correo": "usuario@ejemplo.com"
+}
+```
+
+| Parámetro | Tipo     | Obligatorio | Descripción                              |
+| --------- | -------- | ----------- | ---------------------------------------- |
+| `correo`  | `string` | Sí          | Correo electrónico asociado a la cuenta. |
+
+### Proceso interno
+
+1. Recibe el correo electrónico desde el cuerpo de la solicitud.
+2. Elimina los espacios al inicio y al final y convierte el correo a minúsculas.
+3. Verifica que el correo no esté vacío.
+4. Busca al usuario mediante `getUsuarioPorCorreo`.
+5. Genera un código numérico aleatorio de seis dígitos.
+6. Establece una fecha de expiración de 15 minutos.
+7. Guarda el código y su fecha de expiración mediante `guardarResetToken`.
+8. Envía el código al correo electrónico del usuario.
+9. Devuelve una respuesta indicando que el código fue enviado.
+
+### Respuestas
+
+**200 OK — Solicitud procesada correctamente**
+
+```json
+{
+  "success": true,
+  "message": "Se ha enviado un código de recuperación a tu correo electrónico"
+}
+```
+
+**400 Bad Request — Correo requerido**
+
+```json
+{
+  "success": false,
+  "message": "El correo es requerido"
+}
+```
+
+**404 Not Found — Usuario no encontrado**
+
+```json
+{
+  "success": false,
+  "message": "Usuario no encontrado"
+}
+```
+
+**500 Internal Server Error — Error durante el procesamiento**
+
+```json
+{
+  "success": false,
+  "message": "Error al procesar la solicitud"
+}
+```
+
+### Consideraciones
+
+- El código de recuperación tiene seis dígitos.
+- El código tiene una vigencia de 15 minutos.
+- El código se almacena en la base de datos junto con su fecha de expiración.
+- Si el envío del correo falla, el endpoint devuelve un error 500, aunque el código ya podría haberse guardado en la base de datos.
+
+---
+
+## 3. Endpoint: Restablecer contraseña
+
+### `POST /reset-password`
+
+**Descripción:** Permite establecer una nueva contraseña después de verificar el código de recuperación enviado al correo electrónico.
+
+### Request
+
+**Headers**
+
+| Campo          | Valor              |
+| -------------- | ------------------ |
+| `Content-Type` | `application/json` |
+
+**Body**
+
+```json
+{
+  "correo": "usuario@ejemplo.com",
+  "codigo": "583921",
+  "nuevaPassword": "NuevaClaveSegura123!"
+}
+```
+
+| Parámetro       | Tipo     | Obligatorio | Descripción                                                 |
+| --------------- | -------- | ----------- | ----------------------------------------------------------- |
+| `correo`        | `string` | Sí          | Correo electrónico asociado a la cuenta.                    |
+| `codigo`        | `string` | Sí          | Código de recuperación de seis dígitos recibido por correo. |
+| `nuevaPassword` | `string` | Sí          | Nueva contraseña que se desea establecer.                   |
+
+### Proceso interno
+
+1. Recibe el correo, el código de recuperación y la nueva contraseña.
+2. Normaliza el correo electrónico.
+3. Verifica que los tres parámetros sean obligatorios.
+4. Valida la nueva contraseña mediante `validatePassword`.
+5. Busca al usuario por su correo electrónico.
+6. Comprueba que exista un código de recuperación y una fecha de expiración.
+7. Verifica que el código coincida con el almacenado en la base de datos.
+8. Comprueba que el código no haya expirado.
+9. Genera un hash de la nueva contraseña mediante `bcrypt.hash`.
+10. Actualiza la contraseña y elimina el código de recuperación mediante `actualizarPasswordYLimpiarToken`.
+11. Devuelve una respuesta indicando que la contraseña se actualizó correctamente.
+
+### Respuestas
+
+**200 OK — Contraseña actualizada correctamente**
+
+```json
+{
+  "success": true,
+  "message": "Contraseña actualizada exitosamente. Ya puedes iniciar sesión."
+}
+```
+
+**400 Bad Request — Parámetros obligatorios faltantes**
+
+```json
+{
+  "success": false,
+  "message": "Correo, código y nueva contraseña son obligatorios"
+}
+```
+
+**400 Bad Request — Contraseña no válida**
+
+```json
+{
+  "success": false,
+  "message": "La contraseña no cumple con los requisitos de seguridad"
+}
+```
+
+**400 Bad Request — Código inválido o expirado**
+
+```json
+{
+  "success": false,
+  "message": "Código inválido o expirado"
+}
+```
+
+Esta respuesta también se produce cuando el usuario no existe o no tiene un código de recuperación almacenado.
+
+**400 Bad Request — Código incorrecto o expirado**
+
+```json
+{
+  "success": false,
+  "message": "El código es incorrecto o ha expirado"
+}
+```
+
+**500 Internal Server Error — Error al restablecer la contraseña**
+
+```json
+{
+  "success": false,
+  "message": "Error al restablecer la contraseña"
+}
+```
+
+### Consideraciones
+
+- La nueva contraseña debe cumplir las reglas definidas en `validatePassword`.
+- La contraseña se almacena como un hash, no como texto plano.
+- El código de recuperación solo puede utilizarse mientras esté vigente.
+- Tras actualizar la contraseña, el código y su fecha de expiración se establecen en `NULL`.
+
+---
+
+## 4. Método de repositorio: `guardarResetToken`
+
+### Descripción
+
+Guarda el código de recuperación y su fecha de expiración para un usuario específico.
+
+### Parámetros
+
+| Posición | Parámetro             | Tipo     | Descripción                            |
+| -------- | --------------------- | -------- | -------------------------------------- |
+| `$1`     | `reset_token`         | `string` | Código de recuperación generado.       |
+| `$2`     | `reset_token_expires` | `Date`   | Fecha y hora de expiración del código. |
+| `$3`     | `id`                  | `string` | Identificador del usuario.             |
+
+**Orden de los parámetros:**
+
+```typescript
+[reset_token, reset_token_expires, id];
+```
+
+### Resultado
+
+Devuelve los datos básicos del usuario actualizado, siempre que exista un registro con el identificador proporcionado.
+
+Los campos devueltos son:
+
+- `id`
+- `nombre_completo`
+- `correo`
+- `telefono`
+- `rol`
+- `fecha_creacion`
+
+---
+
+## 5. Método de repositorio: `actualizarPasswordYLimpiarToken`
+
+### Descripción
+
+Actualiza el hash de la contraseña del usuario y elimina los datos del proceso de recuperación para impedir que el mismo código vuelva a utilizarse.
+
+### Parámetros
+
+| Posición | Parámetro       | Tipo     | Descripción                  |
+| -------- | --------------- | -------- | ---------------------------- |
+| `$1`     | `password_hash` | `string` | Hash de la nueva contraseña. |
+| `$2`     | `id`            | `string` | Identificador del usuario.   |
+
+**Orden de los parámetros:**
+
+```typescript
+[password_hash, id];
+```
+
+### Resultado
+
+Devuelve los datos básicos del usuario actualizado, siempre que exista un registro con el identificador proporcionado.
+
+La consulta realiza tres operaciones:
+
+1. Actualiza `password_hash` con el hash de la nueva contraseña.
+2. Establece `reset_token` en `NULL`.
+3. Establece `reset_token_expires` en `NULL`.
+
+Estas operaciones se ejecutan en una única sentencia SQL.
+
+---
+
+## 6. Configuración de rutas
+
+Las rutas se registran mediante Express de la siguiente manera:
+
+```typescript
+router.post("/forgot-password", (req, res) => Auth.forgotPassword(req, res));
+
+router.post("/reset-password", (req, res) => Auth.resetPassword(req, res));
+```
+
+La URL completa de cada endpoint depende del prefijo con el que se monte el router en la aplicación.
+
+Por ejemplo, si el router está montado en `/api/auth`, las rutas serían:
+
+- `POST /api/auth/forgot-password`
+- `POST /api/auth/reset-password`
+
+---
+
+## 7. Flujo completo de recuperación
+
+1. El usuario introduce su correo electrónico.
+2. El frontend envía una petición a `/forgot-password`.
+3. El backend genera y guarda un código de recuperación.
+4. El usuario recibe el código por correo electrónico.
+5. El usuario introduce el código y su nueva contraseña.
+6. El frontend envía una petición a `/reset-password`.
+7. El backend valida el código, la expiración y los requisitos de la contraseña.
+8. El backend actualiza el hash de la contraseña y elimina el código de recuperación.
+9. El usuario puede iniciar sesión con su nueva contraseña.
+
+---
+
+## 8. Recomendaciones de seguridad
+
+- **Evitar enumeración de usuarios:** responder con un mensaje genérico tanto si el correo existe como si no, para no revelar qué cuentas están registradas.
+- **Generar códigos seguros:** utilizar un generador criptográficamente seguro, como `crypto.randomInt`, en lugar de `Math.random()`.
+- **Limitar intentos:** implementar límites de solicitudes de recuperación y de intentos de validación del código.
+- **Almacenar el código de forma segura:** considerar guardar un hash del código en lugar del código en texto plano.
+- **Validar el tipo de los datos:** comprobar que `correo`, `codigo` y `nuevaPassword` sean cadenas antes de aplicar métodos como `trim()`.
+- **Invalidar sesiones si corresponde:** evaluar la revocación de sesiones o tokens de acceso existentes después de cambiar la contraseña.
+- **Verificar las actualizaciones SQL:** comprobar que las operaciones afecten al usuario esperado y gestionar posibles fallos de persistencia.
+- **Evitar códigos reutilizables:** limpiar el código y su expiración después de restablecer correctamente la contraseña, como ya hace `actualizarPasswordYLimpiarToken`.
+
 # Resumen de nuevos endpoints
 
 | Método   | Endpoint         | Descripción                                     |
@@ -641,6 +973,8 @@ router.post("/google-auth", (req, res) => Auth.googleAuth(req, res));
 router.put("/update-user", (req, res) => Auth.updateUser(req, res));
 router.delete("/delete-user", (req, res) => Auth.deleteUser(req, res));
 router.get("/check-session", (req, res) => Auth.checkSession(req, res));
+router.post("/forgot-password", (req, res) => Auth.forgotPassword(req, res));
+router.post("/reset-password", (req, res) => Auth.resetPassword(req, res));
 ```
 
 De esta forma, los nuevos endpoints se integran con los tres endpoints que ya estaban documentados: `login`, `register` y `logout`.
