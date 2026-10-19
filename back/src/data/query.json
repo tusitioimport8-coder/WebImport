@@ -405,5 +405,22 @@
       "estado": "string"
     },
     "orderArray": ["id", "estado"]
+  },
+  "actualizarPasswordYLimpiarToken": {
+    "query": "UPDATE usuarios SET password_hash = $1, reset_token = NULL, reset_token_expires = NULL WHERE id = $2 RETURNING id, nombre_completo, correo, telefono, rol, fecha_creacion",
+    "structure_params": {
+      "password_hash": "string",
+      "id": "string"
+    },
+    "orderArray": ["password_hash", "id"]
+  },
+  "guardarResetToken": {
+    "query": "UPDATE usuarios SET reset_token = $1, reset_token_expires = $2 WHERE id = $3 RETURNING id, nombre_completo, correo, telefono, rol, fecha_creacion",
+    "structure_params": {
+      "reset_token": "string",
+      "reset_token_expires": "Date",
+      "id": "string"
+    },
+    "orderArray": ["reset_token", "reset_token_expires", "id"]
   }
 }

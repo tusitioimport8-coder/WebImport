@@ -85,6 +85,32 @@ class UserRepository {
     });
     return result?.[0] || result;
   }
+
+  async actualizarPasswordYLimpiarToken(id: string, password_hash: string) {
+    // Ejecuta la consulta "actualizarPasswordYLimpiarToken" de query.json
+    const result = await this.db.excecuteNameQuery(
+      "actualizarPasswordYLimpiarToken",
+      {
+        password_hash,
+        id,
+      },
+    );
+    return result?.[0] || result;
+  }
+
+  async guardarResetToken(
+    id: string,
+    reset_token: string,
+    reset_token_expires: Date,
+  ) {
+    // Ejecuta la consulta "guardarResetToken" de query.json
+    const result = await this.db.excecuteNameQuery("guardarResetToken", {
+      id,
+      reset_token,
+      reset_token_expires,
+    });
+    return result?.[0] || result;
+  }
 }
 
 export default new UserRepository();

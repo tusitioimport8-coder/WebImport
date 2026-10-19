@@ -16,4 +16,6 @@ router.delete("/delete-user", authMiddleware, (req, res) =>
 );
 router.get("/check-session", (req, res) => Auth.checkSession(req, res));
 
+router.post("/forgot-password", (req, res) => Auth.forgotPassword(req, res));
+router.post("/reset-password", (req, res) => Auth.resetPassword(req, res));
 export default router;

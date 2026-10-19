@@ -10,6 +10,7 @@ import {
   ActualizarUsuarioInput as ActualizarUsuarioDTO,
 } from "../interfaces/usuario.interface.js";
 import { SessionUser } from "../types/express-session.js";
+import { enviarCorreoRecuperacion } from "../utils/mailer.js";
 
 class Auth {
   constructor(
@@ -403,6 +404,112 @@ class Auth {
       return res.status(401).json({
         success: false,
         message: "Error al autenticar con Google o token expirado",
+      });
+    }
+  }
+
+  async forgotPassword(req: Request, res: Response): Promise<Response> {
+    try {
+      const { correo } = req.body;
+      const normalizedEmail = (correo ?? "").trim().toLowerCase();
+
+      if (!normalizedEmail) {
+        return res
+          .status(400)
+          .json({ success: false, message: "El correo es requerido" });
+      }
+
+      const userBD = await this.repository.getUsuarioPorCorreo(normalizedEmail);
+      if (!userBD) {
+        // Por seguridad, a veces es mejor decir "Si el correo existe, enviaremos un código"
+        // para evitar que descubran qué correos están registrados.
+        return res
+          .status(404)
+          .json({ success: false, message: "Usuario no encontrado" });
+      }
+
+      // Generar código aleatorio de 6 dígitos
+      const resetToken = Math.floor(100000 + Math.random() * 900000).toString();
+      const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 minutos de vigencia
+
+      // Guardar token en la BD (debes crear este método en tu UserRepository)
+      await this.repository.guardarResetToken(userBD.id, resetToken, expiresAt);
+
+      // Enviar correo
+      await enviarCorreoRecuperacion(normalizedEmail, resetToken);
+
+      return res.json({
+        success: true,
+        message:
+          "Se ha enviado un código de recuperación a tu correo electrónico",
+      });
+    } catch (error) {
+      console.error("Error en forgotPassword:", error);
+      return res
+        .status(500)
+        .json({ success: false, message: "Error al procesar la solicitud" });
+    }
+  }
+
+  async resetPassword(req: Request, res: Response): Promise<Response> {
+    try {
+      const { correo, codigo, nuevaPassword } = req.body;
+      const normalizedEmail = (correo ?? "").trim().toLowerCase();
+
+      if (!normalizedEmail || !codigo || !nuevaPassword) {
+        return res.status(400).json({
+          success: false,
+          message: "Correo, código y nueva contraseña son obligatorios",
+        });
+      }
+
+      // Validar requisitos de la nueva contraseña
+      const passwordValidation =
+        await this.validator.validatePassword(nuevaPassword);
+      if (!passwordValidation.success) {
+        return res.status(400).json({
+          success: false,
+          message: "La contraseña no cumple con los requisitos de seguridad",
+        });
+      }
+
+      const userBD = await this.repository.getUsuarioPorCorreo(normalizedEmail);
+      if (!userBD || !userBD.reset_token || !userBD.reset_token_expires) {
+        return res
+          .status(400)
+          .json({ success: false, message: "Código inválido o expirado" });
+      }
+
+      // Verificar si el código coincide y no ha expirado
+      const isTokenValid = userBD.reset_token === codigo;
+      const isNotExpired = new Date() < new Date(userBD.reset_token_expires);
+
+      if (!isTokenValid || !isNotExpired) {
+        return res.status(400).json({
+          success: false,
+          message: "El código es incorrecto o ha expirado",
+        });
+      }
+
+      // Hashear la nueva contraseña
+      const hashedPassword = await this.bcrypt.hash(nuevaPassword);
+
+      // Actualizar contraseña y limpiar el token de recuperación en la BD
+      await this.repository.actualizarPasswordYLimpiarToken(
+        userBD.id,
+        hashedPassword,
+      );
+
+      return res.json({
+        success: true,
+        message:
+          "Contraseña actualizada exitosamente. Ya puedes iniciar sesión.",
+      });
+    } catch (error) {
+      console.error("Error en resetPassword:", error);
+      return res.status(500).json({
+        success: false,
+        message: "Error al restablecer la contraseña",
       });
     }
   }

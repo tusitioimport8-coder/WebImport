@@ -10,6 +10,8 @@ export interface Usuario {
   password_hash: string;
   rol: RolUsuario;
   fecha_creacion: Date;
+  reset_token_expires: Date | null;
+  reset_token?: string;
 }
 
 // 2. DTOs e Interfaces de Entrada / Salida
