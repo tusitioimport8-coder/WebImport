@@ -14,8 +14,6 @@ router.put("/update-user", authMiddleware, (req, res) =>
 router.delete("/delete-user", authMiddleware, (req, res) =>
   Auth.deleteUser(req, res),
 );
-router.get("/check-session", authMiddleware, (req, res) =>
-  Auth.checkSession(req, res),
-);
+router.get("/check-session", (req, res) => Auth.checkSession(req, res));
 
 export default router;
