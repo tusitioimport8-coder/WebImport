@@ -422,5 +422,34 @@
       "id": "string"
     },
     "orderArray": ["reset_token", "reset_token_expires", "id"]
+  },
+  "obtenerBannerPorIdentificador": {
+    "query": "SELECT * FROM banners WHERE identificador = $1",
+    "structure_params": {
+      "identificador": "string"
+    },
+    "orderArray": ["identificador"]
+  },
+  "obtenerTodosLosBanners": {
+    "query": "SELECT * FROM banners ORDER BY creado_en DESC",
+    "structure_params": {},
+    "orderArray": []
+  },
+  "guardarOActualizarBanner": {
+    "query": "INSERT INTO banners (identificador, titulo, imagenes, activo) VALUES ($1, $2, $3::jsonb, $4) ON CONFLICT (identificador) DO UPDATE SET titulo = EXCLUDED.titulo, imagenes = EXCLUDED.imagenes::jsonb, activo = EXCLUDED.activo, actualizado_en = CURRENT_TIMESTAMP RETURNING *",
+    "structure_params": {
+      "identificador": "string",
+      "titulo": "string",
+      "imagenes": "string",
+      "activo": "boolean"
+    },
+    "orderArray": ["identificador", "titulo", "imagenes", "activo"]
+  },
+  "eliminarBanner": {
+    "query": "DELETE FROM banners WHERE identificador = $1 RETURNING *",
+    "structure_params": {
+      "identificador": "string"
+    },
+    "orderArray": ["identificador"]
   }
 }
