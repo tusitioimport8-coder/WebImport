@@ -30,7 +30,30 @@ export async function solicitarPresignedUrl(req: Request, res: Response) {
     }
 
     // 3. Mapear la carpeta de destino basada en el enum
-    let carpeta = StorageFolder.PRODUCTO_IMAGEN;
+
+    if (!destino) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "El campo 'destino' es obligatorio y debe ser uno de los siguientes: 'banners', 'usuarios', 'productos', 'avatar', 'video'",
+      });
+    }
+
+    let carpeta: StorageFolder | string;
+
+    if (destino === "banners" || destino === "banner") {
+      carpeta = StorageFolder.IMAGENES_BANNER; // "banners/imagenes"
+    } else if (destino === "usuarios" || destino === "usuario") {
+      carpeta = StorageFolder.USUARIO_AVATAR; // "usuarios/avatars"
+    } else if (destino === "productos" || destino === "producto") {
+      carpeta = StorageFolder.PRODUCTO_IMAGEN; // "productos/imagenes"
+    } else {
+      return res.status(400).json({
+        success: false,
+        message: `Destino '${destino}' no válido`,
+      });
+    }
+
     if (destino === "avatar") carpeta = StorageFolder.USUARIO_AVATAR;
     if (destino === "video") carpeta = StorageFolder.PRODUCTO_VIDEO;
 

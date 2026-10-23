@@ -10,6 +10,7 @@ export enum StorageFolder {
   PRODUCTO_IMAGEN = "productos/imagenes",
   PRODUCTO_VIDEO = "productos/videos",
   USUARIO_AVATAR = "usuarios/avatars",
+  IMAGENES_BANNER = "banners/imagenes",
 }
 
 export class StorageService {
