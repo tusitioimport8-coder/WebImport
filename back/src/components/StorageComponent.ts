@@ -3,6 +3,7 @@ import {
   PutObjectCommand,
   HeadBucketCommand,
   CreateBucketCommand,
+  DeleteObjectCommand,
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
@@ -72,6 +73,15 @@ export class StorageService {
         console.error("⚠️ No se pudo asegurar el bucket:", error);
       }
     }
+  }
+
+  async eliminarArchivo(objectKey: string): Promise<void> {
+    await this.s3.send(
+      new DeleteObjectCommand({
+        Bucket: this.bucketName,
+        Key: objectKey,
+      }),
+    );
   }
 
   async generarPresignedUrl(

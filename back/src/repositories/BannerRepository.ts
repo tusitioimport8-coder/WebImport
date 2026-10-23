@@ -47,6 +47,12 @@ export class BannerRepository {
 
     return result[0];
   }
+
+  async eliminarPorIdentificador(identificador: string): Promise<void> {
+    await this.db.excecuteNameQuery("eliminarBanner", {
+      identificador,
+    });
+  }
 }
 
 export default new BannerRepository();
