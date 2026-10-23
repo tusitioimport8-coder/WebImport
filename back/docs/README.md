@@ -18,11 +18,11 @@ CRUD completo de productos, incluyendo imágenes, galería, precios, categorías
 
 ➡️ [Ver documentación de Productos](./productos.md)
 
-### 🛒 Carrito
+### 🛒 pedidos
 
-Gestión del carrito de compras, cantidades, precios por nivel, descuentos y notificaciones de progreso.
+Gestión del pedidos de compras, cantidades, precios por nivel, descuentos y notificaciones de progreso.
 
-➡️ [Ver documentación del Carrito](./carrito.md)
+➡️ [Ver documentación del pedidos](./pedidos.md)
 
 ### 🏷️ Categorías
 
