@@ -48,6 +48,12 @@ Información general sobre la organización técnica y puntos de configuración 
 
 ➡️ [Ver documentación de Configuración](./configuracion.md)
 
+### 📸 Banners
+
+Gestión de banners, incluyendo creación, actualización y eliminación.
+
+➡️ [Ver documentación de Banners](./banners.md)
+
 ---
 
 ## 🗂️ Estructura
