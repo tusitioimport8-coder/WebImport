@@ -1,0 +1,107 @@
+<div
+  class="wishlist-backdrop"
+  [class.wishlist-backdrop_open]="isOpen()"
+  (click)="close()"
+></div>
+
+<aside
+  class="wishlist-drawer"
+  role="dialog"
+  aria-modal="true"
+  aria-label="Lista de deseos"
+  [class.wishlist-drawer_open]="isOpen()"
+  [attr.aria-hidden]="!isOpen()"
+>
+  <header class="wishlist-header">
+    <div>
+      <span class="wishlist-eyebrow">Tus favoritos</span>
+      <h2>Lista de deseos</h2>
+    </div>
+
+    <button
+      type="button"
+      class="close-button"
+      aria-label="Cerrar lista de deseos"
+      (click)="close()"
+    >
+      <i class="pi pi-times"></i>
+    </button>
+  </header>
+
+  <div class="wishlist-content">
+    @if (items().length === 0) {
+      <div class="empty-wishlist">
+        <div class="empty-icon">
+          <i class="pi pi-heart"></i>
+        </div>
+
+
+
+        <h3>Tu lista está vacía</h3>
+        <p>Guarda productos que te interesen para encontrarlos fácilmente.</p>
+      </div>
+    } @else {
+      <div class="wishlist-items">
+        @for (item of items(); track item.id) {
+          <article class="wishlist-item">
+            <div class="item-image">
+              @if (item.imageUrl) {
+                <img
+                  [src]="item.imageUrl"
+                  [alt]="item.name"
+                  loading="lazy"
+                  decoding="async"
+                />
+              } @else {
+                <i class="pi pi-image"></i>
+              }
+            </div>
+
+            <div class="item-info">
+              <div class="item-top">
+                <h3>{{ item.name }}</h3>
+
+                <button
+                  type="button"
+                  class="remove-button"
+                  aria-label="Eliminar de favoritos"
+                  (click)="remove(item.id)"
+                >
+                  <i class="pi pi-trash"></i>
+                </button>
+              </div>
+
+              <strong class="item-price">
+                {{ item.price | currency:'USD':'symbol':'1.2-2' }}
+              </strong>
+
+              <button
+                type="button"
+                class="add-cart-button"
+                [disabled]="item.stock <= 0 || getQuantityInCart(item) >= item.stock"
+                (click)="addToCart(item)"
+              >
+                <i class="pi pi-shopping-cart"></i>
+                {{ item.stock <= 0 ? 'Sin stock' : 'Agregar al carrito' }}
+              </button>
+            </div>
+          </article>
+        }
+      </div>
+    }
+  </div>
+
+  @if (items().length > 0) {
+  <footer class="wishlist-footer">
+    <button
+      type="button"
+      class="add-all-button"
+      (click)="addAllToCart()"
+    >
+      <i class="pi pi-shopping-cart"></i>
+      Agregar todo al carrito
+    </button>
+  </footer>
+}
+
+</aside>

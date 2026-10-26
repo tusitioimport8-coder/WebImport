@@ -5,7 +5,9 @@ import productoRoutes from "./producto.routes.js";
 import categoriaRoutes from "./categoria.routes.js";
 import sugerenciasRoutes from "./sugerencias.routes.js";
 import listaDeseoRoutes from "./listaDeseo.routes.js";
-
+import bannerRoutes from "./banner.routes.js";
+import { authMiddleware } from "../middlewares/AuthMiddleware.js";
+import { requireRole } from "../middlewares/RoleMiddleware.js";
 const router = Router();
 
 // Asignas prefijos limpios
@@ -15,6 +17,7 @@ router.use("/productos", productoRoutes);
 router.use("/categorias", categoriaRoutes);
 router.use("/sugerencias", sugerenciasRoutes);
 router.use("/lista-deseos", listaDeseoRoutes);
+router.use("/banners", authMiddleware, requireRole("MARKETING"), bannerRoutes);
 router.get("/ventas-locales", (req, res) => {
   // Lógica para manejar las ventas locales
   console.log("Ventas locales endpoint alcanzado");

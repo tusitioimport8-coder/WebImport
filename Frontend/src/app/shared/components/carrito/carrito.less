@@ -1,0 +1,550 @@
+
+:host {
+  display: contents;
+}
+
+/* FONDO OSCURO */
+.cart-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 9998;
+  background: rgba(0, 0, 0, .55);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .25s ease;
+
+  &_open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
+/* PANEL PRINCIPAL */
+.cart-drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  width: min(420px, 42vw);
+  height: 100dvh;
+  box-sizing: border-box;
+  padding: 12px 10px 8px;
+  overflow: hidden;
+  background: #ff00cc;
+  color: #000;
+  box-shadow:
+  -12px 0 22px rgba(0, 0, 0, .45),
+  -25px 0 55px rgba(0, 0, 0, .32),
+  0 0 28px rgba(255, 0, 200, .3);
+  transform: translateX(100%);
+  visibility: hidden;
+  transition: transform .3s ease, visibility .3s;
+}
+
+.cart-drawer_open {
+  transform: translateX(0);
+  visibility: visible;
+}
+
+/* CABECERA */
+.cart-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+  min-height: 58px;
+  padding: 8px 10px 4px;
+  border-radius: 23px 23px 0 0;
+  background: #ffd0f5;
+
+  h2 {
+    margin: 2px 0 0;
+    color: #000;
+    font-size: 1.35rem;
+    font-weight: 900;
+    line-height: 1.1;
+  }
+}
+
+.cart-eyebrow {
+  color: #111;
+  font-size: .62rem;
+  font-weight: 900;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.close-button {
+  display: grid;
+  place-items: center;
+  width: 31px;
+  height: 31px;
+  padding: 0;
+  border: 0;
+  border-radius: 10px;
+  background: #baff00;
+  color: #000;
+  cursor: pointer;
+
+  i {
+    font-size: .8rem;
+  }
+
+  &:hover {
+    background: #a7e500;
+  }
+}
+
+/* CONTENIDO ROSA */
+.cart-content {
+  flex: 1;
+  min-height: 0;
+  padding: 8px 2px 12px;
+  overflow-y: auto;
+  background: #ffd0f5;
+  border-radius: 0 0 13px 13px;
+
+  scrollbar-width: thin;
+  scrollbar-color: #8b005d transparent;
+}
+
+.cart-content::-webkit-scrollbar {
+  width: 5px;
+}
+
+.cart-content::-webkit-scrollbar-thumb {
+  border-radius: 10px;
+  background: #8b005d;
+}
+
+/* CARRITO VACÍO */
+.empty-cart {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 55vh;
+  padding: 20px;
+  text-align: center;
+
+  h3 {
+    margin: 12px 0 5px;
+    color: #000;
+    font-size: 1rem;
+    font-weight: 800;
+  }
+
+  p {
+    max-width: 240px;
+    margin: 0;
+    color: #555;
+    font-size: .8rem;
+    line-height: 1.5;
+  }
+}
+
+.empty-icon {
+  display: grid;
+  place-items: center;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: #baff00;
+  color: #000;
+  font-size: 1.5rem;
+}
+
+/* PRODUCTOS */
+.cart-items {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.cart-item {
+  display: grid;
+  grid-template-columns: 68px minmax(0, 1fr);
+  gap: 10px;
+  min-height: 105px;
+  padding: 11px;
+  box-sizing: border-box;
+  border: 1px solid #222;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.item-image {
+  display: grid;
+  place-items: center;
+  align-self: start;
+  width: 60px;
+  height: 65px;
+  overflow: hidden;
+  border-radius: 4px;
+  background: #eef0f1;
+  color: #777;
+
+  img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+}
+
+.item-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.item-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 5px;
+
+  h3 {
+    display: -webkit-box;
+    margin: 0;
+    overflow: hidden;
+    color: #000;
+    font-size: .75rem;
+    font-weight: 800;
+    line-height: 1.2;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+}
+
+.remove-button {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 23px;
+  height: 23px;
+  padding: 0;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: #111;
+  cursor: pointer;
+
+  i {
+    font-size: .85rem;
+  }
+
+  &:hover {
+    background: #ffe0ee;
+  }
+}
+
+/* TIPO DE PRECIO */
+.item-price-type {
+  align-self: flex-start;
+  margin-top: 3px;
+  padding: 3px 10px;
+  border: 0;
+  border-radius: 999px;
+  background: #baff00;
+  color: #000;
+  font-size: .62rem;
+  font-weight: 800;
+}
+
+/* PRECIO */
+.item-price {
+  margin-top: 5px;
+  color: #000;
+  font-size: .78rem;
+  font-weight: 900;
+}
+
+.item-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: auto;
+  padding-top: 5px;
+}
+
+/* CONTROLES DE CANTIDAD */
+.quantity-control {
+  display: grid;
+  grid-template-columns: 23px 23px 23px;
+  height: 24px;
+  overflow: hidden;
+  border: 0;
+  border-radius: 8px;
+  background: #baff00;
+
+  button {
+    display: grid;
+    place-items: center;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: #000;
+    cursor: pointer;
+
+    i {
+      font-size: .65rem;
+      font-weight: 900;
+    }
+
+    &:hover:not(:disabled) {
+      background: #a7e500;
+    }
+
+    &:disabled {
+      opacity: .35;
+      cursor: not-allowed;
+    }
+  }
+
+  span {
+    display: grid;
+    place-items: center;
+    color: #000;
+    font-size: .72rem;
+    font-weight: 900;
+  }
+}
+
+.item-subtotal {
+  color: #000;
+  font-size: .78rem;
+  font-weight: 800;
+}
+
+/* PIE FUCSIA */
+.cart-footer {
+  flex-shrink: 0;
+  padding: 16px 2px 14px;
+  background: #ff00cc;
+  color: #fff;
+}
+.cart-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 17px;
+  margin-bottom: 10px;
+
+  > div {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: #fff;
+    font-size: .8rem;
+
+    strong {
+      color: #fff;
+      font-weight: 900;
+    }
+  }
+}
+.total-row {
+  padding: 0;
+  border: 0;
+
+  span {
+    font-size: 1rem;
+  }
+
+  strong {
+    font-size: 1.3rem;
+    font-weight: 900;
+  }
+}
+
+/* WHATSAPP VERDE LIMA */
+.whatsapp-button {
+  width: 100%;
+  min-height: 43px;
+  border: 0 !important;
+  border-radius: 13px !important;
+  background: #baff00 !important;
+  color: #000 !important;
+  font-size: .85rem;
+  font-weight: 900;
+  cursor: pointer;
+
+  i {
+    margin-right: 5px;
+    color: #000;
+    font-size: 1rem;
+  }
+
+  &:hover:not(:disabled) {
+    background: #a7e500 !important;
+  }
+
+  &:disabled {
+    opacity: .65;
+    cursor: not-allowed;
+  }
+}
+
+.whatsapp-warning {
+  display: block;
+  margin-top: 10px;
+  color: #000;
+  font-size: .65rem;
+  text-align: center;
+}
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+  .cart-drawer {
+    width: min(420px, 80vw);
+  }
+}
+
+@media (max-width: 560px) {
+  .cart-drawer {
+    width: 92vw;
+  }
+}
+
+.pedido-form {
+  display: grid;
+  gap: 10px;
+  margin: 16px 0;
+
+  h3 {
+    margin: 0 0 4px;
+  }
+
+  input,
+  select,
+  textarea {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 11px 12px;
+    border: 1px solid #d1d1d1;
+    border-radius: 8px;
+    background: #fff;
+    color: #111;
+    font: inherit;
+  }
+
+  textarea {
+    min-height: 70px;
+    resize: vertical;
+  }
+
+  label {
+    font-size: 13px;
+    font-weight: 600;
+  }
+}
+
+.pedido-error {
+  color: #dc2626;
+  font-size: 13px;
+}
+
+/* ==========================================
+   MODAL DEL PEDIDO
+   ========================================== */
+
+.pedido-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background: rgba(0, 0, 0, 0.65);
+}
+
+.pedido-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  z-index: 10001;
+
+  width: min(520px, calc(100vw - 32px));
+  max-height: min(90vh, 800px);
+
+  display: flex;
+  flex-direction: column;
+
+  overflow: hidden;
+
+  background: #fff;
+  color: #111;
+
+  border-radius: 18px;
+
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.3);
+}
+
+.pedido-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 20px 24px;
+
+  background: #ffd5f4;
+
+  h2 {
+    margin: 4px 0 0;
+  }
+}
+
+.pedido-modal-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  padding: 24px;
+
+  overflow-y: auto;
+
+  input,
+  select,
+  textarea {
+    box-sizing: border-box;
+    width: 100%;
+
+    padding: 12px 14px;
+
+    border: 1px solid #ddd;
+    border-radius: 10px;
+
+    background: #fff;
+    color: #111;
+
+    font: inherit;
+  }
+
+  label {
+    font-weight: 600;
+    font-size: 13px;
+  }
+
+  textarea {
+    resize: vertical;
+  }
+
+  .whatsapp-button {
+    flex-shrink: 0;
+    width: 100%;
+    margin-top: 8px;
+  }
+}
+
+@media (max-width: 600px) {
+  .pedido-modal {
+    width: calc(100vw - 24px);
+    max-height: 90dvh;
+  }
+
+  .pedido-modal-content {
+    padding: 18px;
+  }
+}

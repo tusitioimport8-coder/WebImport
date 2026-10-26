@@ -1,0 +1,62 @@
+<footer class="site-footer">
+  <div class="footer-main">
+    <div class="footer-about">
+      <img class="footer-logo" src="/images/logo.png" alt="Tu Sitio Import" />
+      <p>
+        Tu tienda online de confianza para productos importados directos a Venezuela.
+        Variedad, rapidez en entregas y los mejores precios del mercado nacional.
+      </p>
+      <span class="footer-guarantee">Garantía 100%</span>
+    </div>
+
+    <nav class="footer-column" aria-label="Categorías del pie de página">
+      <h3>CATEGORÍAS</h3>
+      <a routerLink="/catalogo" [queryParams]="{ categoria: 'Electrónica' }">Electrónica</a>
+      <a routerLink="/catalogo" [queryParams]="{ categoria: 'Accesorios' }">Accesorios</a>
+      <a routerLink="/catalogo" [queryParams]="{ categoria: 'Hogar' }">Hogar</a>
+      <a routerLink="/catalogo" [queryParams]="{ categoria: 'Oficina' }">Oficina</a>
+      <a class="footer-offers" routerLink="/catalogo">Zona de Ofertas</a>
+    </nav>
+
+    <div class="footer-column">
+      <h3>ATENCIÓN AL CLIENTE</h3>
+      <a routerLink="/envios">Envíos y Tiempos de Entrega</a>
+      <a routerLink="/formas-de-pago">Formas de Pago</a>
+      <a routerLink="/garantias">Políticas de Garantía</a>
+      <a routerLink="/rastreo">Rastreo de Pedido</a>
+
+      <div class="footer-support">
+        <i class="pi pi-comments"></i>
+        <span>
+          <strong>App Soporte</strong>
+          <small>+58 (412) 000-0000</small>
+        </span>
+      </div>
+    </div>
+
+    <div class="footer-column footer-payments">
+      <h3>MÉTODOS DE PAGO</h3>
+      <p>Aceptamos múltiples divisas e instrumentos bancarios:</p>
+
+      <div class="payment-tags">
+        <span>Zelle</span>
+        <span>Pago Móvil</span>
+        <span>Binance Pay</span>
+        <span>Banesco / Mercantil</span>
+      </div>
+
+      <div class="footer-security">
+        <small>Seguridad Verificada</small>
+        <strong><i class="pi pi-shield"></i> Compras 100% Protegidas</strong>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer-bottom">
+    <span>© 2026 Tu Sitio Import / Tienda Import C.A. Todos los derechos reservados.</span>
+    <span>
+      <a routerLink="/terminos">Términos y Condiciones</a>
+      <a routerLink="/privacidad">Privacidad</a>
+    </span>
+  </div>
+</footer>

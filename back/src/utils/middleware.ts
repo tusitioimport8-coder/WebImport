@@ -55,7 +55,7 @@ app.use(
 // ==========================================
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutos
-  max: 100, // Máximo 100 peticiones por ventana de tiempo
+  max: 1000, // Máximo 100 peticiones por ventana de tiempo
   standardHeaders: true, // Retorna la info en los headers 'RateLimit-*'
   legacyHeaders: false,
   message: {

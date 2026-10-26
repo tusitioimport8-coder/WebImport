@@ -1,0 +1,217 @@
+
+
+<app-site-header
+  [searchTerm]="headerSearchTerm()"
+  [wishlistCount]="wishlistTotalItems()"
+  [cartCount]="cartHeaderTotalItems()"
+  (searchChange)="onHeaderSearchChange($event)"
+  (wishlistClick)="openWishlist()"
+  (cartClick)="openHeaderCart()"
+/>
+
+<main class="product-detail-page">
+
+  @if (loading()) {
+    <section class="detail-state">
+      <div class="loading-spinner"></div>
+      <h2>Cargando producto</h2>
+      <p>Estamos obteniendo la información.</p>
+    </section>
+
+  } @else if (errorMessage()) {
+    <section class="detail-state error-state">
+      <i class="pi pi-exclamation-triangle"></i>
+      <h2>No pudimos mostrar el producto</h2>
+      <p>{{ errorMessage() }}</p>
+      <button type="button" (click)="loadProducts()">
+        Intentar nuevamente
+      </button>
+    </section>
+
+  } @else if (product(); as product) {
+
+    <nav class="product-breadcrumb" aria-label="Ruta de navegación">
+      <span>Inicio</span>
+      <i class="pi pi-angle-right"></i>
+      <span>Productos</span>
+      <i class="pi pi-angle-right"></i>
+      <strong>{{ product.nombre }}</strong>
+    </nav>
+
+    <section class="product-main">
+
+      <!-- GALERÍA: UNA IMAGEN REAL POR AHORA -->
+      <div class="product-gallery">
+        <div class="main-image-wrapper">
+
+          @if (product.imagen_url) {
+            <img
+              class="main-image"
+              [src]="product.imagen_url"
+              [alt]="product.nombre"
+              decoding="async"
+            />
+          } @else {
+            <div class="image-placeholder">
+              <i class="pi pi-image"></i>
+              <span>Imagen no disponible</span>
+            </div>
+          }
+
+        </div>
+      </div>
+
+      <!-- INFORMACIÓN DEL PRODUCTO -->
+      <div class="product-summary">
+
+        <h1 class="product-title">{{ product.nombre }}</h1>
+
+        <div class="product-meta">
+          <span class="stock-badge"
+                [class.out-of-stock]="product.stock <= 0">
+            <i class="pi"
+               [class.pi-check-circle]="product.stock > 0"
+               [class.pi-times-circle]="product.stock <= 0"></i>
+            {{ product.stock > 0 ? 'En stock' : 'Agotado' }}
+          </span>
+
+          <span class="stock-text">
+            {{ product.stock }} disponibles
+          </span>
+        </div>
+
+        <!-- PRECIO DESTACADO -->
+        <div class="selected-price-box">
+          <strong>
+            {{ selectedPrice() | currency:'USD':'symbol':'1.2-2' }}
+          </strong>
+          <span>Precio {{ selectedPriceLabel() }}</span>
+        </div>
+
+        <!-- TIPOS DE PRECIO EXISTENTES -->
+        <div class="price-section">
+          <span class="field-label">Tipo de precio</span>
+
+          <div class="price-options">
+            @for (option of priceOptions(); track option.type) {
+              <button
+                type="button"
+                class="price-option"
+                [class.price-option_active]="selectedPriceType() === option.type"
+                [disabled]="option.type !== 'Detal' || !option.available"
+                (click)="selectPrice(option.type)"
+              >
+                <span class="price-option-label">{{ option.label }}</span>
+                <strong>
+                  {{ option.price | currency:'USD':'symbol':'1.2-2' }}
+                </strong>
+              </button>
+            }
+          </div>
+        </div>
+
+        <!-- CANTIDAD + CARRITO -->
+        <div class="purchase-row">
+
+          <div class="quantity-control">
+            <button
+              type="button"
+              class="quantity-button"
+              aria-label="Reducir cantidad"
+              [disabled]="quantity() <= 1"
+              (click)="decreaseQuantity()"
+            >
+              <i class="pi pi-minus"></i>
+            </button>
+
+            <input
+              type="number"
+              min="1"
+              [max]="product.stock"
+              [value]="quantity()"
+              aria-label="Cantidad"
+              (input)="setQuantity($any($event.target).value)"
+            />
+
+            <button
+              type="button"
+              class="quantity-button"
+              aria-label="Aumentar cantidad"
+              [disabled]="quantity() >= product.stock"
+              (click)="increaseQuantity()"
+            >
+              <i class="pi pi-plus"></i>
+            </button>
+          </div>
+
+          <button
+            type="button"
+            class="add-cart-button"
+            [disabled]="product.stock <= 0"
+            (click)="addToCart()"
+          >
+            <i class="pi pi-shopping-cart"></i>
+            Añadir al carrito
+          </button>
+        </div>
+
+        <!-- MOCKUP: SIN INTEGRACIÓN CON WHATSAPP -->
+        <button
+          type="button"
+          class="buy-whatsapp-button"
+          disabled
+          title="Próximamente"
+        >
+          <i class="pi pi-comments"></i>
+          Comprar por WhatsApp
+        </button>
+
+        <!-- INFORMACIÓN DISPONIBLE -->
+        <div class="product-accordions">
+
+          <details class="product-accordion" open>
+            <summary>
+              Descripción
+              <i class="pi pi-chevron-down"></i>
+            </summary>
+            <div class="accordion-content">
+              @if (product.descripcion) {
+                <p>{{ product.descripcion }}</p>
+              } @else {
+                <p>Este producto no tiene descripción disponible.</p>
+              }
+            </div>
+          </details>
+
+          <details class="product-accordion">
+            <summary>
+              Disponibilidad
+              <i class="pi pi-chevron-down"></i>
+            </summary>
+            <div class="accordion-content">
+              <p>
+                {{ product.stock > 0
+                  ? 'Unidades disponibles: ' + product.stock
+                  : 'Producto agotado' }}
+              </p>
+            </div>
+          </details>
+
+        </div>
+
+      </div>
+    </section>
+  }
+
+</main>
+
+<app-carrito></app-carrito>
+
+<app-wishlist
+  [items]="wishlistProducts()"
+  [isOpen]="wishlistOpen()"
+  (closeRequested)="closeWishlist()"
+  (removeRequested)="removeFromWishlist($event)"
+/>
+
+<app-site-footer />

@@ -1,0 +1,238 @@
+
+:host {
+  display: block;
+}
+
+/* FONDO GENERAL */
+.sesion {
+  --lime: #baff00;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  min-height: calc(100vh - 80px);
+  padding: 35px 20px;
+  box-sizing: border-box;
+
+  background-color: #ff00d4;
+background-image: url('/images/fondo-inicio.png');
+  background-repeat: repeat;
+  background-position: center;
+  background-size: auto;
+
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* TARJETA ROSA */
+.sesion-card {
+  width: 100%;
+  max-width: 345px;
+  padding: 22px 30px 28px;
+  box-sizing: border-box;
+
+  border: 0;
+  border-radius: 25px;
+
+  background: rgba(255, 215, 248, .94);
+  box-shadow: none;
+}
+
+/* CABECERA */
+.sesion-header {
+  margin-bottom: 22px;
+
+  h2 {
+    margin: 10px 0 7px;
+    color: #000;
+    font-size: 26px;
+    font-weight: 900;
+    line-height: 1.1;
+    letter-spacing: -.5px;
+  }
+
+  p {
+    margin: 0;
+    color: #222;
+    font-size: 12px;
+    line-height: 1.5;
+  }
+}
+
+/* LOGO */
+.sesion-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 44px;
+  margin-bottom: 10px;
+
+  img {
+    display: block;
+    max-width: 105px;
+    max-height: 44px;
+    object-fit: contain;
+  }
+}
+
+/* CAMPOS */
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-bottom: 15px;
+
+  label {
+    color: #000;
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  input {
+    width: 100%;
+    height: 37px;
+    box-sizing: border-box;
+    padding: 0 13px;
+
+    border: 0;
+    border-radius: 9px;
+    outline: none;
+
+    background: #fff;
+    color: #111;
+    font-family: inherit;
+    font-size: 12px;
+
+    transition: box-shadow .2s ease;
+
+    &::placeholder {
+      color: #333;
+      opacity: 1;
+    }
+
+    &:focus {
+      background: #fff;
+      box-shadow: 0 0 0 2px #baff00;
+    }
+  }
+}
+
+/* BOTÓN PRINCIPAL */
+.btn-principal {
+  width: 100%;
+  min-height: 37px;
+  margin-top: 5px;
+  padding: 8px 12px;
+
+  border: 0;
+  border-radius: 10px;
+
+  background: #baff00;
+  color: #000;
+
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 900;
+
+  cursor: pointer;
+  transition: background .2s ease;
+
+  &:hover:not(:disabled) {
+    background: #a7e500;
+  }
+
+  &:disabled {
+    opacity: .6;
+    cursor: not-allowed;
+  }
+}
+
+/* MENSAJES */
+.mensaje {
+  margin: 0 0 13px;
+  padding: 10px;
+  border-radius: 8px;
+  font-size: 11px;
+
+  &.error {
+    background: #fff0f0;
+    color: #b42323;
+  }
+
+  &.exito {
+    background: #edffd3;
+    color: #365700;
+  }
+}
+
+/* CAMBIO LOGIN / REGISTRO */
+.sesion-footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 4px;
+
+  margin-top: 24px;
+
+  color: #444;
+  font-size: 11px;
+  text-align: center;
+
+  button {
+    padding: 0;
+    border: 0;
+    background: transparent;
+
+    color: #000;
+    font-family: inherit;
+    font-size: inherit;
+    font-weight: 900;
+
+    cursor: pointer;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+/* RESPONSIVE */
+@media (max-width: 480px) {
+  .sesion {
+    min-height: 100dvh;
+    padding: 22px 14px;
+  }
+
+  .sesion-card {
+    max-width: 345px;
+    padding: 22px 22px 26px;
+  }
+
+  .sesion-header h2 {
+    font-size: 24px;
+  }
+}
+
+
+.google-login {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  margin-top: 22px;
+  margin-bottom: 20px;
+}
+
+.google-separador {
+  margin: 0;
+  font-size: 13px;
+  color: #777;
+}
+
+.google-button {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  min-height: 44px;
+}

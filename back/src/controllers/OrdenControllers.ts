@@ -4,7 +4,7 @@ import {
   CrearPedidoRequestDTO,
   GuardarPedidoInput,
 } from "../interfaces/Orden.interface.js";
-
+import { generarLinkWhatsAppHelper } from "../utils/Messenge.js";
 export class OrderController {
   constructor(private readonly orderRepository = OrderRepository) {}
 
@@ -19,17 +19,15 @@ export class OrderController {
 
       // 1. Validaciones iniciales
       if (!items || items.length === 0) {
-        return res.status(400).json({
-          success: false,
-          message: "El carrito está vacío",
-        });
+        return res
+          .status(400)
+          .json({ success: false, message: "El carrito está vacío" });
       }
 
       if (!contacto || !entrega || !pago) {
         return res.status(400).json({
           success: false,
-          message:
-            "Faltan datos obligatorios en el formulario de pedido (contacto, entrega o pago)",
+          message: "Faltan datos obligatorios del pedido",
         });
       }
 
@@ -46,7 +44,7 @@ export class OrderController {
         if (!producto) {
           return res.status(404).json({
             success: false,
-            message: `Producto con ID ${item.producto_id} no encontrado o inactivo`,
+            message: `Producto ${item.producto_id} no encontrado`,
           });
         }
 
@@ -55,7 +53,6 @@ export class OrderController {
         productosValidados.push({ producto, cantidad: item.cantidad });
       }
 
-      // Determinar nivel de precio aplicable según tus reglas de negocio
       let tipoPrecio: "Detal" | "Mayor" | "GranMayor" = "Detal";
       if (totalUnidades >= 40 && montoBaseDetal >= 200) {
         tipoPrecio = "GranMayor";
@@ -63,9 +60,10 @@ export class OrderController {
         tipoPrecio = "Mayor";
       }
 
-      // 3. Construir los detalles calculando precios unitarios finales
+      // 3. Construir detalles y precios finales
       let totalPedido = 0;
       const detallesProcesados = [];
+      const itemsParaWhatsApp = [];
 
       for (const { producto, cantidad } of productosValidados) {
         let precioUnitario = Number(producto.precio_detal);
@@ -84,17 +82,21 @@ export class OrderController {
 
         detallesProcesados.push({
           id_producto: producto.id,
-          cantidad: cantidad,
+          cantidad,
           precio_unitario: precioFinal,
+        });
+
+        itemsParaWhatsApp.push({
+          nombre: producto.nombre,
+          cantidad,
+          subtotal,
         });
       }
 
-      // 4. Obtener ID de usuario si inició sesión de forma opcional durante el checkout
       const usuarioId = req.session?.user?.id
         ? String(req.session.user.id)
         : null;
 
-      // 5. Armar el payload estructurado para el repositorio
       const payloadPedido: GuardarPedidoInput = {
         id_usuario: usuarioId,
         nombre_completo: contacto.nombre_completo,
@@ -109,14 +111,35 @@ export class OrderController {
         detalles: detallesProcesados,
       };
 
-      // 6. Persistir en la base de datos a través del repositorio
+      // 4. Guardar en Base de Datos (Neon)
       const pedidoCreado =
         await this.orderRepository.guardarPedidoConDetalles(payloadPedido);
 
+      // =========================================================================
+      // 5. LLAMADA AL MÓDULO DESACOPLADO DE WHATSAPP
+      // =========================================================================
+      const whatsappUrl = generarLinkWhatsAppHelper({
+        telefonoEmpresa: process.env.WHATSAPP_EMPRESA || "584129668437",
+        datosOrden: {
+          idPedido: pedidoCreado.id,
+          clienteNombre: contacto.nombre_completo,
+          telefonoCliente: contacto.telefono,
+          tipoEntrega: entrega.tipo,
+          metodoPago: pago.metodo,
+          nivelAplicado: tipoPrecio,
+          items: itemsParaWhatsApp,
+          totalPagar: Number(totalPedido.toFixed(2)),
+        },
+      });
+
+      // 6. Respuesta final al frontend con la orden y la URL lista para redirigir
       return res.status(201).json({
         success: true,
         message: "¡Pedido registrado exitosamente!",
-        data: pedidoCreado,
+        data: {
+          pedido: pedidoCreado,
+          whatsappUrl: whatsappUrl,
+        },
       });
     } catch (error: any) {
       console.error("Error al crear el pedido:", error);
