@@ -101,6 +101,18 @@ export class OrderRepository {
     );
     return result?.[0] || null;
   }
+
+  async eliminarPedido(id: string): Promise<boolean> {
+    try {
+      const result = await this.db.excecuteNameQuery("eliminarPedido", { id });
+
+      // Si la base de datos devolvió el ID, significa que el registro existía y fue borrado.
+      return !!(result && result.length > 0);
+    } catch (error) {
+      console.error("Error al eliminar pedido en repositorio:", error);
+      return false;
+    }
+  }
 }
 
 export default new OrderRepository();

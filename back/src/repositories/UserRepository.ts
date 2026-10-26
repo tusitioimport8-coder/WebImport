@@ -111,6 +111,31 @@ class UserRepository {
     });
     return result?.[0] || result;
   }
+
+  /**
+   * Obtiene todos los usuarios registrados en el sistema
+   */
+  async obtenerTodosLosUsuarios(): Promise<Usuario[]> {
+    const result = await this.db.excecuteNameQuery<Usuario>(
+      "obtenerTodosLosUsuarios",
+      {},
+    );
+    return result || [];
+  }
+
+  /**
+   * Actualiza el rol de un usuario por su ID
+   */
+  async actualizarRolUsuario(id: string, rol: string): Promise<Usuario | null> {
+    const result = await this.db.excecuteNameQuery<Usuario>(
+      "actualizarRolUsuario",
+      {
+        rol,
+        id,
+      },
+    );
+    return result?.[0] || null;
+  }
 }
 
 export default new UserRepository();

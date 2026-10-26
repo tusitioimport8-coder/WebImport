@@ -244,6 +244,40 @@ export class OrderController {
       });
     }
   }
+
+  /**
+   * DELETE /api/pedidos/:id
+   * Elimina un pedido específico.
+   */
+
+  async eliminarPedido(req: Request, res: Response): Promise<Response> {
+    try {
+      const { id } = req.params;
+
+      const pedidoEliminado = await this.orderRepository.eliminarPedido(
+        id.toString(),
+      );
+
+      if (!pedidoEliminado) {
+        return res.status(404).json({
+          success: false,
+          message: "Pedido no encontrado para eliminar",
+        });
+      }
+
+      return res.json({
+        success: true,
+        message: "Pedido eliminado correctamente",
+        data: pedidoEliminado,
+      });
+    } catch (error: any) {
+      return res.status(500).json({
+        success: false,
+        message: "Error al eliminar el pedido",
+        details: error.message,
+      });
+    }
+  }
 }
 
 export default new OrderController();

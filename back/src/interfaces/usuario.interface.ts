@@ -1,5 +1,5 @@
 // 1. Representación exacta de la tabla en BD (para el Repository)
-export type RolUsuario = "admin" | "cliente";
+export type RolUsuario = "admin" | "cliente" | "F_ventas" | "marketing";
 
 export interface Usuario {
   id: string; // UUID de PostgreSQL
