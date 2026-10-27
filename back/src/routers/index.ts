@@ -18,7 +18,7 @@ router.use("/productos", productoRoutes);
 router.use("/categorias", categoriaRoutes);
 router.use("/sugerencias", sugerenciasRoutes);
 router.use("/lista-deseos", listaDeseoRoutes);
-router.use("/banners", authMiddleware, requireRole("MARKETING"), bannerRoutes);
+router.use("/banners", bannerRoutes);
 router.use("/admin", authMiddleware, requireRole("ADMIN"), adminRoutes);
 router.use("/orden", OrdenRoute);
 router.get("/ventas-locales", (req, res) => {

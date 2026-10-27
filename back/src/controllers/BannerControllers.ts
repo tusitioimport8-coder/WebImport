@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import BannerRepository from "../repositories/BannerRepository.js";
 import storageService from "../components/StorageComponent.js"; // Asegúrate de importar tu servicio de S3
+import BannerValidator from "../utils/BannerValidator.js";
 export class BannerController {
   constructor(private readonly bannerRepo = BannerRepository) {}
 
@@ -28,12 +29,19 @@ export class BannerController {
   async guardarBanner(req: Request, res: Response): Promise<Response> {
     try {
       const { identificador, titulo, imagenes, activo } = req.body;
+      const validationResult =
+        await BannerValidator.validateCrearOActualizarBanner({
+          identificador,
+          titulo,
+          imagenes,
+          activo,
+        });
 
-      if (!identificador || !imagenes || !Array.isArray(imagenes)) {
+      if (!validationResult.success) {
         return res.status(400).json({
           success: false,
-          message:
-            "El campo 'identificador' y un arreglo de 'imagenes' son obligatorios",
+          message: "Datos inválidos",
+          details: validationResult.error.flatten(),
         });
       }
 
@@ -56,10 +64,7 @@ export class BannerController {
               );
 
               // Si tienes acceso al s3Client en tu StorageService, puedes ejecutar esto:
-              // await storageService['s3'].send(new DeleteObjectCommand({
-              //   Bucket: storageService['bucketName'],
-              //   Key: imgVieja.objectKey
-              // }));
+              await storageService.eliminarArchivo(imgVieja.objectKey);
             } catch (s3Error) {
               console.error(
                 `⚠️ No se pudo eliminar la imagen vieja de S3 (${imgVieja.objectKey}):`,
