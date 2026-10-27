@@ -145,7 +145,6 @@
     },
     "orderArray": ["id"]
   },
-
   "actualizarProducto": {
     "query": "UPDATE productos SET nombre = COALESCE($2, nombre), descripcion = COALESCE($3, descripcion), descuento_porcentaje = COALESCE($4, descuento_porcentaje), imagen_url = COALESCE($5, imagen_url), video_url = COALESCE($6, video_url), stock = COALESCE($7, stock), estado = COALESCE($8, estado) WHERE id = $1 RETURNING *",
     "structure_params": {
