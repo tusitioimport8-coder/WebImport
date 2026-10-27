@@ -1,6 +1,9 @@
+
 import { Request, Response } from "express";
 import BannerRepository from "../repositories/BannerRepository.js";
-import storageService from "../components/StorageComponent.js"; // Asegúrate de importar tu servicio de S3
+import storageService from "../components/StorageComponent.js";
+import BannerValidator from "../utils/BannerValidator.js";
+
 export class BannerController {
   constructor(private readonly bannerRepo = BannerRepository) {}
 
@@ -23,43 +26,46 @@ export class BannerController {
 
   /**
    * POST /api/banners
-   * Guarda o actualiza un banner (soporta 1 imagen o un array de imágenes) y limpia las viejas en S3
+   * Guarda o actualiza un banner y limpia las imágenes anteriores en S3
    */
   async guardarBanner(req: Request, res: Response): Promise<Response> {
     try {
       const { identificador, titulo, imagenes, activo } = req.body;
 
-      if (!identificador || !imagenes || !Array.isArray(imagenes)) {
+      const validationResult =
+        await BannerValidator.validateCrearOActualizarBanner({
+          identificador,
+          titulo,
+          imagenes,
+          activo,
+        });
+
+      if (!validationResult.success) {
         return res.status(400).json({
           success: false,
-          message:
-            "El campo 'identificador' y un arreglo de 'imagenes' son obligatorios",
+          message: "Datos inválidos",
+          details: validationResult.error.flatten(),
         });
       }
 
-      // 1. Buscar si ya existe el banner en la BD para detectar imágenes anteriores y eliminarlas
+      // 1. Buscar el banner existente para detectar imágenes anteriores
       const bannerExistente =
         await this.bannerRepo.obtenerPorIdentificador(identificador);
 
       if (bannerExistente && bannerExistente.imagenes) {
-        // Obtenemos los objectKeys actuales que están en la base de datos
-        const keysNuevos = new Set(imagenes.map((img: any) => img.objectKey));
+        const keysNuevos = new Set(
+          imagenes.map((img: any) => img?.objectKey),
+        );
 
         for (const imgVieja of bannerExistente.imagenes) {
-          // Si la imagen vieja ya no viene en el nuevo payload, significa que fue reemplazada o eliminada
-        if (imgVieja?.objectKey && !keysNuevos.has(imgVieja.objectKey)) {
+          // Ignorar imágenes nulas o sin objectKey
+          if (imgVieja?.objectKey && !keysNuevos.has(imgVieja.objectKey)) {
             try {
-              // Borramos físicamente el archivo del bucket S3
-              // (Asumiendo que expones o tienes acceso al cliente s3 o puedes usar un método en tu StorageService)
               console.log(
                 `🗑️ Eliminando archivo obsoleto de S3: ${imgVieja.objectKey}`,
               );
 
-              // Si tienes acceso al s3Client en tu StorageService, puedes ejecutar esto:
-              // await storageService['s3'].send(new DeleteObjectCommand({
-              //   Bucket: storageService['bucketName'],
-              //   Key: imgVieja.objectKey
-              // }));
+              await storageService.eliminarArchivo(imgVieja.objectKey);
             } catch (s3Error) {
               console.error(
                 `⚠️ No se pudo eliminar la imagen vieja de S3 (${imgVieja.objectKey}):`,

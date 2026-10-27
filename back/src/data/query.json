@@ -145,6 +145,7 @@
     },
     "orderArray": ["id"]
   },
+
   "actualizarProducto": {
     "query": "UPDATE productos SET nombre = COALESCE($2, nombre), descripcion = COALESCE($3, descripcion), descuento_porcentaje = COALESCE($4, descuento_porcentaje), imagen_url = COALESCE($5, imagen_url), video_url = COALESCE($6, video_url), stock = COALESCE($7, stock), estado = COALESCE($8, estado) WHERE id = $1 RETURNING *",
     "structure_params": {
@@ -450,5 +451,25 @@
       "identificador": "string"
     },
     "orderArray": ["identificador"]
+  },
+  "obtenerTodosLosUsuarios": {
+    "query": "SELECT id, nombre_completo, correo, telefono, rol, fecha_creacion FROM usuarios ORDER BY fecha_creacion DESC",
+    "structure_params": {},
+    "orderArray": []
+  },
+  "actualizarRolUsuario": {
+    "query": "UPDATE usuarios SET rol = $1 WHERE id = $2 RETURNING id, nombre_completo, correo, telefono, rol, fecha_creacion",
+    "structure_params": {
+      "rol": "string",
+      "id": "string"
+    },
+    "orderArray": ["rol", "id"]
+  },
+  "eliminarPedido": {
+    "query": "DELETE FROM pedidos WHERE id = $1 RETURNING id",
+    "structure_params": {
+      "id": "string"
+    },
+    "orderArray": ["id"]
   }
 }
