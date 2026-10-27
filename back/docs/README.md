@@ -54,6 +54,12 @@ Gestión de banners, incluyendo creación, actualización y eliminación.
 
 ➡️ [Ver documentación de Banners](./banners.md)
 
+### 🛠️ Administración
+
+Gestión de usuarios, roles y permisos del sistema.
+
+➡️ [Ver documentación de Administración](./admin.md)
+
 ---
 
 ## 🗂️ Estructura
