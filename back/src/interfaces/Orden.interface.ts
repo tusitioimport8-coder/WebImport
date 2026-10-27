@@ -59,6 +59,7 @@ export interface CrearPedidoRequestDTO {
   contacto: ContactoPedidoInput;
   entrega: EntregaPedidoInput;
   pago: PagoPedidoInput;
+  tipo_documento: "pedido" | "presupuesto";
   items: ItemLocalStorageInput[];
 }
 

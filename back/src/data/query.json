@@ -349,31 +349,28 @@
     },
     "orderArray": ["id", "google_id", "avatar_url"]
   },
+
   "crearPedido": {
-    "query": "INSERT INTO pedidos (id_usuario, nombre_completo, telefono, correo, sede, direccion_base, tipo_entrega, datos_entrega, metodo_pago, total, estado) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, 'pendiente') RETURNING id, creado_en",
+    "query": "INSERT INTO pedidos (usuario_id, nombre_completo, telefono, correo, tipo_entrega, metodo_pago, total, estado, tipo_documento) VALUES ($1, $2, $3, $4, $5, $6, $7, 'pendiente', $8) RETURNING id, creado_en",
     "structure_params": {
-      "id_usuario": "string",
+      "usuario_id": "string | null",
       "nombre_completo": "string",
       "telefono": "string",
       "correo": "string",
-      "sede": "string",
-      "direccion_base": "string",
       "tipo_entrega": "string",
-      "datos_entrega": "string",
       "metodo_pago": "string",
-      "total": "number"
+      "total": "number",
+      "tipo_documento": "string"
     },
     "orderArray": [
-      "id_usuario",
+      "usuario_id",
       "nombre_completo",
       "telefono",
       "correo",
-      "sede",
-      "direccion_base",
       "tipo_entrega",
-      "datos_entrega",
       "metodo_pago",
-      "total"
+      "total",
+      "tipo_documento"
     ]
   },
   "crearDetallePedido": {
@@ -387,25 +384,33 @@
     "orderArray": ["id_pedido", "id_producto", "cantidad", "precio_unitario"]
   },
   "obtenerPedidos": {
-    "query": "SELECT id, nombre_completo, telefono, correo, sede, tipo_entrega, metodo_pago, total, estado, creado_en FROM pedidos ORDER BY creado_en DESC",
+    "query": "SELECT id, usuario_id, nombre_completo, telefono, correo, tipo_entrega, metodo_pago, total, estado, tipo_documento, creado_en FROM pedidos ORDER BY creado_en DESC",
     "structure_params": {},
     "orderArray": []
   },
   "obtenerPedidoPorId": {
-    "query": "SELECT p.id, p.nombre_completo, p.telefono, p.correo, p.sede, p.direccion_base, p.tipo_entrega, p.datos_entrega, p.metodo_pago, p.total, p.estado, p.creado_en, COALESCE(json_agg(json_build_object('id_producto', dp.id_producto, 'cantidad', dp.cantidad, 'precio_unitario', dp.precio_unitario, 'subtotal', ROUND(dp.cantidad * dp.precio_unitario, 2))) FILTER (WHERE dp.id IS NOT NULL), '[]') AS items FROM pedidos p LEFT JOIN detalles_pedido dp ON p.id = dp.id_pedido WHERE p.id = $1 GROUP BY p.id",
+    "query": "SELECT p.id, p.usuario_id, p.nombre_completo, p.telefono, p.correo, p.tipo_entrega, p.metodo_pago, p.total, p.estado, p.tipo_documento, p.creado_en, COALESCE(json_agg(json_build_object('id_producto', dp.id_producto, 'cantidad', dp.cantidad, 'precio_unitario', dp.precio_unitario, 'subtotal', ROUND(dp.cantidad * dp.precio_unitario, 2)) ORDER BY dp.id) FILTER (WHERE dp.id IS NOT NULL), '[]'::json) AS items FROM pedidos p LEFT JOIN detalles_pedido dp ON p.id = dp.id_pedido WHERE p.id = $1 GROUP BY p.id",
     "structure_params": {
       "id": "string"
     },
     "orderArray": ["id"]
   },
   "actualizarEstadoPedido": {
-    "query": "UPDATE pedidos SET estado = $2, actualizado_en = CURRENT_TIMESTAMP WHERE id = $1 RETURNING *",
+    "query": "UPDATE pedidos SET estado = $2 WHERE id = $1 RETURNING *",
     "structure_params": {
       "id": "string",
       "estado": "string"
     },
     "orderArray": ["id", "estado"]
   },
+  "eliminarPedido": {
+    "query": "DELETE FROM pedidos WHERE id = $1 RETURNING *",
+    "structure_params": {
+      "id": "string"
+    },
+    "orderArray": ["id"]
+  },
+
   "actualizarPasswordYLimpiarToken": {
     "query": "UPDATE usuarios SET password_hash = $1, reset_token = NULL, reset_token_expires = NULL WHERE id = $2 RETURNING id, nombre_completo, correo, telefono, rol, fecha_creacion",
     "structure_params": {
@@ -465,11 +470,26 @@
     },
     "orderArray": ["rol", "id"]
   },
-  "eliminarPedido": {
-    "query": "DELETE FROM pedidos WHERE id = $1 RETURNING id",
+  "crearPresupuesto": {
+    "query": "INSERT INTO pedidos (id, usuario_id, total, estado, tipo_documento, creado_en) VALUES ($1, $2, $3, 'emitido', 'presupuesto', CURRENT_TIMESTAMP) RETURNING *",
     "structure_params": {
+      "id": "string",
+      "usuario_id": "string",
+      "total": "number"
+    },
+    "orderArray": ["id", "usuario_id", "total"]
+  },
+  "listarPresupuestos": {
+    "query": "SELECT * FROM pedidos WHERE tipo_documento = 'presupuesto' ORDER BY creado_en DESC",
+    "structure_params": {},
+    "orderArray": []
+  },
+  "actualizarEstadoPresupuesto": {
+    "query": "UPDATE pedidos SET estado = $1 WHERE id = $2 RETURNING *",
+    "structure_params": {
+      "estado": "string",
       "id": "string"
     },
-    "orderArray": ["id"]
+    "orderArray": ["estado", "id"]
   }
 }
