@@ -7,6 +7,7 @@ import listaDeseoRoutes from "./listaDeseo.routes.js";
 import bannerRoutes from "./banner.routes.js";
 import OrdenRoute from "./orden.routes.js";
 import adminRoutes from "./admin.routes.js";
+import presupuestoRoutes from "./presupuestos.routes.js";
 import { authMiddleware } from "../middlewares/AuthMiddleware.js";
 import { requireRole } from "../middlewares/RoleMiddleware.js";
 
@@ -21,6 +22,7 @@ router.use("/lista-deseos", listaDeseoRoutes);
 router.use("/banners", bannerRoutes);
 router.use("/admin", authMiddleware, requireRole("ADMIN"), adminRoutes);
 router.use("/orden", OrdenRoute);
+router.use("/presupuestos", presupuestoRoutes);
 router.get("/ventas-locales", (req, res) => {
   // Lógica para manejar las ventas locales
   console.log("Ventas locales endpoint alcanzado");

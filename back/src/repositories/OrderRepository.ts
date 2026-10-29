@@ -1,4 +1,4 @@
-import DB from "../components/DBComponent.js"; // Ajusta tu ruta de importación de base de datos según tu proyecto
+import DB from "../components/DBComponent.js";
 import {
   EstadoPedido,
   GuardarPedidoInput,
@@ -8,8 +8,10 @@ import {
   PedidoConDetallesResponse,
   ProductoDbRecord,
 } from "../interfaces/Orden.interface.js";
+
 export class OrderRepository {
   constructor(private readonly db = DB) {}
+
   /**
    * Obtiene un producto por ID para validar precios reales y stock.
    */
@@ -20,12 +22,11 @@ export class OrderRepository {
       "getProductoPorId",
       { id },
     );
-
     return result?.[0] || null;
   }
 
   /**
-   * Guarda el pedido principal y todos sus detalles (ítems del localStorage) en una transacción.
+   * Guarda el pedido principal y todos sus detalles dentro de la base de datos.
    */
   async guardarPedidoConDetalles(
     payloadPedido: GuardarPedidoInput,
@@ -43,12 +44,15 @@ export class OrderRepository {
         datos_entrega: JSON.stringify(payloadPedido.datos_entrega),
         metodo_pago: payloadPedido.metodo_pago,
         total: payloadPedido.total,
+        tipo_documento: payloadPedido.tipo_documento,
       },
     );
 
     const pedido = pedidoResult?.[0];
     if (!pedido) {
-      throw new Error("No se pudo crear el pedido");
+      throw new Error(
+        "No se pudo registrar la cabecera del pedido en la base de datos.",
+      );
     }
 
     for (const detalle of payloadPedido.detalles) {
@@ -64,15 +68,14 @@ export class OrderRepository {
   }
 
   /**
-   * Obtiene la lista de todos los pedidos (para panel administrativo).
+   * Obtiene la lista de todos los pedidos para el panel administrativo.
    */
   async obtenerTodosLosPedidos(): Promise<PedidoListadoDbRecord[]> {
-    return (
-      (await this.db.excecuteNameQuery<PedidoListadoDbRecord>(
-        "obtenerPedidos",
-        {},
-      )) || []
+    const result = await this.db.excecuteNameQuery<PedidoListadoDbRecord>(
+      "obtenerPedidos",
+      {},
     );
+    return result || [];
   }
 
   /**
@@ -89,7 +92,7 @@ export class OrderRepository {
   }
 
   /**
-   * Actualiza la fase/estado del pedido (ej: 'pendiente' -> 'procesando' -> 'completado').
+   * Actualiza el estado o fase del pedido.
    */
   async actualizarEstado(
     id: string,
@@ -102,14 +105,15 @@ export class OrderRepository {
     return result?.[0] || null;
   }
 
+  /**
+   * Elimina un pedido por ID
+   */
   async eliminarPedido(id: string): Promise<boolean> {
     try {
       const result = await this.db.excecuteNameQuery("eliminarPedido", { id });
-
-      // Si la base de datos devolvió el ID, significa que el registro existía y fue borrado.
       return !!(result && result.length > 0);
     } catch (error) {
-      console.error("Error al eliminar pedido en repositorio:", error);
+      console.error("Error en repositorio al eliminar pedido:", error);
       return false;
     }
   }

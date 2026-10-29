@@ -13,6 +13,8 @@ export type EstadoPedido =
   | "completado"
   | "cancelado";
 
+export type TipoPrecio = "Detal" | "Mayor" | "GranMayor";
+
 // ---------------------------------------------------------
 // DATOS DEL CLIENTE Y FORMULARIO (PASOS 1, 2 Y 3)
 // ---------------------------------------------------------
@@ -75,6 +77,7 @@ export interface GuardarPedidoInput {
   metodo_pago: MetodoPago;
   total: number;
   detalles: DetallePedidoInput[];
+  tipo_documento: "pedido" | "presupuesto";
 }
 
 // ---------------------------------------------------------
@@ -136,19 +139,43 @@ export interface ItemPedidoFormateado {
 }
 
 // Objeto completo que devuelve el repositorio al consultar un pedido con sus detalles
-export interface PedidoConDetallesResponse extends Omit<
-  PedidoDbRecord,
-  "datos_entrega"
-> {
-  datos_entrega: DatosEntregaDetalle; // Ya parseado como objeto
-  items: ItemPedidoFormateado[];
+// Sub-interfaz para tipar cada elemento del arreglo de precios
+export interface PrecioProductoItemDb {
+  id_precio: string;
+  tipo_precio: TipoPrecio;
+  precio: number;
+  precio_final: number;
 }
 
+// Interfaz actualizada de Producto para que soporte la nueva estructura de la BD
 export interface ProductoDbRecord {
   id: string;
   nombre: string;
-  precio_detal: number;
-  precio_mayor: number;
-  precio_gran_mayor: number;
-  descuento_porcentaje?: number;
+  descripcion?: string | null;
+  descuento_porcentaje?: string | number;
+  imagen_url?: string | null;
+  video_url?: string | null;
+  stock: number;
+  estado: boolean;
+  creado_en: string;
+  precios: PrecioProductoItemDb[]; // 👈 Aquí está la clave para que TypeScript reconozca la propiedad
+}
+
+export interface PedidoConDetallesResponse {
+  id: string;
+  id_usuario: string | null;
+  nombre_completo: string;
+  telefono: string;
+  correo: string;
+  sede: string;
+  direccion_base: string | null;
+  tipo_entrega: TipoEntrega;
+  datos_entrega: DatosEntregaDetalle;
+  metodo_pago: MetodoPago;
+  total: number;
+  estado: EstadoPedido;
+  creado_en: string;
+  actualizado_en?: string;
+  detalles: DetallePedidoDbRecord[];
+  productos: ProductoDbRecord[]; // 👈 Aquí está la clave para que TypeScript reconozca la propiedad
 }

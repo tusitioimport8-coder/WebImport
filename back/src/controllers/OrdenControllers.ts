@@ -1,23 +1,24 @@
 import { Request, Response } from "express";
 import OrderRepository from "../repositories/OrderRepository.js";
-import {
-  CrearPedidoRequestDTO,
-  GuardarPedidoInput,
-} from "../interfaces/Orden.interface.js";
-import { generarLinkWhatsAppHelper } from "../utils/Messenge.js";
+import OrderService from "../service/OrdenService.js";
+import { CrearPedidoRequestDTO } from "../interfaces/Orden.interface.js";
+
 export class OrderController {
-  constructor(private readonly orderRepository = OrderRepository) {}
+  constructor(
+    private readonly orderRepository = OrderRepository,
+    private readonly orderService = OrderService,
+  ) {}
 
   /**
    * POST /api/pedidos
-   * Procesa el checkout de invitados o usuarios logueados utilizando los ítems del localStorage.
+   * Procesa el checkout de invitados o usuarios logueados.
    */
   async crearPedido(req: Request, res: Response): Promise<Response> {
     try {
       const body: CrearPedidoRequestDTO = req.body;
       const { contacto, entrega, pago, items } = body;
 
-      // 1. Validaciones iniciales
+      // 1. Validaciones básicas de entrada HTTP
       if (!items || items.length === 0) {
         return res
           .status(400)
@@ -31,117 +32,30 @@ export class OrderController {
         });
       }
 
-      // 2. Validar productos en la BD y calcular niveles de precio (Detal, Mayor, GranMayor)
-      let totalUnidades = 0;
-      let montoBaseDetal = 0;
-      const productosValidados = [];
-
-      for (const item of items) {
-        const producto =
-          await this.orderRepository.obtenerProductoParaValidacion(
-            item.producto_id,
-          );
-        if (!producto) {
-          return res.status(404).json({
-            success: false,
-            message: `Producto ${item.producto_id} no encontrado`,
-          });
-        }
-
-        totalUnidades += item.cantidad;
-        montoBaseDetal += Number(producto.precio_detal) * item.cantidad;
-        productosValidados.push({ producto, cantidad: item.cantidad });
-      }
-
-      let tipoPrecio: "Detal" | "Mayor" | "GranMayor" = "Detal";
-      if (totalUnidades >= 40 && montoBaseDetal >= 200) {
-        tipoPrecio = "GranMayor";
-      } else if (totalUnidades >= 6 && montoBaseDetal >= 50) {
-        tipoPrecio = "Mayor";
-      }
-
-      // 3. Construir detalles y precios finales
-      let totalPedido = 0;
-      const detallesProcesados = [];
-      const itemsParaWhatsApp = [];
-
-      for (const { producto, cantidad } of productosValidados) {
-        let precioUnitario = Number(producto.precio_detal);
-        if (tipoPrecio === "Mayor")
-          precioUnitario = Number(producto.precio_mayor);
-        if (tipoPrecio === "GranMayor")
-          precioUnitario = Number(producto.precio_gran_mayor);
-
-        const descuento = Number(producto.descuento_porcentaje || 0);
-        const precioFinal = Number(
-          (precioUnitario * (1 - descuento / 100)).toFixed(2),
-        );
-        const subtotal = Number((precioFinal * cantidad).toFixed(2));
-
-        totalPedido += subtotal;
-
-        detallesProcesados.push({
-          id_producto: producto.id,
-          cantidad,
-          precio_unitario: precioFinal,
-        });
-
-        itemsParaWhatsApp.push({
-          nombre: producto.nombre,
-          cantidad,
-          subtotal,
-        });
-      }
-
       const usuarioId = req.session?.user?.id
         ? String(req.session.user.id)
         : null;
 
-      const payloadPedido: GuardarPedidoInput = {
-        id_usuario: usuarioId,
-        nombre_completo: contacto.nombre_completo,
-        telefono: contacto.telefono,
-        correo: contacto.correo,
-        sede: contacto.sede,
-        direccion_base: contacto.direccion_base,
-        tipo_entrega: entrega.tipo,
-        datos_entrega: entrega.detalles,
-        metodo_pago: pago.metodo,
-        total: Number(totalPedido.toFixed(2)),
-        detalles: detallesProcesados,
-      };
+      // 2. Delegar la lógica de negocio al Servicio
+      const resultado = await this.orderService.procesarCheckout(
+        body,
+        usuarioId,
+      );
 
-      // 4. Guardar en Base de Datos (Neon)
-      const pedidoCreado =
-        await this.orderRepository.guardarPedidoConDetalles(payloadPedido);
-
-      // =========================================================================
-      // 5. LLAMADA AL MÓDULO DESACOPLADO DE WHATSAPP
-      // =========================================================================
-      const whatsappUrl = generarLinkWhatsAppHelper({
-        telefonoEmpresa: process.env.WHATSAPP_EMPRESA || "584129668437",
-        datosOrden: {
-          idPedido: pedidoCreado.id,
-          clienteNombre: contacto.nombre_completo,
-          telefonoCliente: contacto.telefono,
-          tipoEntrega: entrega.tipo,
-          metodoPago: pago.metodo,
-          nivelAplicado: tipoPrecio,
-          items: itemsParaWhatsApp,
-          totalPagar: Number(totalPedido.toFixed(2)),
-        },
-      });
-
-      // 6. Respuesta final al frontend con la orden y la URL lista para redirigir
       return res.status(201).json({
         success: true,
         message: "¡Pedido registrado exitosamente!",
-        data: {
-          pedido: pedidoCreado,
-          whatsappUrl: whatsappUrl,
-        },
+        data: resultado,
       });
     } catch (error: any) {
+      if (error.message?.startsWith("PRODUCT_NOT_FOUND:")) {
+        const productoId = error.message.split(":")[1];
+        return res.status(404).json({
+          success: false,
+          message: `Producto ${productoId} no encontrado`,
+        });
+      }
+
       console.error("Error al crear el pedido:", error);
       return res.status(500).json({
         success: false,
@@ -153,7 +67,7 @@ export class OrderController {
 
   /**
    * GET /api/pedidos
-   * Obtiene la lista completa de pedidos (para administradores).
+   * Obtiene la lista completa de pedidos (Admin / Fuerza de Ventas).
    */
   async listarPedidos(req: Request, res: Response): Promise<Response> {
     try {
@@ -178,7 +92,6 @@ export class OrderController {
   async obtenerPedido(req: Request, res: Response): Promise<Response> {
     try {
       const { id } = req.params;
-
       const pedido = await this.orderRepository.obtenerPedidoPorId(
         id.toString(),
       );
@@ -249,16 +162,14 @@ export class OrderController {
    * DELETE /api/pedidos/:id
    * Elimina un pedido específico.
    */
-
   async eliminarPedido(req: Request, res: Response): Promise<Response> {
     try {
       const { id } = req.params;
-
-      const pedidoEliminado = await this.orderRepository.eliminarPedido(
+      const fueEliminado = await this.orderRepository.eliminarPedido(
         id.toString(),
       );
 
-      if (!pedidoEliminado) {
+      if (!fueEliminado) {
         return res.status(404).json({
           success: false,
           message: "Pedido no encontrado para eliminar",
@@ -268,7 +179,6 @@ export class OrderController {
       return res.json({
         success: true,
         message: "Pedido eliminado correctamente",
-        data: pedidoEliminado,
       });
     } catch (error: any) {
       return res.status(500).json({
