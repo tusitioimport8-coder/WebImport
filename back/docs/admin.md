@@ -145,19 +145,11 @@ Define los roles que se pueden asignar. Debe mantenerse sincronizado con los rol
 
 ## Pedidos locales
 
-El controlador original incluye un método para obtener pedidos locales, pero la implementación compartida utiliza un arreglo vacío fijo y no consulta ningún repositorio.
-
-Por ese motivo, el endpoint `GET /api/admin/pedidos-locales` no se considera implementado en esta versión de la documentación. Antes de publicarlo, debe conectarse con la consulta real y registrarse en `adminRoutes.ts`.
+Para obtener la lista de pedidos locales, debe consultar la siguiente ruta la especificación completa en la sección de [Listar todos los pedidos](./pedidos.md#4-listar-todos-los-pedidos).
 
 ## Mejoras pendientes
 
 - Incorporar paginación en el listado de usuarios.
-- Auditar los cambios de roles.
-- Impedir de forma atómica que se elimine el último administrador activo, si esa es una regla del sistema.
-- Verificar que la protección contra cambios del propio rol utiliza correctamente la identidad proporcionada por el middleware.
-- Ajustar la validación del identificador al formato real de la base de datos.
-- Confirmar que las respuestas del repositorio no incluyen información sensible.
-- Implementar la consulta real de pedidos locales antes de exponer su endpoint.
 
 ## Resumen
 
