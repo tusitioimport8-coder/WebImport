@@ -27,6 +27,8 @@ export const crearProductoSchema = zod.object({
     .optional(),
 
   categorias_ids: zod.array(zod.number()).optional(),
+  imagen_url: zod.string().optional().nullable(),
+  video_url: zod.string().optional().nullable(),
 });
 
 class ProductosValidator {

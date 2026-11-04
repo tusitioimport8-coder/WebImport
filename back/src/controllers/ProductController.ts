@@ -70,6 +70,8 @@ class ProductController {
         request.body,
       );
 
+      console.log("Validation result:", validation);
+
       if (!validation.success) {
         return response.status(400).json({
           success: false,
@@ -78,7 +80,7 @@ class ProductController {
         });
       }
 
-      // 2. Guardar producto base (recibe imagen_url directamente en validation.data)
+      //  2. Guardar producto base (recibe imagen_url directamente en validation.data)
       const productoCreado = await this.repository.crearProducto(
         validation.data,
       );
