@@ -8,11 +8,13 @@ Los presupuestos se almacenan en la tabla `pedidos`, identificándose mediante e
 
 ## Resumen de endpoints
 
-| Método | Endpoint                   | Descripción                            |
-| ------ | -------------------------- | -------------------------------------- |
-| `POST` | `/presupuestos`            | Crear un presupuesto                   |
-| `GET`  | `/presupuestos`            | Listar todos los presupuestos          |
-| `PUT`  | `/presupuestos/:id/estado` | Actualizar el estado de un presupuesto |
+| Método   | Endpoint                   | Descripción                            |
+| -------- | -------------------------- | -------------------------------------- |
+| `POST`   | `/presupuestos`            | Crear un presupuesto                   |
+| `GET`    | `/presupuestos`            | Listar todos los presupuestos          |
+| `PATCH`  | `/presupuestos/:id/estado` | Actualizar el estado de un presupuesto |
+| `GET`    | `/presupuestos/:id`        | Obtener un presupuesto por su ID       |
+| `DELETE` | `/presupuestos/:id`        | Eliminar un presupuesto por su ID      |
 
 > Las rutas anteriores representan los endpoints documentados a partir de los métodos del controlador. La ruta base y los paths definitivos deben coincidir con la configuración del router del proyecto.
 
@@ -151,7 +153,7 @@ Si ocurre un error al consultar los presupuestos:
 
 ---
 
-# `PUT /presupuestos/:id/estado`
+# `PATCH /presupuestos/:id/estado`
 
 Permite actualizar el estado de un presupuesto existente mediante su identificador.
 
@@ -172,7 +174,7 @@ Permite actualizar el estado de un presupuesto existente mediante su identificad
 ## Ejemplo
 
 ```http
-PUT /presupuestos/presupuesto-123/estado
+PATCH /presupuestos/presupuesto-123/estado
 ```
 
 Body:
@@ -234,15 +236,95 @@ Si ocurre un error al actualizar el estado:
 }
 ```
 
+# `GET /presupuestos/:id`
+
+Obtiene un presupuesto por su identificador.
+
+## Respuesta exitosa — `200 OK`
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": "presupuesto-123",
+    "usuario_id": "123",
+    "total": 1500.5,
+    "estado": "emitido",
+    "tipo_documento": "presupuesto"
+  }
+}
+```
+
+### `404 Not Found`
+
+Si no existe un presupuesto con el identificador indicado:
+
+```json
+{
+  "success": false,
+  "message": "Presupuesto no encontrado"
+}
+```
+
+### `500 Internal Server Error`
+
+Si ocurre un error al obtener el presupuesto:
+
+```json
+{
+  "success": false,
+  "message": "Error al obtener el presupuesto",
+  "details": "Descripción del error"
+}
+```
+
+# `DELETE /presupuestos/:id`
+
+Elimina un presupuesto por su identificador.
+
+## Respuesta exitosa — `200 OK`
+
+```json
+{
+  "success": true,
+  "message": "Presupuesto eliminado correctamente"
+}
+```
+
+### `404 Not Found`
+
+Si no existe un presupuesto con el identificador indicado:
+
+```json
+{
+  "success": false,
+  "message": "Presupuesto no encontrado"
+}
+```
+
+### `500 Internal Server Error`
+
+Si ocurre un error al eliminar el presupuesto:
+
+```json
+{
+  "success": false,
+  "message": "Error al eliminar el presupuesto",
+  "details": "Descripción del error"
+}
+```
+
 ---
 
 ## Resumen del módulo
 
-| Operación           | Método del controlador | Descripción                                                                               |
-| ------------------- | ---------------------- | ----------------------------------------------------------------------------------------- |
-| Crear presupuesto   | `crearPresupuesto()`   | Genera un ID y registra un presupuesto asociado a un usuario                              |
-| Listar presupuestos | `listarPresupuestos()` | Consulta los registros de tipo `presupuesto`, ordenados por fecha de creación descendente |
-| Cambiar estado      | `cambiarEstado()`      | Actualiza el estado de un presupuesto identificado por su ID                              |
+| Operación            | Método del controlador      | Descripción                                                                               |
+| -------------------- | --------------------------- | ----------------------------------------------------------------------------------------- |
+| Crear presupuesto    | `crearPresupuesto()`        | Genera un ID y registra un presupuesto asociado a un usuario                              |
+| Listar presupuestos  | `listarPresupuestos()`      | Consulta los registros de tipo `presupuesto`, ordenados por fecha de creación descendente |
+| Cambiar estado       | `cambiarEstado()`           | Actualiza el estado de un presupuesto identificado por su ID                              |
+| Obtener presupuesto  | `obtenerPresupuestoPorId()` | Recupera un presupuesto por su ID                                                         |
+| Eliminar presupuesto | `eliminarPresupuesto()`     | Elimina un presupuesto por su ID                                                          |
 
 ## Consideraciones
 
