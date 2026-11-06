@@ -20,6 +20,6 @@ router.get("/:id", (req, res) => ProductController.getProductoPorId(req, res));
 
 router.get("/", (req, res) => ProductController.getProductos(req, res));
 
-router.post("/upload-url", authMiddleware, solicitarPresignedUrl);
+router.post("/upload-url", solicitarPresignedUrl);
 
 export default router;

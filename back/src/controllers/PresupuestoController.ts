@@ -76,6 +76,61 @@ export class PresupuestoController {
       });
     }
   }
+
+  async obtenerPresupuestoPorId(
+    req: Request,
+    res: Response,
+  ): Promise<Response> {
+    try {
+      const { id } = req.params;
+      const presupuesto = await this.repo.obtenerPresupuestoPorId(
+        id.toString(),
+      );
+
+      if (!presupuesto) {
+        return res.status(404).json({
+          success: false,
+          message: "Presupuesto no encontrado",
+        });
+      }
+
+      return res.json({
+        success: true,
+        data: presupuesto,
+      });
+    } catch (error: any) {
+      return res.status(500).json({
+        success: false,
+        message: "Error al obtener el presupuesto",
+        details: error.message,
+      });
+    }
+  }
+
+  async eliminarPresupuesto(req: Request, res: Response): Promise<Response> {
+    try {
+      const { id } = req.params;
+      const eliminado = await this.repo.eliminarPresupuesto(id.toString());
+
+      if (!eliminado) {
+        return res.status(404).json({
+          success: false,
+          message: "Presupuesto no encontrado",
+        });
+      }
+
+      return res.json({
+        success: true,
+        message: "Presupuesto eliminado correctamente",
+      });
+    } catch (error: any) {
+      return res.status(500).json({
+        success: false,
+        message: "Error al eliminar el presupuesto",
+        details: error.message,
+      });
+    }
+  }
 }
 
 export default new PresupuestoController();

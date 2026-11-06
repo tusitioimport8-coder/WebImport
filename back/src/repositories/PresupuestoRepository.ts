@@ -35,6 +35,20 @@ export class PresupuestoRepository {
     );
     return result?.[0] || null;
   }
+
+  async obtenerPresupuestoPorId(id: string): Promise<IPresupuesto | null> {
+    const result = await this.db.excecuteNameQuery("obtenerPresupuestoPorId", {
+      id,
+    });
+    return result?.[0] || null;
+  }
+
+  async eliminarPresupuesto(id: string): Promise<boolean> {
+    const result = await this.db.excecuteNameQuery("eliminarPresupuesto", {
+      id,
+    });
+    return result?.[0] || null;
+  }
 }
 
 export default new PresupuestoRepository();
