@@ -41,7 +41,10 @@ export class OrderRepository {
         sede: payloadPedido.sede,
         direccion_base: payloadPedido.direccion_base ?? null,
         tipo_entrega: payloadPedido.tipo_entrega,
-        datos_entrega: JSON.stringify(payloadPedido.datos_entrega),
+        datos_entrega:
+          typeof payloadPedido.datos_entrega === "string"
+            ? payloadPedido.datos_entrega
+            : JSON.stringify(payloadPedido.datos_entrega),
         metodo_pago: payloadPedido.metodo_pago,
         total: payloadPedido.total,
         tipo_documento: payloadPedido.tipo_documento,

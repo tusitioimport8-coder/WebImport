@@ -37,7 +37,7 @@ export interface DatosEntregaDetalle {
 
 export interface EntregaPedidoInput {
   tipo: TipoEntrega;
-  detalles: DatosEntregaDetalle;
+  datos_entrega: string;
 }
 
 export interface PagoPedidoInput {
@@ -73,7 +73,7 @@ export interface GuardarPedidoInput {
   sede: string;
   direccion_base?: string | null;
   tipo_entrega: TipoEntrega;
-  datos_entrega: DatosEntregaDetalle;
+  datos_entrega: string;
   metodo_pago: MetodoPago;
   total: number;
   detalles: DetallePedidoInput[];

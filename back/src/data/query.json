@@ -351,13 +351,14 @@
   },
 
   "crearPedido": {
-    "query": "INSERT INTO pedidos (usuario_id, nombre_completo, telefono, correo, tipo_entrega, metodo_pago, total, estado, tipo_documento) VALUES ($1, $2, $3, $4, $5, $6, $7, 'pendiente', $8) RETURNING id, creado_en",
+    "query": "INSERT INTO pedidos (usuario_id, nombre_completo, telefono, correo, tipo_entrega, datos_entrega, metodo_pago, total, estado, tipo_documento) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'pendiente', $9) RETURNING id, creado_en",
     "structure_params": {
       "usuario_id": "string | null",
       "nombre_completo": "string",
       "telefono": "string",
       "correo": "string",
       "tipo_entrega": "string",
+      "datos_entrega": "string",
       "metodo_pago": "string",
       "total": "number",
       "tipo_documento": "string"
@@ -368,6 +369,7 @@
       "telefono",
       "correo",
       "tipo_entrega",
+      "datos_entrega",
       "metodo_pago",
       "total",
       "tipo_documento"

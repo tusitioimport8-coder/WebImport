@@ -119,7 +119,7 @@ export class OrderService {
       sede: contacto.sede,
       direccion_base: contacto.direccion_base,
       tipo_entrega: entrega.tipo,
-      datos_entrega: entrega.detalles,
+      datos_entrega: entrega.datos_entrega,
       metodo_pago: pago.metodo,
       total: Number(totalPedido.toFixed(2)),
       tipo_documento: tipo_documento || "pedido", // Asigna 'pedido' por defecto si viene vacío
