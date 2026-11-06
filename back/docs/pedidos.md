@@ -60,7 +60,7 @@ El endpoint permite procesar pedidos tanto de usuarios autenticados como de invi
   },
   "entrega": {
     "tipo": "domicilio",
-    "detalles": "Casa blanca, portón negro"
+    "datos_entrega": "Casa blanca, portón negro"
   },
   "pago": {
     "metodo": "transferencia"
