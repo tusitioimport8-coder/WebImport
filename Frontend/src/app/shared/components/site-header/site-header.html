@@ -1,0 +1,121 @@
+
+<header class="shop-toolbar">
+  <a class="shop-brand" routerLink="/" aria-label="Ir al inicio de Tu Sitio Import">
+    <img class="shop-logo" src="/images/logo.png" alt="Tu Sitio Import" />
+  </a>
+
+  <div class="search-wrapper">
+    <tui-textfield class="search-control">
+      <input
+        tuiInput
+        type="search"
+        autocomplete="off"
+        placeholder="Buscar productos..."
+        [ngModel]="searchTerm"
+        (ngModelChange)="searchChange.emit($event)"
+      />
+    </tui-textfield>
+
+    <button
+      type="button"
+      class="search-icon-button"
+      aria-label="Buscar productos"
+      (click)="searchChange.emit(searchTerm)"
+    >
+      <img src="/images/buscar.png" alt="" />
+    </button>
+  </div>
+
+  <div class="toolbar-actions">
+    <button
+      type="button"
+      class="toolbar-action"
+      aria-label="Lista de deseos"
+      (click)="wishlistClick.emit()"
+    >
+      <span class="toolbar-action-content">
+        <img src="/images/deseos.png" alt="" class="toolbar-action-image" />
+        <span class="toolbar-action-label">DESEOS</span>
+      </span>
+
+      @if (wishlistCount > 0) {
+        <span class="action-badge">{{ wishlistCount }}</span>
+      }
+    </button>
+
+    <button
+      type="button"
+      class="toolbar-action"
+      aria-label="Carrito"
+      (click)="cartClick.emit()"
+    >
+      <span class="toolbar-action-content">
+        <img src="/images/carrito.png" alt="" class="toolbar-action-image" />
+        <span class="toolbar-action-label">CARRITO</span>
+      </span>
+
+      @if (cartCount > 0) {
+        <span class="action-badge">{{ cartCount }}</span>
+      }
+    </button>
+
+    <!-- MI PERFIL -->
+    <button
+      type="button"
+      class="toolbar-action"
+      aria-label="Mi perfil"
+      (click)="profileClick.emit()"
+    >
+      <span class="toolbar-action-content">
+        <img src="/images/perfil.png" alt="" class="toolbar-action-image" />
+        <span class="toolbar-action-label">MI PERFIL</span>
+      </span>
+    </button>
+
+    <!-- INGRESAR -->
+    <a
+      class="toolbar-action"
+      routerLink="/sesion"
+      aria-label="Iniciar sesión"
+    >
+      <span class="toolbar-action-content">
+        <span class="toolbar-action-symbol">
+          <i class="pi pi-sign-in"></i>
+        </span>
+        <span class="toolbar-action-label">INGRESAR</span>
+      </span>
+    </a>
+
+    <!-- ADMIN -->
+    <a
+      class="toolbar-action"
+      routerLink="/admin"
+      aria-label="Panel de administración"
+    >
+      <span class="toolbar-action-content">
+        <span class="toolbar-action-symbol">
+          <i class="pi pi-cog"></i>
+        </span>
+        <span class="toolbar-action-label">ADMIN</span>
+      </span>
+    </a>
+
+   <!-- INVENTARIO: SOLO ADMIN Y MARKETING -->
+@if (canAccessInventory) {
+  <a
+    class="toolbar-action"
+    routerLink="/inventario"
+    aria-label="Inventario"
+  >
+    <span class="toolbar-action-content">
+      <img
+        src="/images/inventario.png"
+        alt=""
+        class="toolbar-action-image"
+      />
+      <span class="toolbar-action-label">INVENTARIO</span>
+    </span>
+  </a>
+}
+  </div>
+</header>
