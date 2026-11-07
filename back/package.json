@@ -4,12 +4,17 @@
   "description": "",
   "main": "dist/server.js",
   "packageManager": "pnpm@11.20.0",
-  "private": "true",
+  "private": true,
   "scripts": {
     "dev": "tsx watch src/server.ts",
     "build": "tsc",
     "start": "node dist/server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "bcrypt"
+    ]
   },
   "keywords": [],
   "author": "",
