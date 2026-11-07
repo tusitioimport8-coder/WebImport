@@ -1,47 +1,49 @@
-import { Request, Response } from "express";
-
-interface Mensaje {
-  telefonoEmpresa: string; // Ej: "584121234567"
+export interface DatosWhatsAppInput {
+  telefonoEmpresa: string;
   datosOrden: {
+    idPedido?: string;
     clienteNombre: string;
+    telefonoCliente?: string;
+    tipoEntrega?: string;
+    metodoPago?: string;
+    nivelAplicado: string;
     items: Array<{ nombre: string; cantidad: number; subtotal: number }>;
     totalPagar: number;
-    nivelAplicado: string;
   };
 }
 
-export function generarLinkWhatsApp(req: Request, res: Response): void {
-  let data: Mensaje = req.body;
+export function generarLinkWhatsAppHelper(data: DatosWhatsAppInput): string {
+  const telefono = data.telefonoEmpresa || "584129668437";
+  const orden = data.datosOrden;
 
-  if (!data || !data.datosOrden) {
-    data = {
-      telefonoEmpresa: "58412-9668437",
-      datosOrden: {
-        clienteNombre: "Juan Pérez",
-        items: [{ nombre: "Producto A", cantidad: 2, subtotal: 20.0 }],
-        totalPagar: 20.0,
-        nivelAplicado: "Delale",
-      },
-    };
+  let mensaje = `👋 Hola, me gustaría confirmar el siguiente pedido:\n\n`;
+
+  if (orden.idPedido) {
+    mensaje += `🆔 *Nro. de Pedido:* ${orden.idPedido.substring(0, 8).toUpperCase()}\n`;
   }
 
-  // Construir el cuerpo del mensaje en texto plano usando saltos de línea (\n)
-  let mensaje = `👋 Hola, me gustaría procesar el siguiente pedido:\n\n`;
-  mensaje += `👤 *Cliente:* ${data.datosOrden.clienteNombre}\n`;
-  mensaje += `🏷️ *Tarifa Aplicada:* ${data.datosOrden.nivelAplicado}\n\n`;
+  mensaje += `👤 *Cliente:* ${orden.clienteNombre}\n`;
+  if (orden.telefonoCliente)
+    mensaje += `📞 *Teléfono:* ${orden.telefonoCliente}\n`;
+
+  mensaje += `🏷️ *Tarifa Aplicada:* ${orden.nivelAplicado}\n`;
+
+  if (orden.tipoEntrega) {
+    mensaje += `📦 *Tipo de Entrega:* ${orden.tipoEntrega.toUpperCase()}\n`;
+  }
+  if (orden.metodoPago) {
+    mensaje += `💳 *Método de Pago:* ${orden.metodoPago.toUpperCase()}\n\n`;
+  }
+
   mensaje += `🛒 *Detalle del Pedido:*\n`;
 
-  data.datosOrden.items.forEach((item) => {
+  orden.items.forEach((item) => {
     mensaje += `• ${item.cantidad}x ${item.nombre} - $${item.subtotal.toFixed(2)}\n`;
   });
 
-  mensaje += `\n💰 *Total a pagar:* $${data.datosOrden.totalPagar.toFixed(2)}\n\n`;
+  mensaje += `\n💰 *Total a pagar:* $${orden.totalPagar.toFixed(2)}\n\n`;
   mensaje += `¿Me confirman los datos para el pago y envío?`;
 
   const mensajeFormateado = encodeURIComponent(mensaje);
-
-  res.json({
-    mensaje: "Link de WhatsApp generado correctamente",
-    url: `https://wa.me/${data.telefonoEmpresa}?text=${mensajeFormateado}`,
-  });
+  return `https://wa.me/${telefono}?text=${mensajeFormateado}`;
 }

@@ -1,812 +1,550 @@
+
 :host {
   display: contents;
 }
 
-
-/* ==========================================
-   FONDO
-   ========================================== */
-
+/* FONDO OSCURO */
 .cart-backdrop {
   position: fixed;
-
   inset: 0;
-
   z-index: 9998;
-
-  background:
-    rgba(
-      0,
-      0,
-      0,
-      0.55
-    );
-
+  background: rgba(0, 0, 0, .55);
   opacity: 0;
-
   pointer-events: none;
+  transition: opacity .25s ease;
 
-  transition:
-    opacity
-    0.25s
-    ease;
+  &_open {
+    opacity: 1;
+    pointer-events: auto;
+  }
 }
 
-
-.cart-backdrop_open {
-  opacity: 1;
-
-  pointer-events: auto;
-}
-
-
-/* ==========================================
-   DRAWER
-   ========================================== */
-
+/* PANEL PRINCIPAL */
 .cart-drawer {
   position: fixed;
-
   top: 0;
   right: 0;
-
   z-index: 9999;
-
   display: flex;
-
   flex-direction: column;
-
-  width:
-    min(
-      420px,
-      42vw
-    );
-
+  width: min(420px, 42vw);
   height: 100dvh;
-
   box-sizing: border-box;
-
-  border-left:
-    1px solid
-    rgba(
-      255,
-      255,
-      255,
-      0.08
-    );
-
-  background: #151515;
-
+  padding: 12px 10px 8px;
+  overflow: hidden;
+  background: #ff00cc;
+  color: #000;
   box-shadow:
-    -18px
-    0
-    50px
-    rgba(
-      0,
-      0,
-      0,
-      0.35
-    );
-
-  transform:
-    translateX(100%);
-
+  -12px 0 22px rgba(0, 0, 0, .45),
+  -25px 0 55px rgba(0, 0, 0, .32),
+  0 0 28px rgba(255, 0, 200, .3);
+  transform: translateX(100%);
   visibility: hidden;
-
-  transition:
-    transform
-    0.3s
-    ease,
-    visibility
-    0.3s;
+  transition: transform .3s ease, visibility .3s;
 }
 
-
 .cart-drawer_open {
-  transform:
-    translateX(0);
-
+  transform: translateX(0);
   visibility: visible;
 }
 
-
-/* ==========================================
-   CABECERA
-   ========================================== */
-
+/* CABECERA */
 .cart-header {
   display: flex;
-
   align-items: center;
-
   justify-content: space-between;
-
   flex-shrink: 0;
-
-  min-height: 78px;
-
-  padding:
-    1rem
-    1.25rem;
-
-  border-bottom:
-    1px solid
-    rgba(
-      255,
-      255,
-      255,
-      0.07
-    );
-
+  min-height: 58px;
+  padding: 8px 10px 4px;
+  border-radius: 23px 23px 0 0;
+  background: #ffd0f5;
 
   h2 {
-    margin:
-      0.15rem
-      0
-      0;
-
-    color: #ffffff;
-
+    margin: 2px 0 0;
+    color: #000;
     font-size: 1.35rem;
+    font-weight: 900;
+    line-height: 1.1;
   }
 }
 
-
 .cart-eyebrow {
-  color:
-    rgba(
-      255,
-      255,
-      255,
-      0.42
-    );
-
-  font-size: 0.68rem;
-
-  font-weight: 700;
-
-  letter-spacing: 0.08em;
-
+  color: #111;
+  font-size: .62rem;
+  font-weight: 900;
+  letter-spacing: .06em;
   text-transform: uppercase;
 }
 
-
-/* ==========================================
-   BOTÓN CERRAR
-   ========================================== */
-
 .close-button {
   display: grid;
-
   place-items: center;
-
-  width: 38px;
-
-  height: 38px;
-
+  width: 31px;
+  height: 31px;
   padding: 0;
-
-  border:
-    1px solid
-    rgba(
-      255,
-      255,
-      255,
-      0.08
-    );
-
+  border: 0;
   border-radius: 10px;
-
-  background:
-    rgba(
-      255,
-      255,
-      255,
-      0.04
-    );
-
-  color: #ffffff;
-
+  background: #baff00;
+  color: #000;
   cursor: pointer;
 
-  transition:
-    background
-    0.2s
-    ease;
-
+  i {
+    font-size: .8rem;
+  }
 
   &:hover {
-    background:
-      rgba(
-        255,
-        255,
-        255,
-        0.09
-      );
+    background: #a7e500;
   }
 }
 
-
-/* ==========================================
-   CONTENIDO
-   ========================================== */
-
+/* CONTENIDO ROSA */
 .cart-content {
   flex: 1;
-
   min-height: 0;
-
+  padding: 8px 2px 12px;
   overflow-y: auto;
+  background: #ffd0f5;
+  border-radius: 0 0 13px 13px;
 
-  padding:
-    0.9rem
-    1rem;
+  scrollbar-width: thin;
+  scrollbar-color: #8b005d transparent;
 }
 
+.cart-content::-webkit-scrollbar {
+  width: 5px;
+}
 
-/* ==========================================
-   CARRITO VACÍO
-   ========================================== */
+.cart-content::-webkit-scrollbar-thumb {
+  border-radius: 10px;
+  background: #8b005d;
+}
 
+/* CARRITO VACÍO */
 .empty-cart {
   display: flex;
-
   flex-direction: column;
-
   align-items: center;
-
   justify-content: center;
-
   min-height: 55vh;
-
-  padding: 2rem;
-
+  padding: 20px;
   text-align: center;
 
-
   h3 {
-    margin:
-      1rem
-      0
-      0.35rem;
-
-    color: #ffffff;
-
+    margin: 12px 0 5px;
+    color: #000;
     font-size: 1rem;
+    font-weight: 800;
   }
 
-
   p {
-    max-width: 250px;
-
+    max-width: 240px;
     margin: 0;
-
-    color:
-      rgba(
-        255,
-        255,
-        255,
-        0.45
-      );
-
-    font-size: 0.82rem;
-
+    color: #555;
+    font-size: .8rem;
     line-height: 1.5;
   }
 }
 
-
 .empty-icon {
   display: grid;
-
   place-items: center;
-
-  width: 64px;
-
-  height: 64px;
-
+  width: 60px;
+  height: 60px;
   border-radius: 50%;
-
-  background:
-    rgba(
-      255,
-      255,
-      255,
-      0.05
-    );
-
-  color:
-    rgba(
-      255,
-      255,
-      255,
-      0.4
-    );
-
-  font-size: 1.6rem;
+  background: #baff00;
+  color: #000;
+  font-size: 1.5rem;
 }
 
-
-/* ==========================================
-   LISTA
-   ========================================== */
-
+/* PRODUCTOS */
 .cart-items {
   display: flex;
-
   flex-direction: column;
-
-  gap: 0.65rem;
+  gap: 8px;
 }
-
-
-/* ==========================================
-   PRODUCTO
-   ========================================== */
 
 .cart-item {
   display: grid;
-
-  grid-template-columns:
-    82px
-    minmax(
-      0,
-      1fr
-    );
-
-  gap: 0.8rem;
-
-  padding: 0.75rem;
-
-  border:
-    1px solid
-    rgba(
-      255,
-      255,
-      255,
-      0.065
-    );
-
-  border-radius: 13px;
-
-  background: #1c1c1c;
+  grid-template-columns: 68px minmax(0, 1fr);
+  gap: 10px;
+  min-height: 105px;
+  padding: 11px;
+  box-sizing: border-box;
+  border: 1px solid #222;
+  border-radius: 12px;
+  background: #fff;
 }
-
 
 .item-image {
   display: grid;
-
   place-items: center;
-
-  width: 82px;
-
-  height: 82px;
-
+  align-self: start;
+  width: 60px;
+  height: 65px;
   overflow: hidden;
-
-  border-radius: 10px;
-
-  background: #242424;
-
-  color:
-    rgba(
-      255,
-      255,
-      255,
-      0.25
-    );
-
+  border-radius: 4px;
+  background: #eef0f1;
+  color: #777;
 
   img {
+    display: block;
     width: 100%;
-
     height: 100%;
-
-    object-fit: cover;
+    object-fit: contain;
   }
 }
 
-
 .item-info {
   display: flex;
-
   flex-direction: column;
-
   min-width: 0;
 }
 
-
 .item-top {
   display: flex;
-
   align-items: flex-start;
-
   justify-content: space-between;
-
-  gap: 0.5rem;
-
+  gap: 5px;
 
   h3 {
     display: -webkit-box;
-
     margin: 0;
-
     overflow: hidden;
-
-    color: #ffffff;
-
-    font-size: 0.83rem;
-
-    font-weight: 600;
-
-    line-height: 1.3;
-
+    color: #000;
+    font-size: .75rem;
+    font-weight: 800;
+    line-height: 1.2;
     -webkit-box-orient: vertical;
-
     -webkit-line-clamp: 2;
   }
 }
 
-
-/* ==========================================
-   ELIMINAR
-   ========================================== */
-
 .remove-button {
-  flex-shrink: 0;
-
   display: grid;
-
   place-items: center;
-
-  width: 27px;
-
-  height: 27px;
-
+  flex-shrink: 0;
+  width: 23px;
+  height: 23px;
   padding: 0;
-
   border: 0;
-
-  border-radius: 7px;
-
+  border-radius: 5px;
   background: transparent;
-
-  color:
-    rgba(
-      255,
-      255,
-      255,
-      0.35
-    );
-
+  color: #111;
   cursor: pointer;
 
+  i {
+    font-size: .85rem;
+  }
 
   &:hover {
-    background:
-      rgba(
-        255,
-        255,
-        255,
-        0.06
-      );
-
-    color: #ffffff;
+    background: #ffe0ee;
   }
 }
 
-
-/* ==========================================
-   TIPO DE PRECIO
-   ========================================== */
-
+/* TIPO DE PRECIO */
 .item-price-type {
   align-self: flex-start;
-
-  margin-top: 0.3rem;
-
-  padding:
-    0.16rem
-    0.42rem;
-
-  border:
-    1px solid
-    rgba(
-      255,
-      255,
-      255,
-      0.08
-    );
-
+  margin-top: 3px;
+  padding: 3px 10px;
+  border: 0;
   border-radius: 999px;
-
-  background:
-    rgba(
-      255,
-      255,
-      255,
-      0.04
-    );
-
-  color:
-    rgba(
-      255,
-      255,
-      255,
-      0.55
-    );
-
-  font-size: 0.62rem;
-
-  font-weight: 600;
+  background: #baff00;
+  color: #000;
+  font-size: .62rem;
+  font-weight: 800;
 }
 
-
-/* ==========================================
-   PRECIO
-   ========================================== */
-
+/* PRECIO */
 .item-price {
-  margin-top: 0.3rem;
-
-  color:
-    rgba(
-      255,
-      255,
-      255,
-      0.68
-    );
-
-  font-size: 0.77rem;
+  margin-top: 5px;
+  color: #000;
+  font-size: .78rem;
+  font-weight: 900;
 }
-
 
 .item-bottom {
   display: flex;
-
   align-items: center;
-
   justify-content: space-between;
-
-  gap: 0.5rem;
-
+  gap: 8px;
   margin-top: auto;
-
-  padding-top: 0.5rem;
+  padding-top: 5px;
 }
 
-
-/* ==========================================
-   CANTIDAD
-   ========================================== */
-
+/* CONTROLES DE CANTIDAD */
 .quantity-control {
   display: grid;
-
-  grid-template-columns:
-    28px
-    32px
-    28px;
-
-  height: 28px;
-
+  grid-template-columns: 23px 23px 23px;
+  height: 24px;
   overflow: hidden;
-
-  border:
-    1px solid
-    rgba(
-      255,
-      255,
-      255,
-      0.08
-    );
-
+  border: 0;
   border-radius: 8px;
-
+  background: #baff00;
 
   button {
     display: grid;
-
     place-items: center;
-
     padding: 0;
-
     border: 0;
-
     background: transparent;
-
-    color: #ffffff;
-
+    color: #000;
     cursor: pointer;
 
+    i {
+      font-size: .65rem;
+      font-weight: 900;
+    }
 
     &:hover:not(:disabled) {
-      background:
-        rgba(
-          255,
-          255,
-          255,
-          0.07
-        );
+      background: #a7e500;
     }
-
 
     &:disabled {
-      opacity: 0.25;
-
+      opacity: .35;
       cursor: not-allowed;
-    }
-
-
-    i {
-      font-size: 0.65rem;
     }
   }
 
-
   span {
     display: grid;
-
     place-items: center;
+    color: #000;
+    font-size: .72rem;
+    font-weight: 900;
+  }
+}
 
-    color: #ffffff;
+.item-subtotal {
+  color: #000;
+  font-size: .78rem;
+  font-weight: 800;
+}
 
-    font-size: 0.75rem;
+/* PIE FUCSIA */
+.cart-footer {
+  flex-shrink: 0;
+  padding: 16px 2px 14px;
+  background: #ff00cc;
+  color: #fff;
+}
+.cart-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 17px;
+  margin-bottom: 10px;
 
+  > div {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: #fff;
+    font-size: .8rem;
+
+    strong {
+      color: #fff;
+      font-weight: 900;
+    }
+  }
+}
+.total-row {
+  padding: 0;
+  border: 0;
+
+  span {
+    font-size: 1rem;
+  }
+
+  strong {
+    font-size: 1.3rem;
+    font-weight: 900;
+  }
+}
+
+/* WHATSAPP VERDE LIMA */
+.whatsapp-button {
+  width: 100%;
+  min-height: 43px;
+  border: 0 !important;
+  border-radius: 13px !important;
+  background: #baff00 !important;
+  color: #000 !important;
+  font-size: .85rem;
+  font-weight: 900;
+  cursor: pointer;
+
+  i {
+    margin-right: 5px;
+    color: #000;
+    font-size: 1rem;
+  }
+
+  &:hover:not(:disabled) {
+    background: #a7e500 !important;
+  }
+
+  &:disabled {
+    opacity: .65;
+    cursor: not-allowed;
+  }
+}
+
+.whatsapp-warning {
+  display: block;
+  margin-top: 10px;
+  color: #000;
+  font-size: .65rem;
+  text-align: center;
+}
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+  .cart-drawer {
+    width: min(420px, 80vw);
+  }
+}
+
+@media (max-width: 560px) {
+  .cart-drawer {
+    width: 92vw;
+  }
+}
+
+.pedido-form {
+  display: grid;
+  gap: 10px;
+  margin: 16px 0;
+
+  h3 {
+    margin: 0 0 4px;
+  }
+
+  input,
+  select,
+  textarea {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 11px 12px;
+    border: 1px solid #d1d1d1;
+    border-radius: 8px;
+    background: #fff;
+    color: #111;
+    font: inherit;
+  }
+
+  textarea {
+    min-height: 70px;
+    resize: vertical;
+  }
+
+  label {
+    font-size: 13px;
     font-weight: 600;
   }
 }
 
-
-.item-subtotal {
-  color: #ffffff;
-
-  font-size: 0.82rem;
-
-  font-weight: 700;
+.pedido-error {
+  color: #dc2626;
+  font-size: 13px;
 }
-
 
 /* ==========================================
-   PIE
+   MODAL DEL PEDIDO
    ========================================== */
 
-.cart-footer {
-  flex-shrink: 0;
-
-  padding:
-    1rem
-    1.25rem
-    1.25rem;
-
-  border-top:
-    1px solid
-    rgba(
-      255,
-      255,
-      255,
-      0.07
-    );
-
-  background: #171717;
+.pedido-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background: rgba(0, 0, 0, 0.65);
 }
 
+.pedido-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 
-.cart-summary {
+  z-index: 10001;
+
+  width: min(520px, calc(100vw - 32px));
+  max-height: min(90vh, 800px);
+
   display: flex;
-
   flex-direction: column;
 
-  gap: 0.5rem;
+  overflow: hidden;
 
-  margin-bottom: 0.9rem;
+  background: #fff;
+  color: #111;
 
+  border-radius: 18px;
 
-  > div {
-    display: flex;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.3);
+}
 
-    align-items: center;
+.pedido-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 
-    justify-content: space-between;
+  padding: 20px 24px;
 
-    color:
-      rgba(
-        255,
-        255,
-        255,
-        0.55
-      );
+  background: #ffd5f4;
 
-    font-size: 0.82rem;
-
-
-    strong {
-      color: #ffffff;
-    }
+  h2 {
+    margin: 4px 0 0;
   }
 }
 
+.pedido-modal-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 
-.total-row {
-  padding-top: 0.65rem;
+  padding: 24px;
 
-  border-top:
-    1px solid
-    rgba(
-      255,
-      255,
-      255,
-      0.06
-    );
+  overflow-y: auto;
 
+  input,
+  select,
+  textarea {
+    box-sizing: border-box;
+    width: 100%;
 
-  span {
-    font-size: 0.9rem;
+    padding: 12px 14px;
+
+    border: 1px solid #ddd;
+    border-radius: 10px;
+
+    background: #fff;
+    color: #111;
+
+    font: inherit;
   }
 
-
-  strong {
-    font-size: 1.2rem;
+  label {
+    font-weight: 600;
+    font-size: 13px;
   }
-}
 
-
-/* ==========================================
-   WHATSAPP
-   ========================================== */
-
-.whatsapp-button {
-  width: 100%;
-
-  min-height: 46px;
-
-
-  i {
-    margin-right: 0.45rem;
-
-    font-size: 1rem;
+  textarea {
+    resize: vertical;
   }
-}
 
-
-.whatsapp-warning {
-  display: block;
-
-  margin-top: 0.55rem;
-
-  color:
-    rgba(
-      255,
-      255,
-      255,
-      0.35
-    );
-
-  font-size: 0.68rem;
-
-  text-align: center;
-}
-
-
-/* ==========================================
-   RESPONSIVE
-   ========================================== */
-
-@media (max-width: 900px) {
-
-  .cart-drawer {
-    width:
-      min(
-        420px,
-        80vw
-      );
+  .whatsapp-button {
+    flex-shrink: 0;
+    width: 100%;
+    margin-top: 8px;
   }
 }
 
+@media (max-width: 600px) {
+  .pedido-modal {
+    width: calc(100vw - 24px);
+    max-height: 90dvh;
+  }
 
-@media (max-width: 560px) {
-
-  .cart-drawer {
-    width: 92vw;
+  .pedido-modal-content {
+    padding: 18px;
   }
 }

@@ -1,6 +1,7 @@
+
 @import '@taiga-ui/styles/taiga-ui-theme.less';
 @import '@taiga-ui/styles/taiga-ui-fonts.less';
-@import "primeicons/primeicons.css";
+@import 'primeicons/primeicons.css';
 
 tui-dialog[data-appearance~='inventory-dialog'] > button[tuiButtonX]::before {
   content: '×' !important;
@@ -21,4 +22,33 @@ tui-dialog[data-appearance~='inventory-dialog'] > button[tuiButtonX]::before {
   line-height: 1 !important;
 
   color: var(--tui-text-primary) !important;
+}
+
+html.overlay-open,
+body.overlay-open {
+  overflow: hidden !important;
+  height: 100%;
+}
+
+html,
+body {
+  background-color: #ff00d4;
+
+  background-image:
+    radial-gradient(
+      ellipse 85% 28% at 50% 20%,
+      rgba(65, 0, 55, 0.42) 0%,
+      transparent 100%
+    ),
+    radial-gradient(
+      ellipse 75% 35% at 50% 75%,
+      rgba(90, 0, 70, 0.28) 0%,
+      transparent 100%
+    );
+
+  background-attachment: fixed;
+}
+
+body {
+  background: #ff00d4;
 }

@@ -2,6 +2,11 @@ import {
   CommonModule,
 } from '@angular/common';
 
+import { SiteHeader } from '../../shared/components/site-header/site-header';
+import { SiteFooter } from '../../shared/components/site-footer/site-footer';
+import { WishlistService } from '../../services/wishlist.service';
+import { Wishlist } from '../../shared/components/wishlist/wishlist';
+
 import {
   ChangeDetectionStrategy,
   Component,
@@ -45,13 +50,15 @@ interface ProductPriceOption {
 @Component({
   selector: 'app-detalle-producto',
   standalone: true,
-
-  imports: [
-    CommonModule,
-    Tag,
-    TuiButton,
-    Carrito,
-  ],
+imports: [
+  CommonModule,
+  Tag,
+  TuiButton,
+  Carrito,
+  Wishlist,
+  SiteHeader,
+  SiteFooter,
+],
 
   templateUrl: './detalle-producto.html',
   styleUrl: './detalle-producto.less',
@@ -62,13 +69,38 @@ interface ProductPriceOption {
 export class DetalleProducto
   implements OnInit {
 
-  private readonly productService =
-    inject(ProductService);
+  private readonly productService = inject(ProductService);
+  private readonly cartService = inject(CartService);
+  private readonly wishlistService = inject(WishlistService);
 
+  // HEADER COMPARTIDO
+  readonly headerSearchTerm = signal('');
+  readonly cartHeaderTotalItems = this.cartService.totalItems;
+  readonly wishlistTotalItems = this.wishlistService.totalItems;
 
-  private readonly cartService =
-    inject(CartService);
+  onHeaderSearchChange(value: string): void {
+    this.headerSearchTerm.set(value);
+  }
 
+  openHeaderCart(): void {
+    this.cartService.open();
+  }
+
+  // WISHLIST COMPARTIDA
+  readonly wishlistOpen = this.wishlistService.isOpen;
+  readonly wishlistProducts = this.wishlistService.items;
+
+  openWishlist(): void {
+    this.wishlistService.open();
+  }
+
+  closeWishlist(): void {
+    this.wishlistService.close();
+  }
+
+  removeFromWishlist(productId: string): void {
+    this.wishlistService.remove(productId);
+  }
 
   /*
    * ID recibido desde Inicio / Catálogo mediante:
@@ -105,7 +137,7 @@ export class DetalleProducto
 
   readonly selectedPriceType =
     signal<ProductPriceType>(
-      'Mayor',
+      'Detal',
     );
 
 
@@ -477,37 +509,9 @@ export class DetalleProducto
      * Mayor es la selección preferida.
      */
 
-    const mayorExists =
-      product.precios.some(
-        (price) =>
-          price.tipo_precio ===
-          'Mayor',
-      );
-
-
-    if (
-      mayorExists
-    ) {
-
-      this.selectedPriceType.set(
-        'Mayor',
-      );
-
-    } else {
-
-      const firstPrice =
-        product.precios[0];
-
-
-      if (
-        firstPrice
-      ) {
-
-        this.selectedPriceType.set(
-          firstPrice.tipo_precio,
-        );
-      }
-    }
+ this.selectedPriceType.set(
+  'Detal',
+);
 
 
     /*

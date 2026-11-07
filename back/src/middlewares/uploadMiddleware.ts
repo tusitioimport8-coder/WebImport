@@ -1,34 +1,77 @@
-// src/middlewares/uploadMiddleware.ts
-import { Request, Response, NextFunction } from "express";
-import multer from "multer";
-import { upload } from "../config/multer"; // Tu configuración actual
+import { Request, Response } from "express";
+import storageService, { StorageFolder } from "../components/StorageComponent";
 
-const uploadFields = upload.fields([
-  { name: "imagen", maxCount: 1 },
-  { name: "galeria", maxCount: 5 },
-]);
+// Tipos MIME permitidos según el destino
+const ALLOWED_MIME_TYPES = [
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "image/gif",
+];
 
-export const handleProductoUpload = (
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) => {
-  uploadFields(req, res, (err) => {
-    if (err instanceof multer.MulterError) {
+export async function solicitarPresignedUrl(req: Request, res: Response) {
+  try {
+    const { nombreArchivo, tipoMime, destino } = req.body;
+
+    // 1. Validar que vengan los datos obligatorios
+    if (!nombreArchivo || !tipoMime) {
       return res.status(400).json({
         success: false,
-        message: "Error en la subida de imágenes",
-        error:
-          err.code === "LIMIT_UNEXPECTED_FILE"
-            ? "Excediste el límite de imágenes permitidas (máximo 1 portada y 5 en galería)"
-            : err.message,
-      });
-    } else if (err) {
-      return res.status(400).json({
-        success: false,
-        message: err.message,
+        message: "nombreArchivo y tipoMime son obligatorios",
       });
     }
-    next();
-  });
-};
+
+    // 2. Restringir tipos de archivo
+    if (!ALLOWED_MIME_TYPES.includes(tipoMime)) {
+      return res.status(400).json({
+        success: false,
+        message: `Tipo de archivo no permitido. Tipos aceptados: ${ALLOWED_MIME_TYPES.join(", ")}`,
+      });
+    }
+
+    // 3. Mapear la carpeta de destino basada en el enum
+
+    if (!destino) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "El campo 'destino' es obligatorio y debe ser uno de los siguientes: 'banners', 'usuarios', 'productos', 'avatar', 'video'",
+      });
+    }
+
+    let carpeta: StorageFolder | string;
+
+    if (destino === "banners" || destino === "banner") {
+      carpeta = StorageFolder.IMAGENES_BANNER; // "banners/imagenes"
+    } else if (destino === "usuarios" || destino === "usuario") {
+      carpeta = StorageFolder.USUARIO_AVATAR; // "usuarios/avatars"
+    } else if (destino === "productos" || destino === "producto") {
+      carpeta = StorageFolder.PRODUCTO_IMAGEN; // "productos/imagenes"
+    } else {
+      return res.status(400).json({
+        success: false,
+        message: `Destino '${destino}' no válido`,
+      });
+    }
+
+    if (destino === "avatar") carpeta = StorageFolder.USUARIO_AVATAR;
+    if (destino === "video") carpeta = StorageFolder.PRODUCTO_VIDEO;
+
+    // 4. Generar la URL firmada
+    const result = await storageService.generarPresignedUrl(
+      nombreArchivo,
+      tipoMime,
+      carpeta,
+    );
+
+    return res.status(200).json({
+      success: true,
+      data: result,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Error al generar la URL de subida",
+    });
+  }
+}

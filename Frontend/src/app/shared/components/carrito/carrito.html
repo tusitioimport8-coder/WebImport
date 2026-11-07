@@ -313,38 +313,187 @@
       </div>
 
 
-      <!-- WHATSAPP -->
+    
+ <button
+  tuiButton
+  type="button"
+  class="whatsapp-button"
+  (click)="abrirFormulario()"
+>
+  <i class="pi pi-whatsapp"></i>
+  Pedir por WhatsApp
+</button>
 
-      <button
-        tuiButton
-        type="button"
-        class="whatsapp-button"
-        [disabled]="
-          !whatsappUrl()
-        "
-        (click)="openWhatsApp()"
-      >
-
-        <i class="pi pi-whatsapp"></i>
-
-        Pedir por WhatsApp
-
-      </button>
-
-
-      @if (!whatsappNumber()) {
-
-        <small class="whatsapp-warning">
-
-          Falta configurar el número
-          de WhatsApp.
-
-        </small>
-
-      }
 
     </footer>
 
   }
 
 </aside>
+
+
+<!-- ==========================================
+     MODAL DE CONFIRMACIÓN DEL PEDIDO
+     ========================================== -->
+
+@if (mostrarFormulario()) {
+
+  <div
+    class="pedido-modal-backdrop"
+    (click)="cerrarFormulario()"
+  ></div>
+
+  <section
+    class="pedido-modal"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="pedido-modal-titulo"
+  >
+
+    <header class="pedido-modal-header">
+
+      <div>
+        <span class="cart-eyebrow">
+          Finalizar compra
+        </span>
+
+        <h2 id="pedido-modal-titulo">
+          Datos del pedido
+        </h2>
+      </div>
+
+      <button
+        type="button"
+        class="close-button"
+        aria-label="Cerrar formulario"
+        [disabled]="procesandoPedido()"
+        (click)="cerrarFormulario()"
+      >
+        <i class="pi pi-times"></i>
+      </button>
+
+    </header>
+
+    <form
+      class="pedido-modal-content"
+      (ngSubmit)="openWhatsApp()"
+    >
+
+      <input
+        type="text"
+        name="nombre_completo"
+        placeholder="Nombre completo"
+        aria-label="Nombre completo"
+        [(ngModel)]="datosPedido.nombre_completo"
+        required
+      />
+
+      <input
+        type="tel"
+        name="telefono"
+        placeholder="Teléfono"
+        aria-label="Teléfono"
+        [(ngModel)]="datosPedido.telefono"
+        required
+      />
+
+      <input
+        type="email"
+        name="correo"
+        placeholder="Correo electrónico"
+        aria-label="Correo electrónico"
+        [(ngModel)]="datosPedido.correo"
+        required
+      />
+
+      <input
+        type="text"
+        name="sede"
+        placeholder="Sede"
+        aria-label="Sede"
+        [(ngModel)]="datosPedido.sede"
+        required
+      />
+
+      <input
+        type="text"
+        name="direccion_base"
+        placeholder="Dirección"
+        aria-label="Dirección"
+        [(ngModel)]="datosPedido.direccion_base"
+      />
+
+      <label for="tipo-entrega">
+        Tipo de entrega
+      </label>
+
+      <select
+        id="tipo-entrega"
+        name="tipo_entrega"
+        [(ngModel)]="datosPedido.tipo_entrega"
+      >
+        <option value="retiro">
+          Retiro en sede
+        </option>
+
+        <option value="domicilio">
+          Envío a domicilio
+        </option>
+      </select>
+
+      <textarea
+        name="detalles_entrega"
+        placeholder="Detalles de entrega (opcional)"
+        aria-label="Detalles de entrega"
+        [(ngModel)]="datosPedido.detalles_entrega"
+        rows="3"
+      ></textarea>
+
+      <label for="metodo-pago">
+        Método de pago
+      </label>
+
+      <select
+        id="metodo-pago"
+        name="metodo_pago"
+        [(ngModel)]="datosPedido.metodo_pago"
+      >
+        <option value="transferencia">
+          Transferencia
+        </option>
+
+        <option value="efectivo">
+          Efectivo
+        </option>
+
+        <option value="pago_movil">
+          Pago móvil
+        </option>
+      </select>
+
+      @if (errorPedido()) {
+        <p class="pedido-error" role="alert">
+          {{ errorPedido() }}
+        </p>
+      }
+
+      <button
+        tuiButton
+        type="submit"
+        class="whatsapp-button"
+        [disabled]="procesandoPedido()"
+      >
+        <i class="pi pi-whatsapp"></i>
+
+        {{
+          procesandoPedido()
+            ? 'Registrando pedido...'
+            : 'Confirmar pedido por WhatsApp'
+        }}
+      </button>
+
+    </form>
+
+  </section>
+
+}

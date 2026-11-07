@@ -1,526 +1,196 @@
-<div class="catalog">
+<div class="catalog-page">
+  <app-site-header
+    [searchTerm]="searchTerm()"
+    [wishlistCount]="wishlistTotalItems()"
+    [cartCount]="cartTotalItems()"
+    (searchChange)="onSearchChange($event)"
+    (wishlistClick)="openWishlist()"
+    (cartClick)="openCart()"
+  />
 
-  <!-- ======================================================
-       CABECERA
-       ====================================================== -->
+  <main class="catalog">
+    <header class="catalog-header">
+      <div class="header-titles">
+        <p class="eyebrow">TIENDA</p>
+        <h1>Catálogo de Productos</h1>
+        <p class="catalog-description">
+          Descubre nuestras últimas novedades a precio de importador
+        </p>
+      </div>
+    </header>
 
-  <header class="catalog-header">
-
-    <div class="header-titles">
-
-      <p class="eyebrow">
-        Tienda
+    <section class="filters-bar" aria-label="Filtros del catálogo">
+      <p class="results-text">
+        Mostrando {{ visibleProducts().length }} de
+        {{ filteredProducts().length }} productos
       </p>
 
+      <div class="filter-group">
+        <div class="filter-field">
+          <label for="catalog-category">Categoría</label>
+          <select
+            id="catalog-category"
+            class="select-control"
+            [ngModel]="selectedCategory()"
+            (ngModelChange)="onCategoryChange($event)"
+          >
+            @for (category of categories(); track category) {
+              <option [value]="category">
+                {{ category === 'Todas' ? 'Todas las categorías' : category }}
+              </option>
+            }
+          </select>
+        </div>
 
-      <h1>
-        Catálogo de Productos
-      </h1>
-
-
-      <p class="catalog-description">
-        Descubre nuestras últimas novedades
-      </p>
-
-    </div>
-
-
-    <!-- CARRITO -->
-
-    <button
-      type="button"
-      class="cart-summary"
-      aria-label="Ver carrito"
-      (click)="openCart()"
-    >
-
-      <tui-icon
-        icon="@tui.shopping-cart"
-      />
-
-
-      @if (
-        cartTotalItems() > 0
-      ) {
-
-        <span class="cart-badge">
-
-          {{ cartTotalItems() }}
-
-        </span>
-
-      }
-
-    </button>
-
-  </header>
-
-
-  <!-- ======================================================
-       FILTROS
-       ====================================================== -->
-
-  <section
-    class="filters-bar"
-    aria-label="Filtros del catálogo"
-  >
-
-    <!-- BUSCADOR -->
-
-    <div class="search-field">
-
-      <label for="catalog-search">
-        Buscar
-      </label>
-
-
-      <tui-textfield
-        class="search-control"
-        iconStart="@tui.search"
-      >
-
-        <input
-          id="catalog-search"
-          tuiInput
-          type="search"
-          autocomplete="off"
-          placeholder="Ej. Auriculares inalámbricos..."
-          [ngModel]="searchTerm()"
-          (ngModelChange)="
-            onSearchChange($event)
-          "
-        />
-
-      </tui-textfield>
-
-    </div>
-
-
-    <div class="filter-group">
-
-      <!-- CATEGORÍA -->
-
-      <div class="filter-field">
-
-        <label for="catalog-category">
-          Categoría
-        </label>
-
-
-        <select
-          id="catalog-category"
-          class="select-control"
-          [ngModel]="selectedCategory()"
-          (ngModelChange)="
-            onCategoryChange($event)
-          "
-        >
-
-          @for (
-            category of categories();
-            track category
-          ) {
-
-            <option
-              [value]="category"
-            >
-
-              {{ category }}
-
-            </option>
-
-          }
-
-        </select>
-
+        <div class="filter-field">
+          <label for="catalog-sort">Ordenar por</label>
+          <select
+            id="catalog-sort"
+            class="select-control"
+            [ngModel]="selectedSort()"
+            (ngModelChange)="onSortChange($event)"
+          >
+            @for (option of sortOptions; track option.value) {
+              <option [value]="option.value">{{ option.label }}</option>
+            }
+          </select>
+        </div>
       </div>
 
-
-      <!-- ORDENAMIENTO -->
-
-      <div class="filter-field">
-
-        <label for="catalog-sort">
-          Ordenar por
-        </label>
-
-
-        <select
-          id="catalog-sort"
-          class="select-control"
-          [ngModel]="selectedSort()"
-          (ngModelChange)="
-            onSortChange($event)
-          "
-        >
-
-          @for (
-            option of sortOptions;
-            track option.value
-          ) {
-
-            <option
-              [value]="option.value"
-            >
-
-              {{ option.label }}
-
-            </option>
-
-          }
-
-        </select>
-
-      </div>
-
-    </div>
-
-  </section>
-
-
-  <!-- ======================================================
-       ESTADOS
-       ====================================================== -->
-
-  @switch (
-    viewState()
-  ) {
-
-
-    <!-- CARGANDO -->
-
-    @case ('loading') {
-
-      <section
-        class="state-card"
-        aria-live="polite"
-      >
-
-        <tui-loader
-          size="xl"
-        />
-
-
-        <h2>
-          Cargando catálogo
-        </h2>
-
-
-        <p>
-          Estamos obteniendo los productos disponibles.
-        </p>
-
-      </section>
-
-    }
-
-
-    <!-- ERROR -->
-
-    @case ('error') {
-
-      <section
-        class="
-          state-card
-          state-card_error
-        "
-        role="alert"
-      >
-
-        <tui-icon
-          class="state-icon"
-          icon="@tui.triangle-alert"
-        />
-
-
-        <h2>
-          Ups, algo salió mal
-        </h2>
-
-
-        <p>
-          No pudimos cargar los productos.
-          Por favor, intenta de nuevo.
-        </p>
-
-      </section>
-
-    }
-
-
-    <!-- SIN PRODUCTOS -->
-
-    @case ('empty') {
-
-      <section class="state-card">
-
-        <tui-icon
-          class="state-icon"
-          icon="@tui.package-open"
-        />
-
-
-        <h2>
-          Próximamente
-        </h2>
-
-
-        <p>
-          Aún no hay productos disponibles
-          en la tienda.
-        </p>
-
-      </section>
-
-    }
-
-
-    <!-- SIN RESULTADOS -->
-
-    @case ('no-results') {
-
-      <section class="state-card">
-
-        <tui-icon
-          class="state-icon"
-          icon="@tui.search-x"
-        />
-
-
-        <h2>
-          Sin resultados
-        </h2>
-
-
-        <p>
-          No encontramos productos que coincidan
-          con los filtros seleccionados.
-        </p>
-
-      </section>
-
-    }
-
-
-    <!-- ====================================================
-         PRODUCTOS
-         ==================================================== -->
-
-    @case ('content') {
-
-      <section
-        class="product-grid"
-        aria-label="Productos disponibles"
-      >
-
-        @for (
-          product of visibleProducts();
-          track product.id
-        ) {
-
-          <article class="product-card">
-
-            <!-- IMAGEN -->
-
-            <div class="product-image-wrapper">
-
-              <a
-                class="product-image-link"
-                routerLink="/detalle-producto"
-                [state]="{
-                  productId: product.id
-                }"
-                [attr.aria-label]="
-                  'Ver detalle de ' +
-                  product.name
-                "
-              >
-
-                @if (
-                  product.imageUrl
-                ) {
-
-                  <img
-                    class="product-image"
-                    [src]="product.imageUrl"
-                    [alt]="product.name"
-                    loading="lazy"
-                    decoding="async"
-                  />
-
-                } @else {
-
-                  <div
-                    class="product-image-placeholder"
-                  >
-
-                    <tui-icon
-                      icon="@tui.image"
-                    />
-
-                  </div>
-
-                }
-
-              </a>
-
-
-              @if (
-                product.quantity <= 5
-              ) {
-
-                <span
-                  tuiBadge
-                  appearance="warning"
-                  size="s"
-                  class="stock-badge"
-                >
-
-                  Últimas
-                  {{ product.quantity }}
-                  unidades
-
-                </span>
-
-              }
-
-            </div>
-
-
-            <!-- INFORMACIÓN -->
-
-            <div class="product-content">
-
-              <span class="product-category">
-
-                {{ product.category }}
-
-              </span>
-
-
-              <a
-                class="product-title-link"
-                routerLink="/detalle-producto"
-                [state]="{
-                  productId: product.id
-                }"
-              >
-
-                <h2 class="product-title">
-
-                  {{ product.name }}
-
-                </h2>
-
-              </a>
-
-
-              <p class="product-description">
-
-                {{ product.description }}
-
-              </p>
-
-
-              <p class="product-price">
-
-                {{
-                  product.price
-                    | currency:
-                      'USD':
-                      'symbol':
-                      '1.2-2'
-                }}
-
-              </p>
-
-
-              <!-- AGREGAR AL CARRITO -->
-
-              <button
-                tuiButton
-                type="button"
-                size="m"
-                iconStart="@tui.plus"
-                class="add-to-cart-btn"
-                [disabled]="
-                  getQuantityInCart(
-                    product.id
-                  ) >=
-                  product.quantity
-                "
-                (click)="
-                  addToCart(
-                    product
-                  )
-                "
-              >
-
-                {{
-                  getQuantityInCart(
-                    product.id
-                  ) > 0
-                    ? 'Agregar otro'
-                    : 'Agregar al carrito'
-                }}
-
-              </button>
-
-            </div>
-
-          </article>
-
-        }
-
-      </section>
-
-
-      <!-- ==================================================
-           PAGINACIÓN
-           ================================================== -->
-
-      @if (
-        pageCount() > 1
-      ) {
-
-        <footer class="pagination-bar">
-
-          <p class="results-text">
-
-            Mostrando
-
-            {{ visibleProducts().length }}
-
-            de
-
-            {{ filteredProducts().length }}
-
-            productos
-
-          </p>
-
-
+      @if (viewState() === 'content' && pageCount() > 1) {
+        <nav class="pagination-top" aria-label="Páginas del catálogo">
           <tui-pagination
             [length]="pageCount()"
             [index]="currentPageIndex()"
-            (indexChange)="
-              onPageChange($event)
-            "
+            (indexChange)="onPageChange($event)"
           />
+        </nav>
+      }
+    </section>
 
-        </footer>
-
+    @switch (viewState()) {
+      @case ('loading') {
+        <section class="state-card" aria-live="polite">
+          <tui-loader size="xl" />
+          <h2>Cargando catálogo</h2>
+          <p>Estamos obteniendo los productos disponibles.</p>
+        </section>
       }
 
+      @case ('error') {
+        <section class="state-card" role="alert">
+          <tui-icon class="state-icon" icon="@tui.triangle-alert" />
+          <h2>Ups, algo salió mal</h2>
+          <p>No pudimos cargar los productos. Por favor, intenta de nuevo.</p>
+        </section>
+      }
+
+      @case ('empty') {
+        <section class="state-card">
+          <tui-icon class="state-icon" icon="@tui.package-open" />
+          <h2>Próximamente</h2>
+          <p>Aún no hay productos disponibles en la tienda.</p>
+        </section>
+      }
+
+      @case ('no-results') {
+        <section class="state-card">
+          <tui-icon class="state-icon" icon="@tui.search-x" />
+          <h2>Sin resultados</h2>
+          <p>No encontramos productos que coincidan con los filtros seleccionados.</p>
+        </section>
+      }
+
+      @case ('content') {
+        <section class="product-grid" aria-label="Productos disponibles">
+          @for (product of visibleProducts(); track product.id) {
+            <article class="product-card">
+              <div class="product-image-wrapper">
+                <a
+                  class="product-image-link"
+                  routerLink="/detalle-producto"
+                  [state]="{ productId: product.id }"
+                  [attr.aria-label]="'Ver detalle de ' + product.name"
+                >
+                  @if (product.imageUrl) {
+                    <img
+                      class="product-image"
+                      [src]="product.imageUrl"
+                      [alt]="product.name"
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  } @else {
+                    <div class="product-image-placeholder">
+                      <tui-icon icon="@tui.image" />
+                    </div>
+                  }
+                </a>
+
+                <button
+                  type="button"
+                  class="wishlist-button"
+                  [class.wishlist-button_active]="isInWishlist(product.id)"
+                  [attr.aria-label]="isInWishlist(product.id) ? 'Quitar de deseos' : 'Agregar a deseos'"
+                  [attr.aria-pressed]="isInWishlist(product.id)"
+                  (click)="toggleWishlist(product)"
+                >
+                  <i class="pi pi-heart"></i>
+                </button>
+
+                <span
+                  class="product-availability"
+                  [class.product-availability_low]="product.quantity <= 5"
+                >
+                  {{ getStockLabel(product) }}
+                </span>
+              </div>
+
+              <div class="product-content">
+                <span class="product-category">{{ product.category }}</span>
+
+                <a
+                  class="product-title-link"
+                  routerLink="/detalle-producto"
+                  [state]="{ productId: product.id }"
+                >
+                  <h2 class="product-title">{{ product.name }}</h2>
+                </a>
+
+                <p class="product-description">{{ product.description }}</p>
+
+                <div class="product-price-row">
+                  <strong class="product-price">
+                    {{ product.price | currency:'USD':'symbol':'1.2-2' }}
+                  </strong>
+                  <span class="product-stock-label">En stock</span>
+                </div>
+
+                <button
+                  type="button"
+                  class="add-to-cart-btn"
+                  [disabled]="getQuantityInCart(product.id) >= product.quantity"
+                  (click)="addToCart(product)"
+                >
+                  <i class="pi pi-plus"></i>
+                  {{ getQuantityInCart(product.id) > 0 ? 'Agregar otro' : 'Agregar al carrito' }}
+                </button>
+              </div>
+            </article>
+          }
+        </section>
+      }
     }
+  </main>
 
-  }
+  <app-site-footer />
 
+  <app-wishlist
+    [items]="wishlistProducts()"
+    [isOpen]="wishlistOpen()"
+    (closeRequested)="closeWishlist()"
+    (removeRequested)="removeFromWishlist($event)"
+  />
 
-  <!-- ======================================================
-       CARRITO REUTILIZABLE
-       ====================================================== -->
-
-  <app-carrito></app-carrito>
-
+  <app-carrito />
 </div>

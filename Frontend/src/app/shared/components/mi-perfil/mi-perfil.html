@@ -1,0 +1,130 @@
+<div
+  class="profile-backdrop"
+  [class.profile-backdrop_open]="isOpen()"
+  (click)="close()"
+></div>
+
+<aside
+  class="profile-drawer"
+  role="dialog"
+  aria-modal="true"
+  aria-label="Mi perfil"
+  [class.profile-drawer_open]="isOpen()"
+  [attr.aria-hidden]="!isOpen()"
+  [attr.inert]="!isOpen() ? '' : null"
+>
+  <header class="profile-header">
+    <div>
+      <span class="profile-eyebrow">Tu cuenta</span>
+      <h2>Mi perfil</h2>
+    </div>
+
+    <button
+      type="button"
+      class="close-button"
+      aria-label="Cerrar perfil"
+      (click)="close()"
+    >
+      <i class="pi pi-times"></i>
+    </button>
+  </header>
+
+  <div class="profile-content">
+
+    @if (authService.user(); as usuario) {
+
+      <div class="profile-avatar">
+        <i class="pi pi-user"></i>
+      </div>
+
+      <h3 class="profile-name">
+        {{ usuario.nombre }}
+      </h3>
+
+      <p class="profile-subtitle">
+        Información de tu cuenta
+      </p>
+
+      <div class="profile-details">
+
+        <div class="profile-detail">
+          <span class="detail-label">
+            <i class="pi pi-user"></i>
+            Nombre completo
+          </span>
+
+          <strong>{{ usuario.nombre }}</strong>
+        </div>
+
+        <div class="profile-detail">
+          <span class="detail-label">
+            <i class="pi pi-envelope"></i>
+            Correo electrónico
+          </span>
+
+          <strong>{{ usuario.email }}</strong>
+        </div>
+
+        <div class="profile-detail">
+          <span class="detail-label">
+            <i class="pi pi-id-card"></i>
+            Tipo de cuenta
+          </span>
+
+          <strong>{{ usuario.tipo }}</strong>
+        </div>
+
+      </div>
+
+    } @else {
+
+      <div class="profile-empty">
+        <i class="pi pi-user"></i>
+
+        <h3>No has iniciado sesión</h3>
+
+        <p>
+          Inicia sesión para consultar tu información.
+        </p>
+
+        <button
+          type="button"
+          class="login-button"
+          (click)="close(); irASesion()"
+        >
+          <i class="pi pi-sign-in"></i>
+          Iniciar sesión
+        </button>
+      </div>
+
+    }
+
+  </div>
+
+  @if (authService.user()) {
+    <footer class="profile-footer">
+
+      @if (error()) {
+        <p class="profile-error" role="alert">
+          {{ error() }}
+        </p>
+      }
+
+      <button
+        type="button"
+        class="logout-button"
+        [disabled]="cerrandoSesion()"
+        (click)="cerrarSesion()"
+      >
+        <i class="pi pi-sign-out"></i>
+
+        {{
+          cerrandoSesion()
+            ? 'Cerrando sesión...'
+            : 'Cerrar sesión'
+        }}
+      </button>
+
+    </footer>
+  }
+</aside>

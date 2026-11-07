@@ -352,3 +352,327 @@ th {
     text-align: center;
   }
 }
+
+
+/* ==========================================
+   INVENTARIO - RESTAURAR COLORES Y TARJETAS
+   ========================================== */
+
+:host {
+  display: block;
+  color: #111;
+}
+
+.inventory {
+  color: #111;
+}
+
+/* Tarjetas de estadísticas */
+.summary-card {
+  background: #ffffff !important;
+  color: #111 !important;
+  border: 2px solid #111;
+  border-radius: 18px;
+  box-shadow: 4px 5px 0 rgba(0, 0, 0, 0.85);
+}
+
+.summary-card p,
+.summary-card span {
+  color: #444 !important;
+}
+
+.summary-card strong {
+  color: #111 !important;
+}
+
+.summary-icon {
+  background: #baff00;
+  color: #111;
+}
+
+/* Contenedor de productos */
+.filters-panel,
+.table-card,
+.state-card {
+  background: #ffffff !important;
+  color: #111 !important;
+  border: 2px solid #111;
+  border-radius: 18px;
+  box-shadow: 4px 5px 0 rgba(0, 0, 0, 0.8);
+}
+
+/* Encabezados y textos */
+.page-header h1,
+.filters-heading h2,
+.page-description,
+.filters-heading p {
+  color: #111 !important;
+}
+
+.eyebrow {
+  color: #111;
+  font-weight: 800;
+}
+
+/* Etiquetas de filtros sobre fondo blanco */
+.filter-field > label {
+  color: #111 !important;
+}
+
+/* Etiquetas del formulario sobre fondo oscuro */
+.form-field > label,
+.field-label {
+  color: #ffffff !important;
+}
+
+/* Selectores */
+.select-control {
+  background: #baff00;
+  color: #111;
+  border: 1px solid #111;
+}
+
+/* Tabla */
+.table-card table {
+  background: #fff;
+  color: #111;
+}
+
+.table-card th {
+  background: #baff00;
+  color: #111;
+  font-weight: 800;
+}
+
+.table-card td {
+  background: #fff;
+  color: #111;
+}
+
+.table-card th,
+.table-card td {
+  border-bottom: 1px solid #ddd;
+}
+
+/* Paginación */
+.pagination-bar,
+.pagination-bar p {
+  color: #111;
+}
+
+/* Tarjetas móviles */
+.product-card {
+  background: #fff;
+  color: #111;
+}
+
+/* ==========================================
+   CORREGIR BUSCADOR DE INVENTARIO
+   ========================================== */
+
+.filter-field_search {
+
+  tui-textfield {
+    background: #ffffff !important;
+    color: #111111 !important;
+
+    --tui-text-primary: #111111;
+    --tui-text-secondary: #555555;
+    --tui-text-action: #111111;
+  }
+
+  input[tuiInput] {
+    color: #111111 !important;
+    -webkit-text-fill-color: #111111 !important;
+    caret-color: #111111 !important;
+
+    &::placeholder {
+      color: #666666 !important;
+      opacity: 1;
+    }
+  }
+
+  tui-icon {
+    color: #111111 !important;
+  }
+}
+
+
+
+/* ==========================================
+   INVENTARIO - CORRECCIÓN DE CONTRASTE
+   ========================================== */
+
+/* Encabezado sobre fondo oscuro */
+.inventory .page-header h1 {
+  color: #ffffff !important;
+}
+
+.inventory .page-header .eyebrow {
+  color: #baff00 !important;
+}
+
+.inventory .page-header .page-description {
+  color: #d1d1d1 !important;
+}
+
+/* Encabezados dentro de tarjetas blancas */
+.inventory .filters-heading h2,
+.inventory .filters-heading p {
+  color: #111111 !important;
+}
+
+/* Textos de las tarjetas */
+.inventory .summary-card,
+.inventory .filters-panel,
+.inventory .table-card,
+.inventory .state-card {
+  color: #111111 !important;
+}
+
+/* Textos secundarios dentro de las tarjetas */
+.inventory .summary-card p,
+.inventory .summary-card span,
+.inventory .pagination-bar p {
+  color: #444444 !important;
+}
+
+/* Filas y encabezados de la tabla */
+.inventory .table-card th,
+.inventory .table-card td {
+  color: #111111 !important;
+}
+
+/* Tarjetas de productos en móvil */
+.inventory .product-card,
+.inventory .product-card dt,
+.inventory .product-card dd {
+  color: #111111 !important;
+}
+
+/* ==========================================
+   FORMULARIO AGREGAR / EDITAR PRODUCTO
+   ========================================== */
+
+.form-introduction {
+  color: #d1d1d1 !important;
+}
+
+.form-grid .form-field > label,
+.form-grid .field-label {
+  color: #ffffff !important;
+  font-weight: 600;
+}
+
+.form-grid .field-error {
+  color: #ff8585 !important;
+}
+
+.form-grid .status-preview {
+  color: #ffffff !important;
+}
+
+
+/* ==========================================
+   INVENTARIO - COLORES Y SOMBRAS DE REFERENCIA
+   ========================================== */
+
+.inventory {
+  color: #111;
+}
+
+/* Tarjetas superiores */
+.inventory .summary-card {
+  background: #fff !important;
+  border: 1px solid #333 !important;
+  border-radius: 12px !important;
+  box-shadow: 0 7px 20px rgba(0, 0, 0, 0.18) !important;
+  color: #111 !important;
+}
+
+/* Iconos sin fondo verde */
+.inventory .summary-icon {
+  background: transparent !important;
+  color: #111 !important;
+}
+
+/* Panel de filtros: sin borde ni sombra */
+.inventory .filters-panel {
+  background: #fff !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+/* Tabla principal */
+.inventory .table-card {
+  background: #fff !important;
+  border: none !important;
+  border-radius: 8px !important;
+  box-shadow: 0 13px 25px rgba(0, 0, 0, 0.28) !important;
+  overflow: hidden;
+}
+
+/* Encabezado verde lima */
+.inventory .table-card th {
+  background: #ccff00 !important;
+  color: #000 !important;
+  border-bottom: 1px solid #333 !important;
+}
+
+/* Filas blancas y separadores oscuros */
+.inventory .table-card td {
+  background: #fff !important;
+  color: #111 !important;
+  border-bottom: 1px solid #777 !important;
+}
+
+/* Filtros fucsia */
+.inventory .select-control {
+  background: #f600bd !important;
+  color: #fff !important;
+  border: none !important;
+  border-radius: 6px !important;
+}
+
+/* Buscador fucsia */
+.inventory .filter-field_search {
+  tui-textfield {
+    background: #f600bd !important;
+    border-radius: 6px !important;
+
+    --tui-background-base: #f600bd;
+    --tui-text-primary: #fff;
+    --tui-text-secondary: #fff;
+    --tui-text-action: #fff;
+  }
+
+  input[tuiInput] {
+    color: #fff !important;
+    -webkit-text-fill-color: #fff !important;
+    caret-color: #fff !important;
+
+    &::placeholder {
+      color: #fff !important;
+      opacity: 1;
+    }
+  }
+
+  tui-icon {
+    color: #fff !important;
+  }
+}
+
+/* Iconos de acciones */
+.inventory .table-actions button,
+.inventory .table-actions .action-icon {
+  color: #ff00c8 !important;
+}
+
+/* Estados vacíos o de error */
+.inventory .state-card {
+  background: #fff !important;
+  border: 1px solid #333 !important;
+  border-radius: 12px !important;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18) !important;
+}

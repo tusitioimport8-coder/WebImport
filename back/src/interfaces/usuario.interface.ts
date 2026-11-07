@@ -1,14 +1,17 @@
 // 1. Representación exacta de la tabla en BD (para el Repository)
-export type RolUsuario = "admin" | "cliente";
+export type RolUsuario = "admin" | "cliente" | "F_ventas" | "marketing";
 
 export interface Usuario {
   id: string; // UUID de PostgreSQL
+  id_google?: string; // ID de Google (opcional)
   nombre_completo: string;
   correo: string;
   telefono?: string;
   password_hash: string;
   rol: RolUsuario;
   fecha_creacion: Date;
+  reset_token_expires: Date | null;
+  reset_token?: string;
 }
 
 // 2. DTOs e Interfaces de Entrada / Salida

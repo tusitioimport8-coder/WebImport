@@ -1,14 +1,8 @@
-export const INVENTORY_CATEGORIES = [
-  'Electrónica',
-  'Accesorios',
-  'Hogar',
-  'Oficina',
-  'Otros',
-] as const;
+
 
 export const INVENTORY_STATUSES = ['available', 'low-stock', 'out-of-stock'] as const;
+export type InventoryCategory = string;
 
-export type InventoryCategory = (typeof INVENTORY_CATEGORIES)[number];
 export type InventoryStatus = (typeof INVENTORY_STATUSES)[number];
 export type InventorySort = 'name-asc' | 'price-asc' | 'price-desc' | 'stock-asc';
 export type InventoryEditorMode = 'create' | 'edit' | 'view';

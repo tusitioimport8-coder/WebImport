@@ -1,5 +1,15 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { switchMap, map, of, finalize, forkJoin, catchError } from 'rxjs';
+import { ProductPayload } from '../../services/product.service';
+import { AuthService } from '../../services/auth';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+  OnInit,
+  signal
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TuiButton, TuiDialog, TuiIcon, TuiInput, TuiLoader } from '@taiga-ui/core';
@@ -7,9 +17,8 @@ import { TuiCardLarge } from '@taiga-ui/layout';
 import { TuiPagination, TuiTextarea } from '@taiga-ui/kit';
 import { Tag } from 'primeng/tag';
 
-import { INVENTORY_MOCK_PRODUCTS } from './inventario.mock';
+
 import {
-  INVENTORY_CATEGORIES,
   InventoryCategory,
   InventoryEditorMode,
   InventoryFilters,
@@ -19,6 +28,16 @@ import {
   InventoryStatus,
   InventorySummary,
 } from './inventario.models';
+
+import {
+  ApiProduct,
+  ProductService,
+} from '../../services/product.service';
+
+import {
+  ApiCategory,
+  CategoryService,
+} from '../../services/category.service';
 
 type InventoryViewState = 'loading' | 'error' | 'empty' | 'no-results' | 'content';
 
@@ -42,11 +61,19 @@ type InventoryViewState = 'loading' | 'error' | 'empty' | 'no-results' | 'conten
   styleUrl: './inventario.less',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class Inventario {
-  private readonly formBuilder = inject(NonNullableFormBuilder);
-  private nextProductSequence = INVENTORY_MOCK_PRODUCTS.length + 1;
+export class Inventario implements OnInit {
 
-  readonly categories = INVENTORY_CATEGORIES;
+  private readonly productService = inject(ProductService);
+  private readonly categoryService = inject(CategoryService);
+  private readonly authService = inject(AuthService);
+
+readonly isMarketing = computed(
+  () => this.authService.user()?.tipo === 'MARKETING'
+);
+  private readonly formBuilder = inject(NonNullableFormBuilder);
+  private nextProductSequence = 1;
+
+  readonly categories = signal<ApiCategory[]>([]);
   readonly pageSize = 5;
   readonly statusLabels: Record<InventoryStatus, string> = {
     available: 'Disponible',
@@ -69,9 +96,7 @@ export class Inventario {
     { value: 'stock-asc', label: 'Menor existencia' },
   ];
 
-  readonly products = signal<InventoryProduct[]>(
-    INVENTORY_MOCK_PRODUCTS.map((product) => ({ ...product })),
-  );
+ readonly products = signal<InventoryProduct[]>([]);
   readonly loading = signal(false);
   readonly errorMessage = signal<string | null>(null);
   readonly searchTerm = signal('');
@@ -83,6 +108,8 @@ export class Inventario {
   readonly editingProductId = signal<string | null>(null);
   readonly submitted = signal(false);
   readonly selectedImage = signal<string | null>(null);
+  readonly selectedImageFile = signal<File | null>(null);
+readonly savingProduct = signal(false);
   readonly previewStatus = signal<InventoryStatus>('out-of-stock');
 
   editorOpen = false;
@@ -97,6 +124,57 @@ export class Inventario {
     minimumStock: [0, [Validators.required, Validators.min(0)]],
     description: ['', Validators.maxLength(300)],
   });
+loadProducts(): void {
+  this.loading.set(true);
+  this.errorMessage.set(null);
+
+  this.productService.getProducts().pipe(
+    switchMap((response) => {
+      if (!response.data.length) {
+        return of([] as ApiProduct[]);
+      }
+
+      return forkJoin(
+        response.data.map((product) =>
+          this.productService.getProductById(product.id).pipe(
+            map((detail) => detail.data),
+            catchError(() => of(product))
+          )
+        )
+      );
+    })
+  ).subscribe({
+    next: (products) => {
+      this.products.set(
+        products.map((product) => this.mapApiProduct(product))
+      );
+
+      this.loading.set(false);
+    },
+
+    error: (error) => {
+      console.error('Error al cargar inventario:', error);
+
+      this.errorMessage.set(
+        'No se pudieron cargar los productos.'
+      );
+
+      this.loading.set(false);
+    },
+  });
+}
+
+loadCategories(): void {
+  this.categoryService.getCategories().subscribe({
+    next: (categories) => {
+      this.categories.set(categories);
+    },
+    error: (error) => {
+      console.error('Error al cargar categorías:', error);
+      this.categories.set([]);
+    },
+  });
+}
 
   readonly filters = computed<InventoryFilters>(() => ({
     search: this.searchTerm(),
@@ -195,6 +273,11 @@ export class Inventario {
     });
   }
 
+ ngOnInit(): void {
+  this.loadProducts();
+  this.loadCategories();
+}
+
   onSearch(event: Event): void {
     this.searchTerm.set(this.getEventValue(event));
     this.resetPage();
@@ -238,21 +321,29 @@ export class Inventario {
   onPageChange(index: number): void {
     this.pageIndex.set(Math.max(0, Math.min(index, this.pageCount() - 1)));
   }
+onImageSelected(event: Event): void {
+  const input = event.target as HTMLInputElement;
+  const file = input.files?.[0];
 
-  onImageSelected(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    const file = input.files?.[0];
+  if (!file) return;
 
-    if (!file) {
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = () => this.selectedImage.set(reader.result as string);
-    reader.readAsDataURL(file);
+  if (!file.type.startsWith('image/')) {
+    console.error('El archivo seleccionado no es una imagen');
+    return;
   }
 
+  this.selectedImageFile.set(file);
+
+  const reader = new FileReader();
+
+  reader.onload = () => {
+    this.selectedImage.set(reader.result as string);
+  };
+
+  reader.readAsDataURL(file);
+}
   openCreate(): void {
+    if (this.isMarketing()) return;
     this.prepareEditor('create');
     this.productForm.reset({
       name: '',
@@ -276,53 +367,163 @@ export class Inventario {
     this.editorOpen = true;
   }
 
-  openEdit(product: InventoryProduct): void {
-    this.prepareEditor('edit', product);
-    this.populateForm(product);
-    this.editorOpen = true;
+openEdit(product: InventoryProduct): void {
+  this.prepareEditor('edit', product);
+  this.populateForm(product);
+
+  if (this.isMarketing()) {
+    this.productForm.disable({ emitEvent: false });
   }
+
+  this.editorOpen = true;
+}
 
   closeEditor(): void {
     this.editorOpen = false;
     this.submitted.set(false);
   }
 
-  saveProduct(): void {
-    if (this.editorReadOnly()) {
-      return;
-    }
+saveProduct(): void {
+  if (this.editorReadOnly() || this.savingProduct()) {
+    return;
+  }
 
-    this.submitted.set(true);
-    this.productForm.markAllAsTouched();
-
-    if (this.productForm.invalid) {
-      return;
-    }
-
-    const value = this.productForm.getRawValue();
-    const productData = this.toProductData(value);
+  if (this.isMarketing()) {
     const editingId = this.editingProductId();
+    const file = this.selectedImageFile();
 
-    if (editingId) {
-      this.products.update((products) =>
-        products.map((product) =>
-          product.id === editingId ? { ...product, ...productData } : product,
-        ),
-      );
-    } else {
-      const id = `product-${String(this.nextProductSequence).padStart(3, '0')}`;
-      this.nextProductSequence += 1;
-      this.products.update((products) => [{ id, ...productData }, ...products]);
+    if (!editingId || !file) {
+      return;
     }
 
-    this.resetPage();
-    this.closeEditor();
+    this.savingProduct.set(true);
+
+    this.productService.getProductUploadUrl(file).pipe(
+      switchMap(response =>
+        this.productService.uploadProductImage(
+          response.data.uploadUrl,
+          file
+        ).pipe(
+          map(() => response.data.publicUrl)
+        )
+      ),
+      switchMap(imageUrl =>
+        this.productService.updateProduct(editingId, {
+          imagen_url: imageUrl
+        })
+      ),
+      finalize(() => this.savingProduct.set(false))
+    ).subscribe({
+      next: () => {
+        this.closeEditor();
+        this.loadProducts();
+      },
+      error: error => {
+        console.error('Error al actualizar imagen:', error);
+        this.errorMessage.set('No se pudo actualizar la imagen.');
+      }
+    });
+
+    return;
   }
 
-  retry(): void {
-    this.errorMessage.set(null);
-    this.loading.set(false);
+  this.submitted.set(true);
+  this.productForm.markAllAsTouched();
+
+  if (this.productForm.invalid) {
+    return;
   }
+
+  const value = this.productForm.getRawValue();
+  const categoryId = this.categories().find(
+  category => category.nombre === value.category
+)?.id;
+  const editingId = this.editingProductId();
+  const file = this.selectedImageFile();
+
+  this.savingProduct.set(true);
+
+  const image$ = file
+    ? this.productService.getProductUploadUrl(file).pipe(
+        switchMap((response) =>
+          this.productService
+            .uploadProductImage(response.data.uploadUrl, file)
+            .pipe(map(() => response.data.publicUrl))
+        )
+      )
+    : of(
+    editingId
+      ? this.products().find(product => product.id === editingId)?.imageUrl ?? ''
+      : ''
+  );
+
+  image$
+    .pipe(
+      switchMap((imageUrl) => {
+        const payload: ProductPayload = {
+          nombre: value.name.trim(),
+          descripcion: value.description.trim(),
+          imagen_url: imageUrl,
+          stock: Number(value.quantity),
+categorias_ids: categoryId !== undefined ? [categoryId] : [],
+          precios: [
+            {
+              tipo_precio: 'Detal',
+              precio: Number(value.price)
+            },
+            {
+              tipo_precio: 'Mayor',
+              precio: Number(value.wholesalePrice)
+            },
+            {
+              tipo_precio: 'GranMayor',
+              precio: Number(value.bulkPrice)
+            }
+          ]
+        };
+
+      console.log('MODO:', editingId ? 'EDITAR' : 'CREAR');
+console.log('ARCHIVO:', file?.name ?? 'SIN ARCHIVO');
+console.log('URL DE IMAGEN:', imageUrl);
+console.log('PAYLOAD DEL PRODUCTO:', payload);
+
+if (editingId) {
+  return this.productService.updateProduct(editingId, payload);
+}
+
+return this.productService.createProduct(payload).pipe(
+  switchMap((response) => {
+    if (!imageUrl) {
+      return of(response);
+    }
+
+    return this.productService.updateProduct(
+      response.data.id,
+      { imagen_url: imageUrl }
+    );
+  })
+);
+      }),
+      finalize(() => this.savingProduct.set(false))
+    )
+    .subscribe({
+      next: () => {
+        this.closeEditor();
+        this.resetPage();
+        this.loadProducts();
+      },
+      error: (error) => {
+        console.error('Error al guardar producto:', error);
+        this.errorMessage.set(
+          'No se pudo guardar el producto. Revisa la consola.'
+        );
+      }
+    });
+}
+
+retry(): void {
+  this.loadProducts();
+}
 
   isFieldInvalid(controlName: keyof InventoryFormValue): boolean {
     const control = this.productForm.controls[controlName];
@@ -364,6 +565,7 @@ export class Inventario {
   }
 
   private prepareEditor(mode: InventoryEditorMode, product?: InventoryProduct): void {
+    this.selectedImageFile.set(null);
     this.productForm.enable({ emitEvent: false });
     this.productForm.markAsPristine();
     this.productForm.markAsUntouched();
@@ -371,6 +573,42 @@ export class Inventario {
     this.editingProductId.set(product?.id ?? null);
     this.submitted.set(false);
   }
+
+  private mapApiProduct(product: ApiProduct): InventoryProduct {
+  const getPrice = (
+    type: 'Detal' | 'Mayor' | 'GranMayor'
+  ): number => {
+    const found = product.precios?.find(
+      (price) =>
+        price.tipo_precio?.trim().toLowerCase() ===
+        type.toLowerCase()
+    );
+
+    return Number(
+      found?.precio_final ?? found?.precio ?? 0
+    );
+  };
+
+  const quantity = Number(product.stock ?? 0);
+  const minimumStock = 5;
+
+  return {
+    id: product.id,
+    name: product.nombre,
+    category: (
+  product.categorias?.map((categoria) => categoria.nombre).join(', ')
+  || 'Sin categoría'
+) as InventoryCategory,
+    price: getPrice('Detal'),
+    wholesalePrice: getPrice('Mayor'),
+    bulkPrice: getPrice('GranMayor'),
+    quantity,
+    minimumStock,
+    status: this.resolveStatus(quantity, minimumStock),
+    description: product.descripcion ?? '',
+    imageUrl: product.imagen_url,
+  };
+}
 
   private populateForm(product: InventoryProduct): void {
     this.productForm.reset({
@@ -438,9 +676,11 @@ export class Inventario {
     return (event.target as HTMLInputElement | HTMLSelectElement).value;
   }
 
-  private isInventoryCategory(value: string): value is InventoryCategory {
-    return (INVENTORY_CATEGORIES as readonly string[]).includes(value);
-  }
+ private isInventoryCategory(value: string): value is InventoryCategory {
+  return this.categories().some(
+    category => category.nombre === value
+  );
+}
 
   private isInventoryStatus(value: string): value is InventoryStatus {
     return value === 'available' || value === 'low-stock' || value === 'out-of-stock';

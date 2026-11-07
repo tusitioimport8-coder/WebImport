@@ -66,19 +66,20 @@
     "orderArray": []
   },
   "getProductoPorId": {
-    "query": "SELECT p.id, p.nombre, p.descripcion, p.descuento_porcentaje, p.imagen_url, p.stock, p.estado, p.creado_en, COALESCE(json_agg(json_build_object('id_precio', pr.id_precio, 'tipo_precio', pr.tipo_precio, 'precio', pr.precio, 'precio_final', ROUND(pr.precio * (1 - p.descuento_porcentaje / 100), 2))) FILTER (WHERE pr.id_precio IS NOT NULL), '[]') AS precios FROM productos p LEFT JOIN precios_productos pr ON p.id = pr.id_producto WHERE p.id = $1 GROUP BY p.id",
+    "query": "SELECT p.id, p.nombre, p.descripcion, p.descuento_porcentaje, p.imagen_url, p.video_url, p.stock, p.estado, p.creado_en, COALESCE(json_agg(json_build_object('id_precio', pr.id_precio, 'tipo_precio', pr.tipo_precio, 'precio', pr.precio, 'precio_final', ROUND(pr.precio * (1 - p.descuento_porcentaje / 100), 2))) FILTER (WHERE pr.id_precio IS NOT NULL), '[]') AS precios FROM productos p LEFT JOIN precios_productos pr ON p.id = pr.id_producto WHERE p.id = $1 GROUP BY p.id",
     "structure_params": {
       "id": "string"
     },
     "orderArray": ["id"]
   },
   "crearProducto": {
-    "query": "INSERT INTO productos (nombre, descripcion, descuento_porcentaje, imagen_url, stock) VALUES ($1, $2, $3, $4, $5) RETURNING id, nombre, descuento_porcentaje, stock, estado",
+    "query": "INSERT INTO productos (nombre, descripcion, descuento_porcentaje, imagen_url, video_url, stock) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id, nombre, descuento_porcentaje, stock, estado",
     "structure_params": {
       "nombre": "string",
       "descripcion": "string",
       "descuento_porcentaje": "number",
       "imagen_url": "string",
+      "video_url": "string",
       "stock": "number"
     },
     "orderArray": [
@@ -86,6 +87,7 @@
       "descripcion",
       "descuento_porcentaje",
       "imagen_url",
+      "video_url",
       "stock"
     ]
   },
@@ -143,14 +145,16 @@
     },
     "orderArray": ["id"]
   },
+
   "actualizarProducto": {
-    "query": "UPDATE productos SET nombre = COALESCE($2, nombre), descripcion = COALESCE($3, descripcion), descuento_porcentaje = COALESCE($4, descuento_porcentaje), imagen_url = COALESCE($5, imagen_url), stock = COALESCE($6, stock), estado = COALESCE($7, estado) WHERE id = $1 RETURNING *",
+    "query": "UPDATE productos SET nombre = COALESCE($2, nombre), descripcion = COALESCE($3, descripcion), descuento_porcentaje = COALESCE($4, descuento_porcentaje), imagen_url = COALESCE($5, imagen_url), video_url = COALESCE($6, video_url), stock = COALESCE($7, stock), estado = COALESCE($8, estado) WHERE id = $1 RETURNING *",
     "structure_params": {
       "id": "string",
       "nombre": "string",
       "descripcion": "string",
       "descuento_porcentaje": "number",
       "imagen_url": "string",
+      "video_url": "string",
       "stock": "number",
       "estado": "boolean"
     },
@@ -160,6 +164,7 @@
       "descripcion",
       "descuento_porcentaje",
       "imagen_url",
+      "video_url",
       "stock",
       "estado"
     ]
@@ -313,5 +318,158 @@
       "item_id": "string"
     },
     "orderArray": ["comprado_por_nombre", "item_id"]
+  },
+
+  "obtenerUsuarioPorEmail": {
+    "query": "SELECT id, nombre, email, password, google_id, avatar_url, estado, creado_en FROM usuarios WHERE email = $1",
+    "structure_params": { "email": "string" },
+    "orderArray": ["email"]
+  },
+  "obtenerUsuarioPorGoogleId": {
+    "query": "SELECT id, nombre, email, google_id, avatar_url, estado, creado_en FROM usuarios WHERE google_id = $1",
+    "structure_params": { "google_id": "string" },
+    "orderArray": ["google_id"]
+  },
+  "crearUsuarioGoogle": {
+    "query": "INSERT INTO usuarios (nombre, email, google_id, avatar_url) VALUES ($1, $2, $3, $4) RETURNING id, nombre, email, avatar_url, estado, creado_en",
+    "structure_params": {
+      "nombre": "string",
+      "email": "string",
+      "google_id": "string",
+      "avatar_url": "string"
+    },
+    "orderArray": ["nombre", "email", "google_id", "avatar_url"]
+  },
+  "vincularGoogleId": {
+    "query": "UPDATE usuarios SET google_id = $2, avatar_url = COALESCE(avatar_url, $3) WHERE id = $1 RETURNING id, nombre, email, google_id, avatar_url",
+    "structure_params": {
+      "id": "string",
+      "google_id": "string",
+      "avatar_url": "string"
+    },
+    "orderArray": ["id", "google_id", "avatar_url"]
+  },
+  "crearPedido": {
+    "query": "INSERT INTO pedidos (id_usuario, nombre_completo, telefono, correo, sede, direccion_base, tipo_entrega, datos_entrega, metodo_pago, total, estado) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, 'pendiente') RETURNING id, creado_en",
+    "structure_params": {
+      "id_usuario": "string",
+      "nombre_completo": "string",
+      "telefono": "string",
+      "correo": "string",
+      "sede": "string",
+      "direccion_base": "string",
+      "tipo_entrega": "string",
+      "datos_entrega": "string",
+      "metodo_pago": "string",
+      "total": "number"
+    },
+    "orderArray": [
+      "id_usuario",
+      "nombre_completo",
+      "telefono",
+      "correo",
+      "sede",
+      "direccion_base",
+      "tipo_entrega",
+      "datos_entrega",
+      "metodo_pago",
+      "total"
+    ]
+  },
+  "crearDetallePedido": {
+    "query": "INSERT INTO detalles_pedido (id_pedido, id_producto, cantidad, precio_unitario) VALUES ($1, $2, $3, $4)",
+    "structure_params": {
+      "id_pedido": "string",
+      "id_producto": "string",
+      "cantidad": "number",
+      "precio_unitario": "number"
+    },
+    "orderArray": ["id_pedido", "id_producto", "cantidad", "precio_unitario"]
+  },
+  "obtenerPedidos": {
+    "query": "SELECT id, nombre_completo, telefono, correo, sede, tipo_entrega, metodo_pago, total, estado, creado_en FROM pedidos ORDER BY creado_en DESC",
+    "structure_params": {},
+    "orderArray": []
+  },
+  "obtenerPedidoPorId": {
+    "query": "SELECT p.id, p.nombre_completo, p.telefono, p.correo, p.sede, p.direccion_base, p.tipo_entrega, p.datos_entrega, p.metodo_pago, p.total, p.estado, p.creado_en, COALESCE(json_agg(json_build_object('id_producto', dp.id_producto, 'cantidad', dp.cantidad, 'precio_unitario', dp.precio_unitario, 'subtotal', ROUND(dp.cantidad * dp.precio_unitario, 2))) FILTER (WHERE dp.id IS NOT NULL), '[]') AS items FROM pedidos p LEFT JOIN detalles_pedido dp ON p.id = dp.id_pedido WHERE p.id = $1 GROUP BY p.id",
+    "structure_params": {
+      "id": "string"
+    },
+    "orderArray": ["id"]
+  },
+  "actualizarEstadoPedido": {
+    "query": "UPDATE pedidos SET estado = $2, actualizado_en = CURRENT_TIMESTAMP WHERE id = $1 RETURNING *",
+    "structure_params": {
+      "id": "string",
+      "estado": "string"
+    },
+    "orderArray": ["id", "estado"]
+  },
+  "actualizarPasswordYLimpiarToken": {
+    "query": "UPDATE usuarios SET password_hash = $1, reset_token = NULL, reset_token_expires = NULL WHERE id = $2 RETURNING id, nombre_completo, correo, telefono, rol, fecha_creacion",
+    "structure_params": {
+      "password_hash": "string",
+      "id": "string"
+    },
+    "orderArray": ["password_hash", "id"]
+  },
+  "guardarResetToken": {
+    "query": "UPDATE usuarios SET reset_token = $1, reset_token_expires = $2 WHERE id = $3 RETURNING id, nombre_completo, correo, telefono, rol, fecha_creacion",
+    "structure_params": {
+      "reset_token": "string",
+      "reset_token_expires": "Date",
+      "id": "string"
+    },
+    "orderArray": ["reset_token", "reset_token_expires", "id"]
+  },
+  "obtenerBannerPorIdentificador": {
+    "query": "SELECT * FROM banners WHERE identificador = $1",
+    "structure_params": {
+      "identificador": "string"
+    },
+    "orderArray": ["identificador"]
+  },
+  "obtenerTodosLosBanners": {
+    "query": "SELECT * FROM banners ORDER BY creado_en DESC",
+    "structure_params": {},
+    "orderArray": []
+  },
+  "guardarOActualizarBanner": {
+    "query": "INSERT INTO banners (identificador, titulo, imagenes, activo) VALUES ($1, $2, $3::jsonb, $4) ON CONFLICT (identificador) DO UPDATE SET titulo = EXCLUDED.titulo, imagenes = EXCLUDED.imagenes::jsonb, activo = EXCLUDED.activo, actualizado_en = CURRENT_TIMESTAMP RETURNING *",
+    "structure_params": {
+      "identificador": "string",
+      "titulo": "string",
+      "imagenes": "string",
+      "activo": "boolean"
+    },
+    "orderArray": ["identificador", "titulo", "imagenes", "activo"]
+  },
+  "eliminarBanner": {
+    "query": "DELETE FROM banners WHERE identificador = $1 RETURNING *",
+    "structure_params": {
+      "identificador": "string"
+    },
+    "orderArray": ["identificador"]
+  },
+  "obtenerTodosLosUsuarios": {
+    "query": "SELECT id, nombre_completo, correo, telefono, rol, fecha_creacion FROM usuarios ORDER BY fecha_creacion DESC",
+    "structure_params": {},
+    "orderArray": []
+  },
+  "actualizarRolUsuario": {
+    "query": "UPDATE usuarios SET rol = $1 WHERE id = $2 RETURNING id, nombre_completo, correo, telefono, rol, fecha_creacion",
+    "structure_params": {
+      "rol": "string",
+      "id": "string"
+    },
+    "orderArray": ["rol", "id"]
+  },
+  "eliminarPedido": {
+    "query": "DELETE FROM pedidos WHERE id = $1 RETURNING id",
+    "structure_params": {
+      "id": "string"
+    },
+    "orderArray": ["id"]
   }
 }

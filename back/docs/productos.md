@@ -1,16 +1,16 @@
 # 📦 Documentación — Productos
 
-Este módulo administra los productos del catálogo, incluyendo información general, precios por nivel, categorías e imágenes de galería.
+Este módulo administra los productos del catálogo, incluyendo información general, precios por nivel, categorías, imagen de portada, video y galería.
 
 ## Resumen de endpoints
 
-| Método   | Endpoint                     | Auth | Descripción                   |
-| -------- | ---------------------------- | ---: | ----------------------------- |
-| `GET`    | `/api/productos/products`    |   No | Listar todos los productos.   |
-| `GET`    | `/api/productos/product/:id` |   No | Consultar un producto por ID. |
-| `POST`   | `/api/productos/product`     |   Sí | Crear un producto.            |
-| `PUT`    | `/api/productos/product/:id` |   Sí | Actualizar un producto.       |
-| `DELETE` | `/api/productos/product/:id` |   Sí | Eliminar un producto.         |
+| Método   | Endpoint             | Auth | Descripción                   |
+| -------- | -------------------- | ---: | ----------------------------- |
+| `GET`    | `/api/productos/`    |   No | Listar todos los productos.   |
+| `GET`    | `/api/productos/:id` |   No | Consultar un producto por ID. |
+| `POST`   | `/api/productos/`    |   Sí | Crear un producto.            |
+| `PUT`    | `/api/productos/:id` |   Sí | Actualizar un producto.       |
+| `DELETE` | `/api/productos/:id` |   Sí | Eliminar un producto.         |
 
 ---
 
@@ -18,15 +18,16 @@ Este módulo administra los productos del catálogo, incluyendo información gen
 
 Los datos principales se almacenan en la tabla `productos`.
 
-| Campo                  | Tipo      | Descripción                          |
-| ---------------------- | --------- | ------------------------------------ |
-| `id`                   | `string`  | Identificador del producto.          |
-| `nombre`               | `string`  | Nombre del producto.                 |
-| `descripcion`          | `string`  | Descripción del producto.            |
-| `descuento_porcentaje` | `number`  | Porcentaje de descuento.             |
-| `imagen_url`           | `string`  | URL pública de la imagen de portada. |
-| `stock`                | `number`  | Existencias disponibles.             |
-| `estado`               | `boolean` | Estado del producto.                 |
+| Campo                  | Tipo      | Descripción                  |
+| ---------------------- | --------- | ---------------------------- |
+| `id`                   | `string`  | Identificador del producto.  |
+| `nombre`               | `string`  | Nombre del producto.         |
+| `descripcion`          | `string`  | Descripción del producto.    |
+| `descuento_porcentaje` | `number`  | Porcentaje de descuento.     |
+| `imagen_url`           | `string`  | URL de la imagen de portada. |
+| `video_url`            | `string`  | URL del video del producto.  |
+| `stock`                | `number`  | Existencias disponibles.     |
+| `estado`               | `boolean` | Estado del producto.         |
 
 > **Importante:** `precio` no es un campo de `productos`. Los precios se almacenan en `precios_productos` y se relacionan mediante `id_producto`.
 
@@ -70,7 +71,7 @@ Ejemplo de los tres precios:
 
 ---
 
-# `GET /api/productos/products`
+# `GET /api/productos`
 
 Obtiene la lista completa de productos.
 
@@ -81,7 +82,7 @@ No requiere autenticación.
 ## Ejemplo
 
 ```http
-GET /api/productos/products
+GET /api/productos/
 ```
 
 ## Respuesta — `200 OK`
@@ -95,7 +96,8 @@ GET /api/productos/products
       "nombre": "Camiseta deportiva",
       "descripcion": "Camiseta de alta calidad",
       "descuento_porcentaje": 10,
-      "imagen_url": "http://localhost:5000/uploads/productos/camiseta.jpg",
+      "imagen_url": "http://localhost:9090/mi-tienda-local/productos/imagenes/camiseta.jpg",
+      "video_url": "https://ejemplo.com/videos/camiseta.mp4",
       "stock": 25,
       "estado": true,
       "precios": [
@@ -131,7 +133,7 @@ GET /api/productos/products
 
 ---
 
-# `GET /api/productos/product/:id`
+# `GET /api/productos/:id`
 
 Obtiene un producto específico mediante su identificador.
 
@@ -148,7 +150,7 @@ No requiere autenticación.
 ## Ejemplo
 
 ```http
-GET /api/productos/product/producto-id
+GET /api/productos/producto-id
 ```
 
 ## Respuesta — `200 OK`
@@ -161,7 +163,8 @@ GET /api/productos/product/producto-id
     "nombre": "Camiseta deportiva",
     "descripcion": "Camiseta de alta calidad",
     "descuento_porcentaje": 10,
-    "imagen_url": "http://localhost:5000/uploads/productos/camiseta.jpg",
+    "imagen_url": "http://localhost:9090/mi-tienda-local/productos/imagenes/camiseta.jpg",
+    "video_url": "https://ejemplo.com/videos/camiseta.mp4",
     "stock": 25,
     "estado": true,
     "precios": [
@@ -216,232 +219,276 @@ GET /api/productos/product/producto-id
 
 ---
 
-# `POST /api/productos/product`
+# `POST /api/productos`
 
-Crea un nuevo producto utilizando `multipart/form-data`.
+Crea un nuevo producto utilizando los datos del producto y las referencias de almacenamiento generadas mediante Presigned URLs.
 
 Requiere autenticación.
 
-## Content-Type
+> **Importante:** la imagen ya no se envía directamente a este endpoint mediante `multipart/form-data`. Primero se solicita una Presigned URL al backend, luego el frontend sube la imagen directamente a S3/S3Mock y finalmente se crea el producto enviando `imagen_url` con la URL del objeto.
+
+## Flujo recomendado
+
+```text
+1. POST /api/productos/upload-url
+        ↓
+   Backend genera uploadUrl + publicUrl + objectKey
+        ↓
+2. PUT uploadUrl
+   Frontend sube la imagen directamente a S3/S3Mock
+        ↓
+3. POST /api/productos/
+   Se crea el producto usando imagen_url = publicUrl
+        ↓
+   Producto guardado en PostgreSQL
+```
+
+---
+
+## Paso 1 — Obtener Presigned URL para la imagen
+
+Solicita al backend una URL temporal firmada para subir la imagen.
+
+### Endpoint
 
 ```http
-Content-Type: multipart/form-data
+POST /api/productos/upload-url
 ```
 
-## Archivos
+### Headers
 
-| Campo     | Tipo     | Obligatorio | Descripción                        |
-| --------- | -------- | ----------: | ---------------------------------- |
-| `imagen`  | `File`   |          Sí | Imagen principal o portada.        |
-| `galeria` | `File[]` |          No | Imágenes adicionales del producto. |
+```http
+Content-Type: application/json
+```
 
-## Campos del formulario
-
-| Campo                  | Tipo recibido | Tipo procesado | Descripción                      |
-| ---------------------- | ------------- | -------------- | -------------------------------- |
-| `nombre`               | `string`      | `string`       | Nombre del producto.             |
-| `descripcion`          | `string`      | `string`       | Descripción del producto.        |
-| `precios`              | `JSON string` | `array`        | Lista de precios del producto.   |
-| `descuento_porcentaje` | `string`      | `number`       | Porcentaje de descuento.         |
-| `stock`                | `string`      | `number`       | Existencias disponibles.         |
-| `categorias_ids`       | `JSON string` | `array`        | IDs de las categorías asociadas. |
-
-Las restricciones definitivas son determinadas por `validateCrearProducto()`.
-
-## Formato de `precios`
-
-`precios` debe enviarse como una cadena JSON válida.
-
-Debe contener los niveles de precio correspondientes al producto:
+### Body
 
 ```json
-[
-  {
-    "tipo_precio": "Detal",
-    "precio": 25.0
-  },
-  {
-    "tipo_precio": "Mayor",
-    "precio": 20.0
-  },
-  {
-    "tipo_precio": "GranMayor",
-    "precio": 18.0
-  }
-]
+{
+  "nombreArchivo": "camiseta.jpg",
+  "tipoMime": "image/jpeg",
+  "destino": "imagen"
+}
 ```
 
-> **No se debe enviar un campo `precio` individual.** Los precios se envían dentro del arreglo `precios`.
-
-## Formato de `categorias_ids`
-
-También debe enviarse como JSON:
-
-```json
-[1, 3]
-```
-
-## Ejemplo de `form-data`
-
-```text
-nombre: Camiseta deportiva
-descripcion: Camiseta deportiva de alta calidad
-precios: [{"tipo_precio":"Detal","precio":25},{"tipo_precio":"Mayor","precio":20},{"tipo_precio":"GranMayor","precio":18}]
-descuento_porcentaje: 10
-stock: 25
-categorias_ids: [1, 3]
-imagen: camiseta.jpg
-galeria: camiseta-frente.jpg
-galeria: camiseta-atras.jpg
-```
-
-## Conversión de datos
-
-Los campos recibidos desde `multipart/form-data` se convierten antes de la validación:
-
-```ts
-precios: request.body.precios
-  ? JSON.parse(request.body.precios)
-  : [],
-
-descuento_porcentaje: request.body.descuento_porcentaje
-  ? Number(request.body.descuento_porcentaje)
-  : undefined,
-
-stock: request.body.stock
-  ? Number(request.body.stock)
-  : undefined,
-
-categorias_ids: request.body.categorias_ids
-  ? JSON.parse(request.body.categorias_ids)
-  : undefined,
-```
-
-## Proceso
-
-1. Recibe `multipart/form-data`.
-2. Obtiene la imagen principal.
-3. Obtiene las imágenes de galería.
-4. Verifica que exista la portada.
-5. Convierte `precios` desde JSON.
-6. Convierte `categorias_ids` desde JSON.
-7. Convierte `descuento_porcentaje` y `stock` a números.
-8. Valida los datos.
-9. Construye la URL pública de la portada.
-10. Crea el registro del producto.
-11. Inserta los precios del producto.
-12. Asocia las categorías.
-13. Guarda las imágenes secundarias.
-14. Retorna el producto creado.
-
-## Consultas relacionadas
-
-### Crear producto
-
-```sql
-INSERT INTO productos
-  (nombre, descripcion, descuento_porcentaje, imagen_url, stock)
-VALUES ($1, $2, $3, $4, $5)
-RETURNING id, nombre, descuento_porcentaje, stock, estado;
-```
-
-### Agregar precio
-
-```sql
-INSERT INTO precios_productos (id_producto, tipo_precio, precio)
-VALUES ($1, $2, $3)
-RETURNING id_precio, tipo_precio, precio;
-```
-
-Parámetros:
-
-| Posición | Parámetro     | Tipo     |
-| -------: | ------------- | -------- |
-|     `$1` | `id_producto` | `string` |
-|     `$2` | `tipo_precio` | `string` |
-|     `$3` | `precio`      | `number` |
-
-El proceso de creación puede insertar los tres niveles:
-
-```text
-Detal
-Mayor
-GranMayor
-```
-
-### Asociar categoría
-
-```sql
-INSERT INTO producto_categorias (producto_id, categoria_id)
-VALUES ($1, $2)
-ON CONFLICT DO NOTHING;
-```
-
-### Agregar imagen de galería
-
-```sql
-INSERT INTO producto_imagenes (producto_id, url, es_principal)
-VALUES ($1, $2, $3)
-RETURNING id, url, es_principal;
-```
-
-Las imágenes secundarias se guardan con:
-
-```text
-es_principal = false
-```
-
-## Respuesta — `201 Created`
+### Respuesta esperada
 
 ```json
 {
   "success": true,
-  "message": "Producto creado exitosamente con su galería",
+  "data": {
+    "uploadUrl": "http://localhost:9090/mi-tienda-local/productos/imagenes/1727632800-abc12.jpg?X-Amz-Algorithm=...",
+    "publicUrl": "http://localhost:9090/mi-tienda-local/productos/imagenes/1727632800-abc12.jpg",
+    "objectKey": "productos/imagenes/1727632800-abc12.jpg"
+  }
+}
+```
+
+### Datos importantes
+
+- `uploadUrl`: URL temporal que se utiliza **solo para subir** el archivo.
+- `publicUrl`: URL que se utilizará como `imagen_url` al crear el producto.
+- `objectKey`: identificador del archivo dentro del bucket.
+
+> **No se debe guardar `uploadUrl` en la base de datos**, porque es una URL temporal y expira.
+
+---
+
+## Paso 2 — Subir la imagen directamente a S3 / S3Mock
+
+El frontend utiliza la `uploadUrl` recibida en el paso anterior.
+
+Esta petición **no pasa por el backend Express**. Va directamente al almacenamiento S3/S3Mock.
+
+### Request
+
+```http
+PUT <uploadUrl>
+```
+
+### Headers
+
+```http
+Content-Type: image/jpeg
+```
+
+> El `Content-Type` debe ser idéntico al `tipoMime` utilizado al solicitar la Presigned URL.
+
+### Body
+
+El archivo binario de la imagen.
+
+### Ejemplo con JavaScript
+
+```ts
+await fetch(uploadUrl, {
+  method: "PUT",
+  headers: {
+    "Content-Type": file.type,
+  },
+  body: file,
+});
+```
+
+### Respuesta esperada
+
+```text
+200 OK
+```
+
+Una vez completado el `PUT`, la imagen queda almacenada en S3/S3Mock.
+
+Ejemplo:
+
+```text
+mi-tienda-local/
+└── productos/
+    └── imagenes/
+        └── 1727632800-abc12.jpg
+```
+
+---
+
+## Paso 3 — Crear el producto
+
+Una vez que la imagen se subió correctamente, se crea el producto mediante:
+
+```http
+POST /api/productos/
+```
+
+Requiere autenticación.
+
+### Content-Type
+
+```http
+Content-Type: application/json
+```
+
+### Body
+
+```json
+{
+  "nombre": "Camiseta Deportiva",
+  "descripcion": "Camiseta de alta calidad",
+  "imagen_url": "http://localhost:9090/mi-tienda-local/productos/imagenes/1727632800-abc12.jpg",
+  "video_url": "https://ejemplo.com/videos/camiseta.mp4",
+  "galeria": [],
+  "precios": [
+    {
+      "tipo_precio": "Detal",
+      "precio": 25.0
+    }
+  ],
+  "stock": 50
+}
+```
+
+### Campos principales
+
+| Campo         | Tipo     | Obligatorio | Descripción                                      |
+| ------------- | -------- | ----------: | ------------------------------------------------ |
+| `nombre`      | `string` |          Sí | Nombre del producto.                             |
+| `descripcion` | `string` |          Sí | Descripción del producto.                        |
+| `imagen_url`  | `string` |          Sí | URL de la imagen previamente subida a S3/S3Mock. |
+| `video_url`   | `string` |          No | URL del video del producto.                      |
+| `galeria`     | `array`  |          No | Imágenes adicionales del producto.               |
+| `precios`     | `array`  |          Sí | Lista de precios por nivel.                      |
+| `stock`       | `number` |          Sí | Existencias disponibles.                         |
+
+> **Importante:** `imagen_url` debe contener la `publicUrl` obtenida en el Paso 1, no la `uploadUrl`.
+
+### Ejemplo completo
+
+```json
+{
+  "nombre": "Camiseta Deportiva",
+  "descripcion": "Camiseta de alta calidad",
+  "imagen_url": "http://localhost:9090/mi-tienda-local/productos/imagenes/1727632800-abc12.jpg",
+  "video_url": "https://ejemplo.com/videos/camiseta.mp4",
+  "galeria": [],
+  "precios": [
+    {
+      "tipo_precio": "Detal",
+      "precio": 25.0
+    },
+    {
+      "tipo_precio": "Mayor",
+      "precio": 20.0
+    },
+    {
+      "tipo_precio": "GranMayor",
+      "precio": 18.0
+    }
+  ],
+  "stock": 50
+}
+```
+
+### Respuesta esperada — `201 Created`
+
+```json
+{
+  "success": true,
+  "message": "Producto creado exitosamente",
   "data": {
     "id": "producto-id",
-    "nombre": "Camiseta deportiva",
-    "descuento_porcentaje": 10,
-    "stock": 25,
+    "nombre": "Camiseta Deportiva",
+    "descripcion": "Camiseta de alta calidad",
+    "imagen_url": "http://localhost:9090/mi-tienda-local/productos/imagenes/1727632800-abc12.jpg",
+    "video_url": "https://ejemplo.com/videos/camiseta.mp4",
+    "stock": 50,
     "estado": true
   }
 }
 ```
 
-## Errores
+---
 
-### Imagen de portada faltante — `400`
+## Resumen del flujo de creación
 
-```json
-{
-  "success": false,
-  "message": "La imagen de portada es obligatoria"
-}
+```text
+Frontend
+   │
+   │ 1. POST /api/productos/upload-url
+   │    { nombreArchivo, tipoMime, destino }
+   ▼
+Backend
+   │
+   │ genera uploadUrl + publicUrl + objectKey
+   ▼
+Frontend
+   │
+   │ 2. PUT uploadUrl
+   │    Body: archivo binario
+   ▼
+S3 / S3Mock
+   │
+   │ imagen almacenada
+   ▼
+Frontend
+   │
+   │ 3. POST /api/productos/
+   │    { nombre, descripcion, imagen_url, video_url, ... }
+   ▼
+Backend
+   │
+   │ guarda producto
+   ▼
+PostgreSQL
 ```
 
-### Error de validación — `400`
-
-```json
-{
-  "success": false,
-  "message": "Error de validación",
-  "error": [
-    {
-      "path": ["precios"],
-      "message": "El formato de los precios no es válido"
-    }
-  ]
-}
-```
+> **La URL que se guarda en `productos.imagen_url` es `publicUrl`. La `uploadUrl` solamente se utiliza durante la subida y no debe persistirse.**
 
 ---
 
-# `PUT /api/productos/product/:id`
+# `PUT /api/productos/:id`
 
 Actualiza parcialmente un producto existente.
 
-Requiere autenticación y permite reemplazar la imagen de portada mediante el campo `imagen`.
+Requiere autenticación.
 
-> **Importante:** este endpoint **no recibe ni actualiza un campo `precio` individual**. Los precios se manejan mediante `precios_productos` y la operación correspondiente para agregar o modificar precios.
+> **Importante:** para cambiar la imagen de portada se debe repetir el flujo de Presigned URL: solicitar una nueva URL, subir la nueva imagen directamente a S3/S3Mock y después enviar la nueva `imagen_url` en este endpoint.
 
 ## Parámetro
 
@@ -451,69 +498,43 @@ Requiere autenticación y permite reemplazar la imagen de portada mediante el ca
 
 ## Campos actualizables
 
-| Campo                  | Tipo procesado | Descripción                       |
-| ---------------------- | -------------- | --------------------------------- |
-| `nombre`               | `string`       | Nuevo nombre.                     |
-| `descripcion`          | `string`       | Nueva descripción.                |
-| `descuento_porcentaje` | `number`       | Nuevo descuento.                  |
-| `stock`                | `number`       | Nuevo stock.                      |
-| `estado`               | `boolean`      | Estado del producto.              |
-| `imagen`               | `File`         | Nueva imagen de portada opcional. |
+| Campo                  | Tipo      | Descripción                        |
+| ---------------------- | --------- | ---------------------------------- |
+| `nombre`               | `string`  | Nuevo nombre.                      |
+| `descripcion`          | `string`  | Nueva descripción.                 |
+| `descuento_porcentaje` | `number`  | Nuevo descuento.                   |
+| `imagen_url`           | `string`  | Nueva URL de la imagen de portada. |
+| `video_url`            | `string`  | Nueva URL del video del producto.  |
+| `stock`                | `number`  | Nuevo stock.                       |
+| `estado`               | `boolean` | Estado del producto.               |
 
 Los campos omitidos conservan su valor actual.
 
-## Conversión de datos
+## Content-Type
 
-- `descuento_porcentaje` se convierte mediante `Number()`.
-- `stock` se convierte mediante `Number()`.
-- `estado` acepta el booleano `true` o la cadena `"true"`.
-- Si no se proporciona una imagen nueva, se conserva `imagen_url`.
-
-## Consulta utilizada
-
-```sql
-UPDATE productos
-SET
-  nombre = COALESCE($2, nombre),
-  descripcion = COALESCE($3, descripcion),
-  descuento_porcentaje = COALESCE($4, descuento_porcentaje),
-  imagen_url = COALESCE($5, imagen_url),
-  stock = COALESCE($6, stock),
-  estado = COALESCE($7, estado)
-WHERE id = $1
-RETURNING *;
+```http
+Content-Type: application/json
 ```
-
-Parámetros:
-
-| Posición | Parámetro              | Tipo      |
-| -------: | ---------------------- | --------- |
-|     `$1` | `id`                   | `string`  |
-|     `$2` | `nombre`               | `string`  |
-|     `$3` | `descripcion`          | `string`  |
-|     `$4` | `descuento_porcentaje` | `number`  |
-|     `$5` | `imagen_url`           | `string`  |
-|     `$6` | `stock`                | `number`  |
-|     `$7` | `estado`               | `boolean` |
-
-Este endpoint no modifica directamente:
-
-- `precios_productos`
-- `producto_categorias`
-- `producto_imagenes`
 
 ## Ejemplo
 
-```text
-PUT /api/productos/product/producto-id
-
-nombre: Camiseta deportiva premium
-descripcion: Camiseta deportiva de alta calidad
-descuento_porcentaje: 15
-stock: 30
-estado: true
-imagen: camiseta-nueva.jpg
+```http
+PUT /api/productos/producto-id
 ```
+
+```json
+{
+  "nombre": "Camiseta deportiva premium",
+  "descripcion": "Camiseta deportiva de alta calidad",
+  "descuento_porcentaje": 15,
+  "imagen_url": "http://localhost:9090/mi-tienda-local/productos/imagenes/nueva-camiseta.jpg",
+  "video_url": "https://ejemplo.com/videos/camiseta-premium.mp4",
+  "stock": 30,
+  "estado": true
+}
+```
+
+> Si se actualiza `imagen_url`, la nueva imagen debe haber sido subida previamente mediante una Presigned URL.
 
 ## Respuesta — `200 OK`
 
@@ -527,7 +548,8 @@ imagen: camiseta-nueva.jpg
     "descuento_porcentaje": 15,
     "stock": 30,
     "estado": true,
-    "imagen_url": "http://localhost:5000/uploads/productos/nueva.jpg"
+    "imagen_url": "http://localhost:9090/mi-tienda-local/productos/imagenes/nueva-camiseta.jpg",
+    "video_url": "https://ejemplo.com/videos/camiseta-premium.mp4"
   }
 }
 ```
@@ -557,7 +579,7 @@ imagen: camiseta-nueva.jpg
 
 ---
 
-# `DELETE /api/productos/product/:id`
+# `DELETE /api/productos/:id`
 
 Elimina un producto.
 
@@ -566,7 +588,7 @@ Requiere autenticación.
 ## Ejemplo
 
 ```http
-DELETE /api/productos/product/producto-id
+DELETE /api/productos/producto-id
 ```
 
 ## Proceso
@@ -660,27 +682,39 @@ ORDER BY es_principal DESC, creado_en ASC;
 
 ---
 
-# Almacenamiento de imágenes
+# Almacenamiento de imágenes y videos
 
-Las imágenes se almacenan en:
+Las imágenes de portada se almacenan en S3/S3Mock.
+
+Ejemplo de estructura:
 
 ```text
-/uploads/productos/
+mi-tienda-local/
+└── productos/
+    └── imagenes/
+        ├── 1727632800-abc12.jpg
+        └── nueva-camiseta.jpg
 ```
 
-La imagen de portada se almacena en:
+La referencia de la imagen de portada se almacena en:
 
 ```text
 productos.imagen_url
 ```
 
-Las imágenes adicionales se almacenan en:
+El video del producto se referencia mediante:
+
+```text
+productos.video_url
+```
+
+> La documentación actual contempla `video_url` como una URL recibida por el endpoint de productos. El flujo específico para subir videos mediante Presigned URL no está definido en este documento.
+
+Las imágenes adicionales de galería se almacenan en:
 
 ```text
 producto_imagenes
 ```
-
----
 
 # Middlewares utilizados
 
@@ -689,9 +723,9 @@ producto_imagenes
 Protege las operaciones que modifican productos:
 
 ```ts
-router.post("/product", authMiddleware, ...);
-router.put("/product/:id", authMiddleware, ...);
-router.delete("/product/:id", authMiddleware, ...);
+router.post("/", authMiddleware, ...);
+router.put("/:id", authMiddleware, ...);
+router.delete("/:id", authMiddleware, ...);
 ```
 
 ## `handleProductoUpload`
@@ -712,21 +746,19 @@ galeria
 # Rutas completas
 
 ```ts
-router.post("/product", authMiddleware, handleProductoUpload, (req, res) =>
+router.post("/", authMiddleware, handleProductoUpload, (req, res) =>
   ProductController.createProducto(req, res),
 );
 
-router.put("/product/:id", authMiddleware, handleProductoUpload, (req, res) =>
+router.put("//:id", authMiddleware, handleProductoUpload, (req, res) =>
   ProductController.updateProducto(req, res),
 );
 
-router.delete("/product/:id", authMiddleware, (req, res) =>
+router.delete("//:id", authMiddleware, (req, res) =>
   ProductController.deleteProducto(req, res),
 );
 
-router.get("/product/:id", (req, res) =>
-  ProductController.getProductoPorId(req, res),
-);
+router.get("//:id", (req, res) => ProductController.getProductoPorId(req, res));
 
 router.get("/products", (req, res) => ProductController.getProductos(req, res));
 ```
@@ -738,25 +770,67 @@ router.get("/products", (req, res) => ProductController.getProductos(req, res));
 # Flujo de creación
 
 ```text
-multipart/form-data
+Solicitar Presigned URL
         ↓
-Obtener imagen y galería
+POST /api/uploads/presigned-url
         ↓
-Convertir JSON y números
+Recibir uploadUrl + publicUrl + objectKey
         ↓
-Validar datos
+Subir imagen directamente a S3/S3Mock
+        ↓
+PUT uploadUrl
         ↓
 Crear producto
         ↓
-Agregar precio Detal
+POST /api/productos/
         ↓
-Agregar precio Mayor
+Guardar imagen_url = publicUrl
         ↓
-Agregar precio GranMayor
+Guardar video_url si existe
+        ↓
+Guardar precios
         ↓
 Asociar categorías
         ↓
-Guardar imágenes de galería
+Guardar galería
         ↓
 Retornar producto creado
+```
+
+## Regla para las URLs
+
+```text
+uploadUrl
+   ↓
+Se usa únicamente para subir el archivo.
+Es temporal.
+NO se guarda en PostgreSQL.
+
+publicUrl
+   ↓
+Referencia al archivo almacenado.
+Se envía como imagen_url.
+Es la URL que se persiste en el producto.
+```
+
+## Flujo completo desde el frontend
+
+```text
+1. Seleccionar imagen
+        ↓
+2. POST /api/productos/upload-url
+        ↓
+3. Recibir uploadUrl + publicUrl
+        ↓
+4. PUT uploadUrl con el archivo
+        ↓
+5. Verificar que la subida terminó correctamente
+        ↓
+6. POST /api/productos/
+        ↓
+7. Enviar imagen_url = publicUrl
+        ↓
+8. Enviar video_url si el producto tiene video
+        ↓
+9. Producto creado
 ```

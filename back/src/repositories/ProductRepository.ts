@@ -53,6 +53,7 @@ class ProductRepository {
       descripcion: datos.descripcion ?? null,
       descuento_porcentaje: datos.descuento_porcentaje ?? 0,
       imagen_url: datos.imagen_url ?? null,
+      video_url: datos.video_url ?? null,
       stock: datos.stock ?? 0,
     };
 
@@ -111,6 +112,7 @@ class ProductRepository {
       descripcion: datos.descripcion ?? null,
       descuento_porcentaje: datos.descuento_porcentaje ?? null,
       imagen_url: datos.imagen_url ?? null,
+      video_url: datos.video_url ?? null,
       stock: datos.stock ?? null,
       estado: datos.estado ?? null,
     };

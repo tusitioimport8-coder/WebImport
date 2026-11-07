@@ -12,11 +12,7 @@ class Validator {
     const passwordSchema = zod
       .string()
       .min(4, "La contraseña debe tener al menos 4 caracteres")
-      .max(64, "La contraseña no puede exceder los 64 caracteres")
-      .regex(/[A-Z]/, "Debe contener al menos una letra mayúscula")
-      .regex(/[a-z]/, "Debe contener al menos una letra minúscula")
-      .regex(/[0-9]/, "Debe contener al menos un número")
-      .regex(/[^A-Za-z0-9]/, "Debe contener al menos un carácter especial");
+      .max(64, "La contraseña no puede exceder los 64 caracteres");
     return passwordSchema.safeParse(password);
   }
 

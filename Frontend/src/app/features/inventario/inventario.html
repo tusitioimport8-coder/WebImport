@@ -1,3 +1,4 @@
+<p>inventario works!</p>
 <section class="inventory" aria-labelledby="inventory-title">
   <header class="page-header">
     <div>
@@ -8,7 +9,13 @@
       </p>
     </div>
 
-    <button tuiButton type="button" size="l" (click)="openCreate()">
+    <button
+  *ngIf="!isMarketing()"
+  tuiButton
+  type="button"
+  size="l"
+  (click)="openCreate()"
+>
       <i class="pi pi-plus" aria-hidden="true"></i>
       <span>Agregar producto</span>
     </button>
@@ -122,9 +129,11 @@
         >
           <option value="Todas">Todas las categorías</option>
 
-          @for (category of categories; track category) {
-            <option [value]="category">{{ category }}</option>
-          }
+          @for (category of categories(); track category.id) {
+  <option [value]="category.nombre">
+    {{ category.nombre }}
+  </option>
+}
         </select>
       </div>
 
@@ -206,10 +215,10 @@
             Agrega el primer producto para comenzar a controlar tus existencias.
           </p>
 
-          <button tuiButton type="button" (click)="openCreate()">
-            <i class="pi pi-plus" aria-hidden="true"></i>
-            <span>Agregar producto</span>
-          </button>
+        <button *ngIf="!isMarketing()" tuiButton type="button" (click)="openCreate()">
+  <i class="pi pi-plus" aria-hidden="true"></i>
+  <span>Agregar producto</span>
+</button>
         </div>
       }
 
@@ -314,21 +323,7 @@
 
                     <td>
                       <div class="table-actions">
-                        <button
-                          appearance="flat"
-                          tuiIconButton
-                          type="button"
-                          size="s"
-                          title="Ver producto"
-                          [attr.aria-label]="'Ver ' + product.name"
-                          (click)="openView(product)"
-                        >
-                          <i
-                            class="pi pi-eye action-icon"
-                            aria-hidden="true"
-                          ></i>
-                        </button>
-
+                      
                         <button
                           appearance="flat"
                           tuiIconButton
@@ -558,11 +553,11 @@
           class="select-control"
           formControlName="category"
         >
-          @for (category of categories; track category) {
-            <option [value]="category">
-              {{ category }}
-            </option>
-          }
+         @for (category of categories(); track category.id) {
+  <option [value]="category.nombre">
+    {{ category.nombre }}
+  </option>
+}
         </select>
       </div>
 
@@ -767,13 +762,14 @@
       </button>
 
       @if (!editorReadOnly()) {
-        <button
-          tuiButton
-          type="submit"
-          iconStart="@tui.check"
-        >
-          Guardar producto
-        </button>
+       <button
+  tuiButton
+  type="submit"
+  iconStart="@tui.check"
+  [disabled]="savingProduct()"
+>
+  {{ savingProduct() ? 'Guardando...' : 'Guardar producto' }}
+</button>
       }
     </footer>
   </form>
