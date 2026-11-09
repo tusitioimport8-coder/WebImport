@@ -1,6 +1,6 @@
 # 📦 Documentación — Productos
 
-Este módulo administra los productos del catálogo, incluyendo información general, precios por nivel, categorías, imagen de portada, video y galería.
+Este módulo administra los productos del catálogo, incluyendo información general, cuatro niveles de precios, categorías, imagen de portada, video y galería.
 
 ## Resumen de endpoints
 
@@ -25,7 +25,7 @@ Los datos principales se almacenan en la tabla `productos`.
 | `descripcion`          | `string`  | Descripción del producto.    |
 | `descuento_porcentaje` | `number`  | Porcentaje de descuento.     |
 | `imagen_url`           | `string`  | URL de la imagen de portada. |
-| `video_url`            | `string`  | URL del video del producto.  |
+| `video_url`            | `string` \| `null` | URL del video del producto. |
 | `stock`                | `number`  | Existencias disponibles.     |
 | `estado`               | `boolean` | Estado del producto.         |
 
@@ -33,30 +33,35 @@ Los datos principales se almacenan en la tabla `productos`.
 
 ## Precios
 
-Cada producto puede tener hasta tres niveles de precio:
+Cada producto puede tener cuatro niveles de precio:
 
-| `tipo_precio` | Descripción                    |
-| ------------- | ------------------------------ |
-| `Detal`       | Precio de venta detallada.     |
-| `Mayor`       | Precio de venta al mayor.      |
-| `GranMayor`   | Precio de venta al gran mayor. |
+| `tipo_precio` | Descripción |
+| ------------- | ----------- |
+| `detal_usd`   | Precio al detal promocional o estándar en USD. |
+| `detal_bs`    | Precio al detal oficial en bolívares. |
+| `Mayor`       | Precio de venta al mayor, normalmente desde 6 unidades. |
+| `GranMayor`   | Precio de venta al gran mayor, normalmente desde 40 unidades. |
 
 La estructura de cada precio es:
 
 ```json
 {
-  "tipo_precio": "Detal",
+  "tipo_precio": "detal_usd",
   "precio": 25.0
 }
 ```
 
-Ejemplo de los tres precios:
+Ejemplo de los cuatro precios:
 
 ```json
 [
   {
-    "tipo_precio": "Detal",
+    "tipo_precio": "detal_usd",
     "precio": 25.0
+  },
+  {
+    "tipo_precio": "detal_bs",
+    "precio": 26.87
   },
   {
     "tipo_precio": "Mayor",
@@ -97,24 +102,34 @@ GET /api/productos/
       "descripcion": "Camiseta de alta calidad",
       "descuento_porcentaje": 10,
       "imagen_url": "http://localhost:9090/mi-tienda-local/productos/imagenes/camiseta.jpg",
-      "video_url": "https://ejemplo.com/videos/camiseta.mp4",
+      "video_url": null,
       "stock": 25,
       "estado": true,
+      "creado_en": "2026-11-09T23:05:23.040Z",
       "precios": [
         {
           "id_precio": "precio-id-1",
-          "tipo_precio": "Detal",
-          "precio": 25
+          "tipo_precio": "detal_usd",
+          "precio": 25,
+          "precio_final": 25
         },
         {
           "id_precio": "precio-id-2",
-          "tipo_precio": "Mayor",
-          "precio": 20
+          "tipo_precio": "detal_bs",
+          "precio": 26.87,
+          "precio_final": 26.87
         },
         {
           "id_precio": "precio-id-3",
+          "tipo_precio": "Mayor",
+          "precio": 20,
+          "precio_final": 20
+        },
+        {
+          "id_precio": "precio-id-4",
           "tipo_precio": "GranMayor",
-          "precio": 18
+          "precio": 18,
+          "precio_final": 18
         }
       ]
     }
@@ -164,24 +179,34 @@ GET /api/productos/producto-id
     "descripcion": "Camiseta de alta calidad",
     "descuento_porcentaje": 10,
     "imagen_url": "http://localhost:9090/mi-tienda-local/productos/imagenes/camiseta.jpg",
-    "video_url": "https://ejemplo.com/videos/camiseta.mp4",
+    "video_url": null,
     "stock": 25,
     "estado": true,
+    "creado_en": "2026-11-09T23:05:23.040Z",
     "precios": [
       {
         "id_precio": "precio-id-1",
-        "tipo_precio": "Detal",
-        "precio": 25
+        "tipo_precio": "detal_usd",
+        "precio": 25,
+        "precio_final": 25
       },
       {
         "id_precio": "precio-id-2",
-        "tipo_precio": "Mayor",
-        "precio": 20
+        "tipo_precio": "detal_bs",
+        "precio": 26.87,
+        "precio_final": 26.87
       },
       {
         "id_precio": "precio-id-3",
+        "tipo_precio": "Mayor",
+        "precio": 20,
+        "precio_final": 20
+      },
+      {
+        "id_precio": "precio-id-4",
         "tipo_precio": "GranMayor",
-        "precio": 18
+        "precio": 18,
+        "precio_final": 18
       }
     ]
   }
@@ -372,45 +397,16 @@ Content-Type: application/json
   "nombre": "Camiseta Deportiva",
   "descripcion": "Camiseta de alta calidad",
   "imagen_url": "http://localhost:9090/mi-tienda-local/productos/imagenes/1727632800-abc12.jpg",
-  "video_url": "https://ejemplo.com/videos/camiseta.mp4",
+  "video_url": null,
   "galeria": [],
   "precios": [
     {
-      "tipo_precio": "Detal",
+      "tipo_precio": "detal_usd",
       "precio": 25.0
-    }
-  ],
-  "stock": 50
-}
-```
-
-### Campos principales
-
-| Campo         | Tipo     | Obligatorio | Descripción                                      |
-| ------------- | -------- | ----------: | ------------------------------------------------ |
-| `nombre`      | `string` |          Sí | Nombre del producto.                             |
-| `descripcion` | `string` |          Sí | Descripción del producto.                        |
-| `imagen_url`  | `string` |          Sí | URL de la imagen previamente subida a S3/S3Mock. |
-| `video_url`   | `string` |          No | URL del video del producto.                      |
-| `galeria`     | `array`  |          No | Imágenes adicionales del producto.               |
-| `precios`     | `array`  |          Sí | Lista de precios por nivel.                      |
-| `stock`       | `number` |          Sí | Existencias disponibles.                         |
-
-> **Importante:** `imagen_url` debe contener la `publicUrl` obtenida en el Paso 1, no la `uploadUrl`.
-
-### Ejemplo completo
-
-```json
-{
-  "nombre": "Camiseta Deportiva",
-  "descripcion": "Camiseta de alta calidad",
-  "imagen_url": "http://localhost:9090/mi-tienda-local/productos/imagenes/1727632800-abc12.jpg",
-  "video_url": "https://ejemplo.com/videos/camiseta.mp4",
-  "galeria": [],
-  "precios": [
+    },
     {
-      "tipo_precio": "Detal",
-      "precio": 25.0
+      "tipo_precio": "detal_bs",
+      "precio": 26.87
     },
     {
       "tipo_precio": "Mayor",
@@ -421,7 +417,55 @@ Content-Type: application/json
       "precio": 18.0
     }
   ],
-  "stock": 50
+  "stock": 50,
+  "categorias_ids": ["categoria-id"]
+}
+```
+
+### Campos principales
+
+| Campo         | Tipo     | Obligatorio | Descripción                                      |
+| ------------- | -------- | ----------: | ------------------------------------------------ |
+| `nombre`      | `string` |          Sí | Nombre del producto.                             |
+| `descripcion` | `string` |          Sí | Descripción del producto.                        |
+| `imagen_url`  | `string` |          Sí | URL de la imagen previamente subida a S3/S3Mock. |
+| `video_url`   | `string` \| `null` | No | URL del video del producto.                 |
+| `galeria`     | `array`  |          No | Imágenes adicionales del producto.               |
+| `precios`     | `array`  |          Sí | Lista de precios por nivel.                      |
+| `stock`       | `number` |          Sí | Existencias disponibles.                         |
+| `categorias_ids` | `array` |       No | Identificadores de las categorías asociadas.    |
+
+> **Importante:** `imagen_url` debe contener la `publicUrl` obtenida en el Paso 1, no la `uploadUrl`.
+
+### Ejemplo completo
+
+```json
+{
+  "nombre": "Camiseta Deportiva",
+  "descripcion": "Camiseta de alta calidad",
+  "imagen_url": "http://localhost:9090/mi-tienda-local/productos/imagenes/1727632800-abc12.jpg",
+  "video_url": null,
+  "galeria": [],
+  "precios": [
+    {
+      "tipo_precio": "detal_usd",
+      "precio": 25.0
+    },
+    {
+      "tipo_precio": "detal_bs",
+      "precio": 26.87
+    },
+    {
+      "tipo_precio": "Mayor",
+      "precio": 20.0
+    },
+    {
+      "tipo_precio": "GranMayor",
+      "precio": 18.0
+    }
+  ],
+  "stock": 50,
+  "categorias_ids": ["categoria-id"]
 }
 ```
 
@@ -436,9 +480,36 @@ Content-Type: application/json
     "nombre": "Camiseta Deportiva",
     "descripcion": "Camiseta de alta calidad",
     "imagen_url": "http://localhost:9090/mi-tienda-local/productos/imagenes/1727632800-abc12.jpg",
-    "video_url": "https://ejemplo.com/videos/camiseta.mp4",
+    "video_url": null,
     "stock": 50,
-    "estado": true
+    "estado": true,
+    "creado_en": "2026-11-09T23:05:23.040Z",
+    "precios": [
+      {
+        "id_precio": "precio-id-1",
+        "tipo_precio": "detal_usd",
+        "precio": 25,
+        "precio_final": 25
+      },
+      {
+        "id_precio": "precio-id-2",
+        "tipo_precio": "detal_bs",
+        "precio": 26.87,
+        "precio_final": 26.87
+      },
+      {
+        "id_precio": "precio-id-3",
+        "tipo_precio": "Mayor",
+        "precio": 20,
+        "precio_final": 20
+      },
+      {
+        "id_precio": "precio-id-4",
+        "tipo_precio": "GranMayor",
+        "precio": 18,
+        "precio_final": 18
+      }
+    ]
   }
 }
 ```
@@ -598,13 +669,6 @@ DELETE /api/productos/producto-id
 3. Elimina el producto mediante `eliminarProducto()`.
 4. Retorna una confirmación.
 
-## Consulta utilizada
-
-```sql
-DELETE FROM productos
-WHERE id = $1;
-```
-
 ## Respuesta — `200 OK`
 
 ```json
@@ -647,38 +711,13 @@ WHERE id = $1;
 
 # Operaciones relacionadas
 
-## Consultar categorías
+Las categorías se reciben mediante `categorias_ids`. Al actualizar un producto,
+las asociaciones se sincronizan con los identificadores enviados; al eliminarlo,
+se eliminan sus asociaciones, pero no las categorías.
 
-```sql
-SELECT c.id, c.nombre, c.descripcion
-FROM categorias c
-JOIN producto_categorias pc ON c.id = pc.categoria_id
-WHERE pc.producto_id = $1;
-```
-
-Parámetro:
-
-```text
-producto_id: string
-```
-
-## Desasociar categorías
-
-```sql
-DELETE FROM producto_categorias
-WHERE producto_id = $1;
-```
-
-Esta operación elimina únicamente las asociaciones, no las categorías.
-
-## Consultar galería
-
-```sql
-SELECT id, url, es_principal, creado_en
-FROM producto_imagenes
-WHERE producto_id = $1
-ORDER BY es_principal DESC, creado_en ASC;
-```
+La galería se devuelve como información relacionada del producto. Sus imágenes se
+almacenan en `producto_imagenes`, mientras que la imagen principal se referencia
+desde `productos.imagen_url`.
 
 ---
 
@@ -728,37 +767,28 @@ router.put("/:id", authMiddleware, ...);
 router.delete("/:id", authMiddleware, ...);
 ```
 
-## `handleProductoUpload`
-
-Procesa las imágenes enviadas mediante `multipart/form-data`.
-
-Se utiliza en la creación y actualización del producto.
-
-Campos procesados:
-
-```text
-imagen
-galeria
-```
+Las imágenes no se procesan mediante `multipart/form-data` en los endpoints de
+productos. Se cargan directamente a S3/S3Mock mediante Presigned URLs y luego se
+envía la `publicUrl` en `imagen_url`.
 
 ---
 
 # Rutas completas
 
 ```ts
-router.post("/", authMiddleware, handleProductoUpload, (req, res) =>
+router.post("/", authMiddleware, (req, res) =>
   ProductController.createProducto(req, res),
 );
 
-router.put("//:id", authMiddleware, handleProductoUpload, (req, res) =>
+router.put("/:id", authMiddleware, (req, res) =>
   ProductController.updateProducto(req, res),
 );
 
-router.delete("//:id", authMiddleware, (req, res) =>
+router.delete("/:id", authMiddleware, (req, res) =>
   ProductController.deleteProducto(req, res),
 );
 
-router.get("//:id", (req, res) => ProductController.getProductoPorId(req, res));
+router.get("/:id", (req, res) => ProductController.getProductoPorId(req, res));
 
 router.get("/products", (req, res) => ProductController.getProductos(req, res));
 ```
@@ -772,7 +802,7 @@ router.get("/products", (req, res) => ProductController.getProductos(req, res));
 ```text
 Solicitar Presigned URL
         ↓
-POST /api/uploads/presigned-url
+POST /api/productos/upload-url
         ↓
 Recibir uploadUrl + publicUrl + objectKey
         ↓
