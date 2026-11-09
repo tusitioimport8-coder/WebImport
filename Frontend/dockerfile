@@ -1,0 +1,22 @@
+# --- Etapa 1: Compilación ---
+FROM node:20-alpine AS builder
+
+WORKDIR /app
+
+RUN npm install -g pnpm
+
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+RUN pnpm install --frozen-lockfile
+
+COPY . .
+RUN pnpm run build
+
+# --- Etapa 2: Servidor Nginx ---
+FROM nginx:alpine
+
+# ⚠️ Reemplaza 'Frontend' por el nombre exacto de la carpeta que genera tu Angular en dist/
+COPY --from=builder /app/dist/Frontend/browser /usr/share/nginx/html
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
