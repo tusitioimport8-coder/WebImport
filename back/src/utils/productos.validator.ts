@@ -1,7 +1,7 @@
 import zod from "zod";
 
 const precioSchema = zod.object({
-  tipo_precio: zod.enum(["Detal", "Mayor", "GranMayor"]),
+  tipo_precio: zod.enum(["detal_usd", "detal_bs", "Mayor", "GranMayor"]),
   precio: zod.number().min(0, "El precio debe ser un número positivo"),
 });
 

@@ -1,6 +1,5 @@
 // 1. Representación exacta de las tablas en BD
-
-export type tipo_precio = "Detal" | "Mayor" | "GranMayor";
+export type tipo_precio = "detal_usd" | "detal_bs" | "Mayor" | "GranMayor";
 export interface Categoria {
   id: number;
   nombre: string;
