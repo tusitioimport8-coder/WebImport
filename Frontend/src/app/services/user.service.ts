@@ -1,7 +1,7 @@
-
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment.development';
 
 export interface ApiUser {
   id: string;
@@ -29,39 +29,29 @@ export interface UpdateUserPayload {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class UserService {
   private readonly http = inject(HttpClient);
 
   // Ajustar al prefijo real de las rutas de usuarios.
-  private readonly apiUrl =
-    'http://localhost:5000/api/usuarios';
+  private readonly apiUrl = environment.apiUrl
+    ? `${environment.apiUrl}api/usuarios`
+    : 'http://localhost:5000/api/usuarios';
 
   getAllUsers(): Observable<UsersResponse> {
-    return this.http.get<UsersResponse>(
-      this.apiUrl,
-      { withCredentials: true }
-    );
+    return this.http.get<UsersResponse>(this.apiUrl, { withCredentials: true });
   }
 
-  updateUser(
-    usuarioId: string,
-    payload: UpdateUserPayload
-  ): Observable<UserActionResponse> {
-    return this.http.patch<UserActionResponse>(
-      `${this.apiUrl}/${usuarioId}`,
-      payload,
-      { withCredentials: true }
-    );
+  updateUser(usuarioId: string, payload: UpdateUserPayload): Observable<UserActionResponse> {
+    return this.http.patch<UserActionResponse>(`${this.apiUrl}/${usuarioId}`, payload, {
+      withCredentials: true,
+    });
   }
 
-  deleteUser(
-    usuarioId: string
-  ): Observable<UserActionResponse> {
-    return this.http.delete<UserActionResponse>(
-      `${this.apiUrl}/${usuarioId}`,
-      { withCredentials: true }
-    );
+  deleteUser(usuarioId: string): Observable<UserActionResponse> {
+    return this.http.delete<UserActionResponse>(`${this.apiUrl}/${usuarioId}`, {
+      withCredentials: true,
+    });
   }
 }

@@ -1,8 +1,7 @@
-
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-
+import { environment } from '../../environments/environment.development';
 export interface BannerImage {
   objectKey: string;
   publicUrl: string;
@@ -31,26 +30,25 @@ export interface UploadUrlResponse {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class BannerService {
   private readonly http = inject(HttpClient);
 
-  private readonly bannersUrl =
-    'http://localhost:5000/api/banners';
+  private readonly bannersUrl = environment.apiUrl
+    ? `${environment.apiUrl}api/banners`
+    : '/api/banners';
 
-  private readonly uploadUrl =
-    'http://localhost:5000/api/productos/upload-url';
+  private readonly uploadUrl = environment.apiUrl
+    ? `${environment.apiUrl}api/productos/upload-url`
+    : '/api/productos/upload-url';
 
   // Carga pública: cualquier usuario puede ver los banners.
- getBanner(identificador: string): Observable<BannerResponse> {
-  return this.http.get<BannerResponse>(
-    `${this.bannersUrl}/${identificador}`,
-    {
-      withCredentials: true
-    }
-  );
-}
+  getBanner(identificador: string): Observable<BannerResponse> {
+    return this.http.get<BannerResponse>(`${this.bannersUrl}/${identificador}`, {
+      withCredentials: true,
+    });
+  }
 
   // Solicita una URL temporal para subir la imagen.
   requestUploadUrl(file: File): Observable<UploadUrlResponse> {
@@ -59,45 +57,35 @@ export class BannerService {
       {
         nombreArchivo: file.name,
         tipoMime: file.type,
-        destino: 'banners'
+        destino: 'banners',
       },
       {
-        withCredentials: true
-      }
+        withCredentials: true,
+      },
     );
   }
 
   // Sube el archivo directamente al almacenamiento.
   uploadImage(uploadUrl: string, file: File): Observable<unknown> {
-    return this.http.put(
-      uploadUrl,
-      file,
-      {
-        headers: {
-          'Content-Type': file.type
-        },
-        responseType: 'text'
-      }
-    );
+    return this.http.put(uploadUrl, file, {
+      headers: {
+        'Content-Type': file.type,
+      },
+      responseType: 'text',
+    });
   }
 
   // Publica las imágenes para que todos puedan verlas.
-saveBanner(
-  identificador: string,
-  imagenes: BannerImage[]
-) {
-  return this.http.post<BannerResponse>(
-    this.bannersUrl,
-    {
-      identificador,
-      titulo:
-        identificador === 'home-principal'
-          ? 'Promoción principal'
-          : 'Promoción secundaria',
-      imagenes,
-      activo: true
-    },
-    { withCredentials: true }
-  );
-}
+  saveBanner(identificador: string, imagenes: BannerImage[]) {
+    return this.http.post<BannerResponse>(
+      this.bannersUrl,
+      {
+        identificador,
+        titulo: identificador === 'home-principal' ? 'Promoción principal' : 'Promoción secundaria',
+        imagenes,
+        activo: true,
+      },
+      { withCredentials: true },
+    );
+  }
 }

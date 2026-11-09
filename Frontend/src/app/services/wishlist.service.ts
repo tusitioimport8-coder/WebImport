@@ -1,5 +1,5 @@
 import { Injectable, computed, signal } from '@angular/core';
-
+import { environment } from '../../environments/environment.development';
 export interface WishlistItem {
   id: string;
   name: string;
@@ -16,19 +16,19 @@ export class WishlistService {
   readonly totalItems = computed(() => this.items().length);
 
   has(productId: string): boolean {
-    return this.items().some(item => item.id === productId);
+    return this.items().some((item) => item.id === productId);
   }
 
   toggle(product: WishlistItem): void {
-    this.items.update(items =>
-      items.some(item => item.id === product.id)
-        ? items.filter(item => item.id !== product.id)
-        : [...items, product]
+    this.items.update((items) =>
+      items.some((item) => item.id === product.id)
+        ? items.filter((item) => item.id !== product.id)
+        : [...items, product],
     );
   }
 
   remove(productId: string): void {
-    this.items.update(items => items.filter(item => item.id !== productId));
+    this.items.update((items) => items.filter((item) => item.id !== productId));
   }
 
   open(): void {

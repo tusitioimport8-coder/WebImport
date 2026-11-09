@@ -1,11 +1,9 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment.development';
 
-export type ProductPriceType =
-  | 'Detal'
-  | 'Mayor'
-  | 'GranMayor';
+export type ProductPriceType = 'Detal' | 'Mayor' | 'GranMayor';
 
 export interface ApiProductPrice {
   id_precio: string;
@@ -83,66 +81,43 @@ export interface ProductUploadUrlResponse {
 export class ProductService {
   private readonly http = inject(HttpClient);
 
-  private readonly apiUrl =
-    'http://localhost:5000/api/productos';
+  private readonly apiUrl = environment.apiUrl
+    ? `${environment.apiUrl}api/productos`
+    : 'http://localhost:5000/api/productos';
 
   getProducts(): Observable<ProductsResponse> {
-    return this.http.get<ProductsResponse>(
-      this.apiUrl,
-    );
+    return this.http.get<ProductsResponse>(this.apiUrl);
   }
 
   getProductById(id: string): Observable<ProductDetailResponse> {
-    return this.http.get<ProductDetailResponse>(
-      `${this.apiUrl}/${id}`,
+    return this.http.get<ProductDetailResponse>(`${this.apiUrl}/${id}`);
+  }
+  createProduct(payload: ProductPayload): Observable<ProductMutationResponse> {
+    return this.http.post<ProductMutationResponse>(this.apiUrl, payload, { withCredentials: true });
+  }
+  updateProduct(id: string, payload: Partial<ProductPayload>): Observable<ProductMutationResponse> {
+    return this.http.put<ProductMutationResponse>(`${this.apiUrl}/${id}`, payload, {
+      withCredentials: true,
+    });
+  }
+  getProductUploadUrl(file: File): Observable<ProductUploadUrlResponse> {
+    return this.http.post<ProductUploadUrlResponse>(
+      `${this.apiUrl}/upload-url`,
+      {
+        nombreArchivo: file.name,
+        tipoMime: file.type,
+        destino: 'productos',
+      },
+      { withCredentials: true },
     );
   }
-createProduct(
-  payload: ProductPayload
-): Observable<ProductMutationResponse> {
-  return this.http.post<ProductMutationResponse>(
-    this.apiUrl,
-    payload,
-    { withCredentials: true }
-  );
-}
-updateProduct(
-  id: string,
-  payload: Partial<ProductPayload>
-): Observable<ProductMutationResponse> {
-  return this.http.put<ProductMutationResponse>(
-    `${this.apiUrl}/${id}`,
-    payload,
-    { withCredentials: true }
-  );
-}
-getProductUploadUrl(
-  file: File
-): Observable<ProductUploadUrlResponse> {
-  return this.http.post<ProductUploadUrlResponse>(
-    `${this.apiUrl}/upload-url`,
-    {
-      nombreArchivo: file.name,
-      tipoMime: file.type,
-     destino: 'productos'
-    },
-    { withCredentials: true }
-  );
-}
 
-uploadProductImage(
-  uploadUrl: string,
-  file: File
-): Observable<unknown> {
-  return this.http.put(
-    uploadUrl,
-    file,
-    {
+  uploadProductImage(uploadUrl: string, file: File): Observable<unknown> {
+    return this.http.put(uploadUrl, file, {
       headers: {
-        'Content-Type': file.type
+        'Content-Type': file.type,
       },
-      responseType: 'text'
-    }
-  );
-}
+      responseType: 'text',
+    });
+  }
 }

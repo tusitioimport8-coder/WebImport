@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-
+import { environment } from '../../environments/environment.development';
 export interface CrearPedidoRequest {
   contacto: {
     nombre_completo: string;
@@ -40,16 +40,11 @@ export interface CrearPedidoResponse {
 export class PedidoService {
   private readonly http = inject(HttpClient);
 
-  private readonly apiUrl =
-    'http://localhost:5000/api/pedidos';
+  private readonly apiUrl = environment.apiUrl
+    ? `${environment.apiUrl}api/pedidos`
+    : 'http://localhost:5000/api/pedidos';
 
-  crearPedido(
-    pedido: CrearPedidoRequest,
-  ): Observable<CrearPedidoResponse> {
-    return this.http.post<CrearPedidoResponse>(
-      this.apiUrl,
-      pedido,
-      { withCredentials: true },
-    );
+  crearPedido(pedido: CrearPedidoRequest): Observable<CrearPedidoResponse> {
+    return this.http.post<CrearPedidoResponse>(this.apiUrl, pedido, { withCredentials: true });
   }
 }
