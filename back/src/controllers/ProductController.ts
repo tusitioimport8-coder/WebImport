@@ -1,4 +1,4 @@
-import Validator from "../utils/productos.validator.js";
+import Validator from "../utils/validator/productos.validator.js";
 import ProductRepository from "../repositories/ProductRepository.js";
 import { Request, Response } from "express";
 

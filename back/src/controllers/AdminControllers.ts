@@ -1,6 +1,6 @@
 import type { Request, Response } from "express";
 import UserRepository from "../repositories/UserRepository.js";
-import AdminValidator from "../utils/AdminValidator.js";
+import AdminValidator from "../utils/validator/AdminValidator.js";
 import type { RolUsuario } from "../interfaces/usuario.interface.js";
 // Conserva aquí la importación de ROLES_PERMITIDOS desde
 // el archivo donde ya está definido en tu proyecto.

@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import Session from "../components/session.js";
-import Validator from "../utils/validator.js";
+import Validator from "../utils/validator/validator.js";
 import userRepositoru from "../repositories/UserRepository.js";
 import { OAuth2Client } from "google-auth-library";
 import Bcrypt from "../utils/bcrypt.js";

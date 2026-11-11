@@ -1,8 +1,7 @@
-
 import { Request, Response } from "express";
 import BannerRepository from "../repositories/BannerRepository.js";
 import storageService from "../components/StorageComponent.js";
-import BannerValidator from "../utils/BannerValidator.js";
+import BannerValidator from "../utils/validator/BannerValidator.js";
 
 export class BannerController {
   constructor(private readonly bannerRepo = BannerRepository) {}
@@ -53,9 +52,7 @@ export class BannerController {
         await this.bannerRepo.obtenerPorIdentificador(identificador);
 
       if (bannerExistente && bannerExistente.imagenes) {
-        const keysNuevos = new Set(
-          imagenes.map((img: any) => img?.objectKey),
-        );
+        const keysNuevos = new Set(imagenes.map((img: any) => img?.objectKey));
 
         for (const imgVieja of bannerExistente.imagenes) {
           // Ignorar imágenes nulas o sin objectKey
