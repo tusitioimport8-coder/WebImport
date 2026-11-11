@@ -11,15 +11,13 @@ router.use(requireRole("ADMIN", "F_VENTAS"));
 router.post("/", (req, res) =>
   presupuestoController.crearPresupuesto(req, res),
 );
-router.get("/", (req, res) =>
-  presupuestoController.listarPresupuestos(req, res),
-);
+router.get("/", (req, res) => presupuestoController.getPresupuestos(req, res));
 router.patch("/:id/estado", (req, res) =>
-  presupuestoController.cambiarEstado(req, res),
+  presupuestoController.actualizarEstado(req, res),
 );
 
 router.get("/:id", (req, res) =>
-  presupuestoController.obtenerPresupuestoPorId(req, res),
+  presupuestoController.getPresupuestoPorId(req, res),
 );
 
 router.delete("/:id", (req, res) =>

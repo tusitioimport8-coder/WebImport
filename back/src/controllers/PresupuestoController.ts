@@ -1,21 +1,58 @@
 import { Request, Response } from "express";
+import ProductRepository from "../repositories/ProductRepository.js";
 import PresupuestoRepository from "../repositories/PresupuestoRepository.js";
-import crypto from "crypto";
 
-export class PresupuestoController {
-  constructor(private readonly repo = PresupuestoRepository) {}
-
-  async crearPresupuesto(req: Request, res: Response): Promise<Response> {
+class PresupuestoController {
+  async getPresupuestos(req: Request, res: Response) {
     try {
-      const { usuario_id, total } = req.body;
-      const id = `presupuesto-${crypto.randomUUID()}`;
-
-      const nuevoPresupuesto = await this.repo.crearPresupuesto({
-        id,
-        usuario_id,
-        total,
+      const data = await PresupuestoRepository.listarPresupuestos;
+      return res.status(200).json({ success: true, data });
+    } catch (error: any) {
+      return res.status(500).json({
+        success: false,
+        message: "Error al obtener presupuestos",
+        error: error.message,
       });
+    }
+  }
 
+  async getPresupuestoPorId(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+      const data = await PresupuestoRepository.obtenerPresupuestoPorId(
+        id.toString(),
+      );
+      if (!data)
+        return res
+          .status(404)
+          .json({ success: false, message: "Presupuesto no encontrado" });
+      return res.status(200).json({ success: true, data });
+    } catch (error: any) {
+      return res.status(500).json({
+        success: false,
+        message: "Error al obtener el presupuesto",
+        error: error.message,
+      });
+    }
+  }
+
+  async crearPresupuesto(req: Request, res: Response) {
+    try {
+      const { detalles } = req.body;
+      for (const detalle of detalles) {
+        const producto = await ProductRepository.getProductoPorId(
+          detalle.producto_id,
+        );
+        if (!producto) {
+          return res.status(404).json({
+            success: false,
+            message: `Producto con ID ${detalle.producto_id} no encontrado`,
+          });
+        }
+      }
+      const nuevoPresupuesto = await PresupuestoRepository.crearPresupuesto(
+        req.body,
+      );
       return res.status(201).json({
         success: true,
         message: "Presupuesto creado exitosamente",
@@ -25,109 +62,57 @@ export class PresupuestoController {
       return res.status(500).json({
         success: false,
         message: "Error al crear presupuesto",
-        details: error.message,
+        error: error.message,
       });
     }
   }
 
-  async listarPresupuestos(req: Request, res: Response): Promise<Response> {
-    try {
-      const lista = await this.repo.listarPresupuestos();
-      return res.json({
-        success: true,
-        data: lista,
-      });
-    } catch (error: any) {
-      return res.status(500).json({
-        success: false,
-        message: "Error al listar presupuestos",
-        details: error.message,
-      });
-    }
-  }
-
-  async cambiarEstado(req: Request, res: Response): Promise<Response> {
+  async actualizarEstado(req: Request, res: Response) {
     try {
       const { id } = req.params;
       const { estado } = req.body;
-
-      const actualizado = await this.repo.actualizarEstadoPresupuesto(
-        id.toString(),
-        estado,
-      );
-
-      if (!actualizado) {
-        return res.status(404).json({
-          success: false,
-          message: "Presupuesto no encontrado",
-        });
-      }
-
-      return res.json({
+      const actualizado =
+        await PresupuestoRepository.actualizarEstadoPresupuesto(
+          id.toString(),
+          estado,
+        );
+      if (!actualizado)
+        return res
+          .status(404)
+          .json({ success: false, message: "Presupuesto no encontrado" });
+      return res.status(200).json({
         success: true,
-        message: "Estado del presupuesto actualizado correctamente",
+        message: "Estado actualizado",
         data: actualizado,
       });
     } catch (error: any) {
       return res.status(500).json({
         success: false,
-        message: "Error al actualizar el estado del presupuesto",
-        details: error.message,
+        message: "Error al actualizar estado",
+        error: error.message,
       });
     }
   }
 
-  async obtenerPresupuestoPorId(
-    req: Request,
-    res: Response,
-  ): Promise<Response> {
+  async eliminarPresupuesto(req: Request, res: Response) {
     try {
       const { id } = req.params;
-      const presupuesto = await this.repo.obtenerPresupuestoPorId(
+      const eliminado = await PresupuestoRepository.eliminarPresupuesto(
         id.toString(),
       );
-
-      if (!presupuesto) {
-        return res.status(404).json({
-          success: false,
-          message: "Presupuesto no encontrado",
-        });
-      }
-
-      return res.json({
+      if (!eliminado)
+        return res
+          .status(404)
+          .json({ success: false, message: "Presupuesto no encontrado" });
+      return res.status(200).json({
         success: true,
-        data: presupuesto,
+        message: "Presupuesto eliminado exitosamente",
       });
     } catch (error: any) {
       return res.status(500).json({
         success: false,
-        message: "Error al obtener el presupuesto",
-        details: error.message,
-      });
-    }
-  }
-
-  async eliminarPresupuesto(req: Request, res: Response): Promise<Response> {
-    try {
-      const { id } = req.params;
-      const eliminado = await this.repo.eliminarPresupuesto(id.toString());
-
-      if (!eliminado) {
-        return res.status(404).json({
-          success: false,
-          message: "Presupuesto no encontrado",
-        });
-      }
-
-      return res.json({
-        success: true,
-        message: "Presupuesto eliminado correctamente",
-      });
-    } catch (error: any) {
-      return res.status(500).json({
-        success: false,
-        message: "Error al eliminar el presupuesto",
-        details: error.message,
+        message: "Error al eliminar presupuesto",
+        error: error.message,
       });
     }
   }
