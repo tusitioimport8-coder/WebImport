@@ -1,12 +1,15 @@
 
-
 <app-site-header
   [searchTerm]="headerSearchTerm()"
+  [isAuthenticated]="!!authService.user()"
+  [canAccessAdmin]="canAccessAdmin()"
+  [canAccessInventory]="canAccessInventory()"
   [wishlistCount]="wishlistTotalItems()"
   [cartCount]="cartHeaderTotalItems()"
   (searchChange)="onHeaderSearchChange($event)"
   (wishlistClick)="openWishlist()"
   (cartClick)="openHeaderCart()"
+  (profileClick)="abrirPerfil()"
 />
 
 <main class="product-detail-page">
@@ -40,7 +43,7 @@
 
     <section class="product-main">
 
-      <!-- GALERÍA: UNA IMAGEN REAL POR AHORA -->
+      <!-- GALERÍA -->
       <div class="product-gallery">
         <div class="main-image-wrapper">
 
@@ -67,11 +70,15 @@
         <h1 class="product-title">{{ product.nombre }}</h1>
 
         <div class="product-meta">
-          <span class="stock-badge"
-                [class.out-of-stock]="product.stock <= 0">
-            <i class="pi"
-               [class.pi-check-circle]="product.stock > 0"
-               [class.pi-times-circle]="product.stock <= 0"></i>
+          <span
+            class="stock-badge"
+            [class.out-of-stock]="product.stock <= 0"
+          >
+            <i
+              class="pi"
+              [class.pi-check-circle]="product.stock > 0"
+              [class.pi-times-circle]="product.stock <= 0"
+            ></i>
             {{ product.stock > 0 ? 'En stock' : 'Agotado' }}
           </span>
 
@@ -82,13 +89,21 @@
 
         <!-- PRECIO DESTACADO -->
         <div class="selected-price-box">
-          <strong>
-            {{ selectedPrice() | currency:'USD':'symbol':'1.2-2' }}
-          </strong>
+
+          @if (selectedPriceType() === 'DetalBCV') {
+            <strong>
+              Bs. {{ formatearBCV(selectedPrice()) }}
+            </strong>
+          } @else {
+            <strong>
+              {{ selectedPrice() | currency:'USD':'symbol':'1.2-2' }}
+            </strong>
+          }
+
           <span>Precio {{ selectedPriceLabel() }}</span>
         </div>
 
-        <!-- TIPOS DE PRECIO EXISTENTES -->
+        <!-- TIPOS DE PRECIO -->
         <div class="price-section">
           <span class="field-label">Tipo de precio</span>
 
@@ -98,19 +113,35 @@
                 type="button"
                 class="price-option"
                 [class.price-option_active]="selectedPriceType() === option.type"
-                [disabled]="option.type !== 'Detal' || !option.available"
+                [disabled]="
+                  !option.available ||
+                  (option.type !== 'DetalBCV' && option.type !== 'Detal')
+                "
                 (click)="selectPrice(option.type)"
               >
-                <span class="price-option-label">{{ option.label }}</span>
+                <span class="price-option-label">
+                  {{ option.label }}
+                </span>
+
+                <small class="price-option-moneda">
+                  ({{ option.moneda }})
+                </small>
+
                 <strong>
                   {{ option.price | currency:'USD':'symbol':'1.2-2' }}
                 </strong>
+
+                @if (option.type === 'DetalBCV') {
+                  <small class="price-option-bcv">
+                    Bs. {{ formatearBCV(option.price) }}
+                  </small>
+                }
               </button>
             }
           </div>
         </div>
 
-        <!-- CANTIDAD + CARRITO -->
+        <!-- CANTIDAD Y CARRITO -->
         <div class="purchase-row">
 
           <div class="quantity-control">
@@ -155,7 +186,7 @@
           </button>
         </div>
 
-        <!-- MOCKUP: SIN INTEGRACIÓN CON WHATSAPP -->
+        <!-- WHATSAPP -->
         <button
           type="button"
           class="buy-whatsapp-button"
@@ -166,7 +197,7 @@
           Comprar por WhatsApp
         </button>
 
-        <!-- INFORMACIÓN DISPONIBLE -->
+        <!-- INFORMACIÓN -->
         <div class="product-accordions">
 
           <details class="product-accordion" open>
@@ -174,6 +205,7 @@
               Descripción
               <i class="pi pi-chevron-down"></i>
             </summary>
+
             <div class="accordion-content">
               @if (product.descripcion) {
                 <p>{{ product.descripcion }}</p>
@@ -188,6 +220,7 @@
               Disponibilidad
               <i class="pi pi-chevron-down"></i>
             </summary>
+
             <div class="accordion-content">
               <p>
                 {{ product.stock > 0
@@ -198,7 +231,6 @@
           </details>
 
         </div>
-
       </div>
     </section>
   }
@@ -213,5 +245,10 @@
   (closeRequested)="closeWishlist()"
   (removeRequested)="removeFromWishlist($event)"
 />
+
+<app-mi-perfil
+  [isOpen]="perfilAbierto()"
+  (closeRequested)="cerrarPerfil()"
+></app-mi-perfil>
 
 <app-site-footer />

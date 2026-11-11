@@ -9,11 +9,15 @@ import {
   signal,
 } from '@angular/core';
 
+import { MiPerfil } from '../../shared/components/mi-perfil/mi-perfil';
+
 import { from, of } from 'rxjs';
 import { catchError, map, mergeMap, toArray } from 'rxjs/operators';
 
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+
+import { AuthService } from '../../services/auth';
 
 import {
   TuiButton,
@@ -72,21 +76,22 @@ export type CatalogViewState =
   selector: 'app-catalogo',
   standalone: true,
   imports: [
-    CurrencyPipe,
-    FormsModule,
-    RouterLink,
-    Wishlist,
-    SiteHeader,
-    SiteFooter,
-    TuiBadge,
-    TuiButton,
-    TuiIcon,
-    TuiInput,
-    TuiLoader,
-    TuiPagination,
-    TuiTextfield,
-    Carrito,
-  ],
+  CurrencyPipe,
+  FormsModule,
+  RouterLink,
+  Wishlist,
+  MiPerfil,
+  SiteHeader,
+  SiteFooter,
+  TuiBadge,
+  TuiButton,
+  TuiIcon,
+  TuiInput,
+  TuiLoader,
+  TuiPagination,
+  TuiTextfield,
+  Carrito,
+],
   templateUrl: './catalogo.html',
   styleUrl: './catalogo.less',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -95,6 +100,35 @@ export class Catalogo implements OnInit {
   private readonly productService = inject(ProductService);
   private readonly categoryService = inject(CategoryService);
   private readonly cartService = inject(CartService);
+
+  readonly authService = inject(AuthService);
+
+readonly isAuthenticated = computed(() =>
+  !!this.authService.user()
+);
+
+readonly canAccessAdmin = computed(() => {
+  const rol = this.authService.user()?.tipo?.trim().toUpperCase();
+
+  return rol === 'ADMIN';
+});
+
+// PANEL MI PERFIL
+readonly perfilAbierto = signal(false);
+
+abrirPerfil(): void {
+  this.perfilAbierto.set(true);
+}
+
+cerrarPerfil(): void {
+  this.perfilAbierto.set(false);
+}
+
+readonly canAccessInventory = computed(() => {
+  const rol = this.authService.user()?.tipo?.trim().toUpperCase();
+
+  return rol === 'ADMIN' || rol === 'MARKETING';
+});
 
   readonly wishlistService = inject(WishlistService);
 

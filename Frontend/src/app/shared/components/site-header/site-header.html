@@ -72,33 +72,38 @@
       </span>
     </button>
 
-    <!-- INGRESAR -->
-    <a
-      class="toolbar-action"
-      routerLink="/sesion"
-      aria-label="Iniciar sesión"
-    >
-      <span class="toolbar-action-content">
-        <span class="toolbar-action-symbol">
-          <i class="pi pi-sign-in"></i>
-        </span>
-        <span class="toolbar-action-label">INGRESAR</span>
+<!-- INGRESAR: SOLO CUANDO NO HAY SESIÓN -->
+@if (!isAuthenticated) {
+  <a
+    class="toolbar-action"
+    routerLink="/sesion"
+    aria-label="Iniciar sesión"
+  >
+    <span class="toolbar-action-content">
+      <span class="toolbar-action-symbol">
+        <i class="pi pi-sign-in"></i>
       </span>
-    </a>
+      <span class="toolbar-action-label">INGRESAR</span>
+    </span>
+  </a>
+}
 
-    <!-- ADMIN -->
-    <a
-      class="toolbar-action"
-      routerLink="/admin"
-      aria-label="Panel de administración"
-    >
-      <span class="toolbar-action-content">
-        <span class="toolbar-action-symbol">
-          <i class="pi pi-cog"></i>
-        </span>
-        <span class="toolbar-action-label">ADMIN</span>
+
+<!-- ADMIN: SOLO USUARIOS CON ROL ADMIN -->
+@if (canAccessAdmin) {
+  <a
+    class="toolbar-action"
+    routerLink="/admin"
+    aria-label="Panel de administración"
+  >
+    <span class="toolbar-action-content">
+      <span class="toolbar-action-symbol">
+        <i class="pi pi-cog"></i>
       </span>
-    </a>
+      <span class="toolbar-action-label">ADMIN</span>
+    </span>
+  </a>
+}
 
    <!-- INVENTARIO: SOLO ADMIN Y MARKETING -->
 @if (canAccessInventory) {

@@ -4,6 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { TuiInput, TuiTextfield } from '@taiga-ui/core';
 
+
+
 @Component({
   selector: 'app-site-header',
   standalone: true,
@@ -15,6 +17,8 @@ export class SiteHeader {
   @Input() searchTerm = '';
   @Input() wishlistCount = 0;
   @Input() cartCount = 0;
+  @Input() isAuthenticated = false;
+  @Input() canAccessAdmin = false;
 
   @Input() canAccessInventory = false;
 

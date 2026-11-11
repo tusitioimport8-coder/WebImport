@@ -1,12 +1,20 @@
 <div class="catalog-page">
-  <app-site-header
-    [searchTerm]="searchTerm()"
-    [wishlistCount]="wishlistTotalItems()"
-    [cartCount]="cartTotalItems()"
-    (searchChange)="onSearchChange($event)"
-    (wishlistClick)="openWishlist()"
-    (cartClick)="openCart()"
-  />
+  
+
+<app-site-header
+  [searchTerm]="searchTerm()"
+  [wishlistCount]="wishlistTotalItems()"
+  [cartCount]="cartTotalItems()"
+  [isAuthenticated]="isAuthenticated()"
+  [canAccessAdmin]="canAccessAdmin()"
+  [canAccessInventory]="canAccessInventory()"
+  (searchChange)="onSearchChange($event)"
+  (wishlistClick)="openWishlist()"
+  (cartClick)="openCart()"
+  (profileClick)="abrirPerfil()"
+/>
+
+
 
   <main class="catalog">
     <header class="catalog-header">
@@ -193,4 +201,9 @@
   />
 
   <app-carrito />
+
+    <app-mi-perfil
+    [isOpen]="perfilAbierto()"
+    (closeRequested)="cerrarPerfil()"
+  ></app-mi-perfil>
 </div>
