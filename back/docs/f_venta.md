@@ -1,221 +1,245 @@
-# 📋 Endpoints de Fuerza de Venta — Presupuestos
+# Fuerza de Venta — Presupuestos
 
 ## Descripción general
 
-El módulo de Fuerza de Venta permite crear presupuestos, consultar los presupuestos registrados y actualizar su estado.
+Este módulo permite crear, consultar, actualizar el estado y eliminar
+presupuestos. La ruta base del módulo es `/presupuestos`.
 
-Los presupuestos se almacenan en la tabla `pedidos`, identificándose mediante el campo `tipo_documento` con el valor `presupuesto`.
+Todas las rutas requieren uno de estos roles:
+
+- `ADMIN`
+- `F_VENTAS`
+
+Los presupuestos se crean con una cabecera y una lista de productos
+detallados. El identificador del presupuesto es opcional: si no se envía, el
+servidor genera uno automáticamente.
 
 ## Resumen de endpoints
 
-| Método   | Endpoint                   | Descripción                            |
-| -------- | -------------------------- | -------------------------------------- |
-| `POST`   | `/presupuestos`            | Crear un presupuesto                   |
-| `GET`    | `/presupuestos`            | Listar todos los presupuestos          |
-| `PATCH`  | `/presupuestos/:id/estado` | Actualizar el estado de un presupuesto |
-| `GET`    | `/presupuestos/:id`        | Obtener un presupuesto por su ID       |
-| `DELETE` | `/presupuestos/:id`        | Eliminar un presupuesto por su ID      |
+| Método   | Ruta                       | Se envía                                       | Se recibe                                   |
+| -------- | -------------------------- | ---------------------------------------------- | ------------------------------------------- |
+| `POST`   | `/presupuestos`            | Cabecera y detalles del presupuesto en el body | Presupuesto creado, incluyendo sus detalles |
+| `GET`    | `/presupuestos`            | Nada                                           | Lista de presupuestos                       |
+| `PATCH`  | `/presupuestos/:id/estado` | `id` en la URL y `estado` en el body           | Presupuesto con el estado actualizado       |
+| `GET`    | `/presupuestos/:id`        | `id` en la URL                                 | Presupuesto solicitado con sus detalles     |
+| `DELETE` | `/presupuestos/:id`        | `id` en la URL                                 | Confirmación de eliminación                 |
 
-> Las rutas anteriores representan los endpoints documentados a partir de los métodos del controlador. La ruta base y los paths definitivos deben coincidir con la configuración del router del proyecto.
+Las respuestas exitosas utilizan la propiedad `success`. Cuando corresponde,
+los datos se entregan en la propiedad `data`.
 
 ---
 
-# `POST /presupuestos`
+## Crear un presupuesto
 
-Permite crear un nuevo presupuesto asociado a un usuario.
+### `POST /presupuestos`
 
-El identificador del presupuesto se genera automáticamente utilizando `crypto.randomUUID()`, con el prefijo `presupuesto-`.
+El body debe ser un objeto JSON con la información del cliente, los totales y
+al menos un producto.
 
-## Request Body
+### Datos enviados
 
-| Campo        | Tipo     | Obligatorio | Descripción                                       |
-| ------------ | -------- | ----------- | ------------------------------------------------- |
-| `usuario_id` | `string` | Sí\*        | Identificador del usuario asociado al presupuesto |
-| `total`      | `number` | Sí\*        | Importe total del presupuesto                     |
+| Campo              | Tipo     | Obligatorio | Reglas                                                                        |
+| ------------------ | -------- | ----------- | ----------------------------------------------------------------------------- |
+| `id`               | `string` | No          | Si se envía, debe ser un UUID válido. Si se omite, se genera automáticamente. |
+| `nombre_cliente`   | `string` | Sí          | Debe tener al menos 2 caracteres.                                             |
+| `telefono_cliente` | `string` | No          | Teléfono del cliente.                                                         |
+| `descuento`        | `number` | No          | Debe ser mayor o igual a `0`. Si se omite, se guarda como `0`.                |
+| `total`            | `number` | Sí          | Debe ser mayor que `0`.                                                       |
+| `detalles`         | `array`  | Sí          | Debe contener al menos un producto.                                           |
 
-\* El controlador obtiene estos campos del body, pero no realiza una validación explícita de su obligatoriedad.
+Cada elemento de `detalles` debe contener:
 
-## Ejemplo
+| Campo             | Tipo      | Obligatorio | Reglas                            |
+| ----------------- | --------- | ----------- | --------------------------------- |
+| `producto_id`     | `string`  | Sí          | Debe ser un UUID válido.          |
+| `cantidad`        | `integer` | Sí          | Debe ser un entero mayor que `0`. |
+| `precio_unitario` | `number`  | Sí          | Debe ser mayor que `0`.           |
+| `tipo_precio`     | `string`  | Sí          | No puede estar vacío.             |
+
+### Ejemplo de request
+
+```http
+POST /presupuestos
+Content-Type: application/json
+```
 
 ```json
 {
-  "usuario_id": "123",
-  "total": 1500.5
+  "nombre_cliente": "Comercial El Sol",
+  "telefono_cliente": "04141234567",
+  "descuento": 50,
+  "total": 1250.5,
+  "detalles": [
+    {
+      "producto_id": "550e8400-e29b-41d4-a716-446655440000",
+      "cantidad": 2,
+      "precio_unitario": 650.25,
+      "tipo_precio": "Mayor"
+    }
+  ]
 }
 ```
 
-## Proceso
+También se puede enviar un `id` propio:
 
-1. Recibe el identificador del usuario y el total desde el body.
-2. Genera un identificador único con el formato `presupuesto-{UUID}`.
-3. Construye el objeto del nuevo presupuesto.
-4. Llama a `repo.crearPresupuesto()` para guardar el registro.
-5. Retorna una respuesta con los datos del presupuesto creado.
+```json
+{
+  "id": "7f1d4b8e-1a2b-4c3d-9e5f-60718293a4b5",
+  "nombre_cliente": "Comercial El Sol",
+  "total": 1250.5,
+  "detalles": [
+    {
+      "producto_id": "550e8400-e29b-41d4-a716-446655440000",
+      "cantidad": 2,
+      "precio_unitario": 650.25,
+      "tipo_precio": "Mayor"
+    }
+  ]
+}
+```
 
-## Respuesta exitosa — `201 Created`
+### Datos recibidos — `201 Created`
+
+El servidor responde con el presupuesto creado en `data`. El repositorio
+inserta la cabecera y cada detalle, y luego consulta nuevamente el presupuesto
+completo; por ello, `data` contiene la información de la cabecera y sus
+detalles anidados.
 
 ```json
 {
   "success": true,
   "message": "Presupuesto creado exitosamente",
   "data": {
-    "id": "presupuesto-uuid-generado",
-    "usuario_id": "123",
-    "total": 1500.5,
-    "estado": "emitido",
-    "tipo_documento": "presupuesto"
+    "id": "7f1d4b8e-1a2b-4c3d-9e5f-60718293a4b5",
+    "nombre_cliente": "Comercial El Sol",
+    "telefono_cliente": "04141234567",
+    "descuento": 50,
+    "total": 1250.5,
+    "detalles": [
+      {
+        "producto_id": "550e8400-e29b-41d4-a716-446655440000",
+        "cantidad": 2,
+        "precio_unitario": 650.25,
+        "tipo_precio": "Mayor"
+      }
+    ]
   }
 }
 ```
 
-La estructura de `data` es ilustrativa: el objeto real depende de las columnas que devuelva el repositorio.
+> La consulta de respuesta puede incluir otros campos calculados o
+> relacionados por la base de datos. Los campos enviados por el cliente son
+> los descritos en las tablas anteriores.
 
-## Errores
+### Errores de creación — `500 Internal Server Error`
 
-### `500 Internal Server Error`
-
-Si ocurre un error al crear el presupuesto:
+Si ocurre un error en el repositorio o en la creación de la cabecera o de sus
+detalles, el controlador responde:
 
 ```json
 {
   "success": false,
   "message": "Error al crear presupuesto",
-  "details": "Descripción del error"
+  "error": "Descripción del error"
 }
 ```
 
+Los valores inválidos deben corregirse según las reglas de validación
+indicadas. Por ejemplo, no se puede enviar un `producto_id` que no sea UUID,
+un `total` igual o menor que cero, ni un arreglo `detalles` vacío.
+
 ---
 
-# `GET /presupuestos`
+## Listar presupuestos
 
-Permite obtener todos los presupuestos registrados.
+### `GET /presupuestos`
 
-El repositorio consulta únicamente los registros cuyo `tipo_documento` es `presupuesto` y los ordena por fecha de creación, del más reciente al más antiguo.
+### Datos enviados
 
-## Parámetros
+No requiere body, parámetros de ruta ni query parameters.
 
-No requiere parámetros de ruta, query string ni body según el controlador proporcionado.
-
-## Ejemplo
-
-```http
-GET /presupuestos
-```
-
-## Proceso
-
-1. Recibe la petición.
-2. Llama a `repo.listarPresupuestos()`.
-3. Obtiene los presupuestos registrados.
-4. Retorna la lista en la propiedad `data`.
-
-## Respuesta exitosa — `200 OK`
+### Datos recibidos — `200 OK`
 
 ```json
 {
   "success": true,
   "data": [
     {
-      "id": "presupuesto-uuid-generado",
-      "usuario_id": "123",
-      "total": 1500.5,
-      "estado": "emitido",
-      "tipo_documento": "presupuesto"
-    },
-    {
-      "id": "presupuesto-otro-uuid",
-      "usuario_id": "456",
-      "total": 2800,
-      "estado": "emitido",
-      "tipo_documento": "presupuesto"
+      "id": "7f1d4b8e-1a2b-4c3d-9e5f-60718293a4b5",
+      "nombre_cliente": "Comercial El Sol",
+      "telefono_cliente": "04141234567",
+      "descuento": 50,
+      "total": 1250.5,
+      "detalles": [
+        {
+          "producto_id": "550e8400-e29b-41d4-a716-446655440000",
+          "cantidad": 2,
+          "precio_unitario": 650.25,
+          "tipo_precio": "Mayor"
+        }
+      ]
     }
   ]
 }
 ```
 
-Los registros del ejemplo son ilustrativos. La respuesta real contiene los campos devueltos por el repositorio.
+Si no existen presupuestos, `data` es un arreglo vacío.
 
-Si no existen presupuestos, el controlador devuelve una lista vacía en `data`, siempre que el repositorio retorne una lista vacía.
-
-## Errores
-
-### `500 Internal Server Error`
-
-Si ocurre un error al consultar los presupuestos:
+### Error — `500 Internal Server Error`
 
 ```json
 {
   "success": false,
-  "message": "Error al listar presupuestos",
-  "details": "Descripción del error"
+  "message": "Error al obtener presupuestos",
+  "error": "Descripción del error"
 }
 ```
 
 ---
 
-# `PATCH /presupuestos/:id/estado`
+## Actualizar el estado
 
-Permite actualizar el estado de un presupuesto existente mediante su identificador.
+### `PATCH /presupuestos/:id/estado`
 
-## Parámetros de ruta
+### Datos enviados
 
-| Parámetro | Tipo     | Obligatorio | Descripción                                      |
-| --------- | -------- | ----------- | ------------------------------------------------ |
-| `id`      | `string` | Sí          | Identificador del presupuesto que se actualizará |
-
-## Request Body
-
-| Campo    | Tipo     | Obligatorio | Descripción                  |
-| -------- | -------- | ----------- | ---------------------------- |
-| `estado` | `string` | Sí\*        | Nuevo estado del presupuesto |
-
-\* El controlador obtiene `estado` del body, pero no valida explícitamente que esté presente ni restringe sus posibles valores.
-
-## Ejemplo
+El `id` se envía como parámetro de la URL y el body debe contener únicamente
+el estado nuevo:
 
 ```http
-PATCH /presupuestos/presupuesto-123/estado
+PATCH /presupuestos/7f1d4b8e-1a2b-4c3d-9e5f-60718293a4b5/estado
+Content-Type: application/json
 ```
-
-Body:
 
 ```json
 {
-  "estado": "aprobado"
+  "estado": "vendido"
 }
 ```
 
-El valor `aprobado` es un ejemplo. Los estados permitidos dependen de las reglas de negocio implementadas en el proyecto.
+Los únicos estados permitidos son:
 
-## Proceso
+- `proceso`
+- `vendido`
+- `cancelado`
 
-1. Obtiene el identificador del presupuesto desde `req.params.id`.
-2. Obtiene el nuevo estado desde `req.body.estado`.
-3. Convierte el identificador a `string`.
-4. Llama a `repo.actualizarEstadoPresupuesto()`.
-5. Si el repositorio no devuelve un presupuesto actualizado, responde con `404 Not Found`.
-6. Si la actualización tiene éxito, retorna el registro actualizado.
-
-## Respuesta exitosa — `200 OK`
+### Datos recibidos — `200 OK`
 
 ```json
 {
   "success": true,
-  "message": "Estado del presupuesto actualizado correctamente",
+  "message": "Estado actualizado",
   "data": {
-    "id": "presupuesto-123",
-    "estado": "aprobado"
+    "id": "7f1d4b8e-1a2b-4c3d-9e5f-60718293a4b5",
+    "estado": "vendido"
   }
 }
 ```
 
-El contenido de `data` es ilustrativo y puede incluir otras columnas devueltas por el repositorio.
+`data` contiene el registro devuelto por la consulta de actualización y puede
+incluir también los demás campos del presupuesto.
 
-## Errores
-
-### `404 Not Found`
-
-Cuando no se encuentra el presupuesto o el repositorio no devuelve un registro actualizado:
+### Presupuesto no encontrado — `404 Not Found`
 
 ```json
 {
@@ -224,40 +248,54 @@ Cuando no se encuentra el presupuesto o el repositorio no devuelve un registro a
 }
 ```
 
-### `500 Internal Server Error`
-
-Si ocurre un error al actualizar el estado:
+### Error — `500 Internal Server Error`
 
 ```json
 {
   "success": false,
-  "message": "Error al actualizar el estado del presupuesto",
-  "details": "Descripción del error"
+  "message": "Error al actualizar estado",
+  "error": "Descripción del error"
 }
 ```
 
-# `GET /presupuestos/:id`
+---
 
-Obtiene un presupuesto por su identificador.
+## Obtener un presupuesto
 
-## Respuesta exitosa — `200 OK`
+### `GET /presupuestos/:id`
+
+### Datos enviados
+
+Solo se envía el identificador como parámetro de ruta:
+
+```http
+GET /presupuestos/7f1d4b8e-1a2b-4c3d-9e5f-60718293a4b5
+```
+
+### Datos recibidos — `200 OK`
 
 ```json
 {
   "success": true,
   "data": {
-    "id": "presupuesto-123",
-    "usuario_id": "123",
-    "total": 1500.5,
-    "estado": "emitido",
-    "tipo_documento": "presupuesto"
+    "id": "7f1d4b8e-1a2b-4c3d-9e5f-60718293a4b5",
+    "nombre_cliente": "Comercial El Sol",
+    "telefono_cliente": "04141234567",
+    "descuento": 50,
+    "total": 1250.5,
+    "detalles": [
+      {
+        "producto_id": "550e8400-e29b-41d4-a716-446655440000",
+        "cantidad": 2,
+        "precio_unitario": 650.25,
+        "tipo_precio": "Mayor"
+      }
+    ]
   }
 }
 ```
 
-### `404 Not Found`
-
-Si no existe un presupuesto con el identificador indicado:
+### Presupuesto no encontrado — `404 Not Found`
 
 ```json
 {
@@ -266,34 +304,40 @@ Si no existe un presupuesto con el identificador indicado:
 }
 ```
 
-### `500 Internal Server Error`
-
-Si ocurre un error al obtener el presupuesto:
+### Error — `500 Internal Server Error`
 
 ```json
 {
   "success": false,
   "message": "Error al obtener el presupuesto",
-  "details": "Descripción del error"
+  "error": "Descripción del error"
 }
 ```
 
-# `DELETE /presupuestos/:id`
+---
 
-Elimina un presupuesto por su identificador.
+## Eliminar un presupuesto
 
-## Respuesta exitosa — `200 OK`
+### `DELETE /presupuestos/:id`
+
+### Datos enviados
+
+Solo se envía el identificador como parámetro de ruta:
+
+```http
+DELETE /presupuestos/7f1d4b8e-1a2b-4c3d-9e5f-60718293a4b5
+```
+
+### Datos recibidos — `200 OK`
 
 ```json
 {
   "success": true,
-  "message": "Presupuesto eliminado correctamente"
+  "message": "Presupuesto eliminado exitosamente"
 }
 ```
 
-### `404 Not Found`
-
-Si no existe un presupuesto con el identificador indicado:
+### Presupuesto no encontrado — `404 Not Found`
 
 ```json
 {
@@ -302,35 +346,12 @@ Si no existe un presupuesto con el identificador indicado:
 }
 ```
 
-### `500 Internal Server Error`
-
-Si ocurre un error al eliminar el presupuesto:
+### Error — `500 Internal Server Error`
 
 ```json
 {
   "success": false,
-  "message": "Error al eliminar el presupuesto",
-  "details": "Descripción del error"
+  "message": "Error al eliminar presupuesto",
+  "error": "Descripción del error"
 }
 ```
-
----
-
-## Resumen del módulo
-
-| Operación            | Método del controlador      | Descripción                                                                               |
-| -------------------- | --------------------------- | ----------------------------------------------------------------------------------------- |
-| Crear presupuesto    | `crearPresupuesto()`        | Genera un ID y registra un presupuesto asociado a un usuario                              |
-| Listar presupuestos  | `listarPresupuestos()`      | Consulta los registros de tipo `presupuesto`, ordenados por fecha de creación descendente |
-| Cambiar estado       | `cambiarEstado()`           | Actualiza el estado de un presupuesto identificado por su ID                              |
-| Obtener presupuesto  | `obtenerPresupuestoPorId()` | Recupera un presupuesto por su ID                                                         |
-| Eliminar presupuesto | `eliminarPresupuesto()`     | Elimina un presupuesto por su ID                                                          |
-
-## Consideraciones
-
-- Los presupuestos se almacenan en la tabla `pedidos`.
-- El identificador se genera automáticamente al crear un presupuesto.
-- Al crearse, el registro utiliza el estado `emitido` y el tipo de documento `presupuesto`, según la operación del repositorio proporcionada.
-- La consulta de listado devuelve únicamente documentos de tipo `presupuesto`.
-- El controlador no especifica una lista de estados permitidos.
-- El controlador mostrado no define middleware de autenticación o autorización; estos podrían estar configurados en el router.
