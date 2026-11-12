@@ -1,28 +1,33 @@
+
 # --- Etapa 1: Compilación ---
-FROM node:20-alpine AS builder
+FROM node:22-alpine AS builder
 
 WORKDIR /app
 
-# Activar Corepack en Node.js (habilita pnpm de forma nativa sin pasar por npm ni musl/glic)
-RUN corepack enable && corepack prepare pnpm@latest --activate
+# Activar pnpm con una versión fija
+RUN corepack enable && corepack prepare pnpm@11.20.0 --activate
 
-# Copiar archivos de dependencias
-COPY package.json pnpm-lock.yaml ./
+# Copiar archivos de dependencias y configuración
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 
-# Si tu proyecto usa monorepo/workspaces, descompleta la siguiente línea:
-# COPY pnpm-workspace.yaml ./
-
+# Instalar dependencias
 RUN pnpm install --frozen-lockfile
 
+# Copiar código fuente
 COPY . .
+
+# Compilar Angular
 RUN pnpm run build
 
 # --- Etapa 2: Servidor Nginx ---
 FROM nginx:alpine
 
-# Reemplaza 'Frontend' por la carpeta real generada en dist/ (ej. dist/tu-app/browser)
+# Copiar compilación de Angular
 COPY --from=builder /app/dist/Frontend/browser /usr/share/nginx/html
+
+# Configuración de Nginx
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 EXPOSE 80
+
 CMD ["nginx", "-g", "daemon off;"]
