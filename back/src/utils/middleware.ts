@@ -89,16 +89,10 @@ export const authLimiter = rateLimit({
 // CORS GLOBAL
 // ==========================================
 const allowedOrigins = [
-  "http://localhost:4200",
-  "http://127.0.0.1:4200",
-  "https://localhost",
+  process.env.URL_FRONT,
+  process.env.FRONTEND_URL,
   "capacitor://localhost",
-];
-
-// Si tienes un dominio de producción en .env, se añade a la lista
-if (process.env.FRONTEND_URL) {
-  allowedOrigins.push(process.env.FRONTEND_URL);
-}
+].filter((origin): origin is string => Boolean(origin));
 
 app.use(
   cors({
