@@ -32,10 +32,13 @@
   <div class="profile-content">
 
     @if (authService.user(); as usuario) {
+<div class="profile-identity">
+  <div class="profile-identity-icon">
+    <i class="pi pi-id-card"></i>
+  </div>
 
-      <div class="profile-avatar">
-        <i class="pi pi-user"></i>
-      </div>
+  <span class="profile-identity-label">DATOS PERSONALES</span>
+</div>
 
       <h3 class="profile-name">
         {{ usuario.nombre }}
@@ -65,14 +68,16 @@
           <strong>{{ usuario.email }}</strong>
         </div>
 
-        <div class="profile-detail">
-          <span class="detail-label">
-            <i class="pi pi-id-card"></i>
-            Tipo de cuenta
-          </span>
+       @if (usuario.tipo?.toUpperCase() !== 'CLIENTE') {
+  <div class="profile-detail">
+    <span class="detail-label">
+      <i class="pi pi-id-card"></i>
+      Rol
+    </span>
 
-          <strong>{{ usuario.tipo }}</strong>
-        </div>
+    <strong>{{ usuario.tipo }}</strong>
+  </div>
+}
 
       </div>
 

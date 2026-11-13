@@ -850,3 +850,38 @@ app-site-header {
   display: block;
   box-shadow: 0 9px 22px rgba(0, 0, 0, .30);
 }
+
+.price-options {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.price-option {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  text-align: center;
+}
+
+.price-option-moneda {
+  display: block;
+  font-size: 11px;
+  opacity: 0.8;
+}
+
+.price-option-bcv {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 600px) {
+  .price-options {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

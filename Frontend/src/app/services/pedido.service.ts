@@ -40,9 +40,11 @@ export interface CrearPedidoResponse {
 export class PedidoService {
   private readonly http = inject(HttpClient);
 
-  private readonly apiUrl = environment.apiUrl
-    ? `${environment.apiUrl}api/pedidos`
-    : 'http://localhost:5000/api/pedidos';
+
+private readonly apiUrl = environment.apiUrl
+  ? `${environment.apiUrl}api/orden`
+  : 'http://localhost:5000/api/orden';
+
 
   crearPedido(pedido: CrearPedidoRequest): Observable<CrearPedidoResponse> {
     return this.http.post<CrearPedidoResponse>(this.apiUrl, pedido, { withCredentials: true });

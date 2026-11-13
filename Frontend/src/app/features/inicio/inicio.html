@@ -1,9 +1,11 @@
 
 <div class="home-page">
   <!-- HEADER -->
+
 <app-site-header
   [searchTerm]="searchTerm()"
-  [canAccessInventory]="canEditBanners()"
+  [isAuthenticated]="!!authService.user()"
+  [canAccessInventory]="canAccessInventory()"
   [wishlistCount]="wishlistTotalItems()"
   [cartCount]="cartTotalItems()"
   (searchChange)="onSearchChange($event)"
@@ -11,6 +13,7 @@
   (cartClick)="openCart()"
   (profileClick)="abrirPerfil()"
 />
+
 <!-- PROMOCIONES -->
 <section class="promo-grid" aria-label="Promociones">
 
@@ -116,6 +119,134 @@
 
 </section>
 
+<!-- PARA TI -->
+<section class="home-section compact-section">
+  <header class="section-header">
+    <div>
+      <span class="section-eyebrow">Seleccionados para ti</span>
+      <h2>Para ti</h2>
+    </div>
+  </header>
+
+  <div class="carousel-shell compact-carousel">
+    <button
+      type="button"
+      class="carousel-arrow carousel-arrow_prev"
+      aria-label="Productos anteriores"
+      (click)="scrollCarousel(forYouCarousel, -1)"
+    >
+      <i class="pi pi-chevron-left"></i>
+    </button>
+
+    <div #forYouCarousel class="product-carousel">
+      @for (product of forYouProducts(); track product.id) {
+        <article
+          class="home-product-card"
+          (mouseenter)="stopAutoplay()"
+          (mouseleave)="startAutoplay()"
+        >
+          <div class="product-image-area">
+            <a
+              class="product-image-link"
+              routerLink="/detalle-producto"
+              [state]="{ productId: product.id }"
+              [attr.aria-label]="'Ver detalle de ' + product.name"
+            >
+              @if (product.imageUrl) {
+                <img
+                  class="product-image"
+                  [src]="product.imageUrl"
+                  [alt]="product.name"
+                  loading="lazy"
+                  decoding="async"
+                />
+              } @else {
+                <div class="image-placeholder">
+                  <i class="pi pi-image"></i>
+                </div>
+              }
+            </a>
+
+            <button
+              type="button"
+              class="wishlist-button"
+              [class.wishlist-button_active]="isInWishlist(product.id)"
+              [attr.aria-label]="isInWishlist(product.id) ? 'Quitar de deseos' : 'Agregar a deseos'"
+              (click)="toggleWishlist(product.id)"
+            >
+              <i class="pi pi-heart"></i>
+            </button>
+
+            <span
+              class="product-availability"
+              [class.product-availability_low]="product.quantity <= 5"
+            >
+              {{ getStockLabel(product) }}
+            </span>
+          </div>
+
+          <div class="product-info">
+            <span class="product-category">{{ product.category || 'Sin categoría' }}</span>
+
+            <a
+              class="product-name-link"
+              routerLink="/detalle-producto"
+              [state]="{ productId: product.id }"
+            >
+              <h3>{{ product.name }}</h3>
+            </a>
+
+            <p class="product-description">{{ product.description }}</p>
+
+            <div class="product-price-row">
+     
+<div class="product-prices">
+  <strong class="product-price">
+    {{ product.price | currency:'USD':'symbol':'1.2-2' }}
+  </strong>
+
+ 
+<span class="product-price-bcv">
+  BS. {{ getPrecioBCV(product.price).toLocaleString('es-VE', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  }) }} BCV
+</span>
+
+</div>
+
+
+              <span
+                class="product-stock-label"
+                [class.product-stock-label_out]="product.quantity <= 0"
+              >
+                {{ product.quantity > 0 ? 'En stock' : 'Agotado' }}
+              </span>
+            </div>
+
+            <button
+              type="button"
+              class="product-add-button"
+              [disabled]="product.quantity <= 0"
+              (click)="addToCart(product)"
+            >
+              <i class="pi pi-plus"></i> Agregar al carrito
+            </button>
+          </div>
+        </article>
+      }
+    </div>
+
+    <button
+      type="button"
+      class="carousel-arrow carousel-arrow_next"
+      aria-label="Productos siguientes"
+      (click)="scrollCarousel(forYouCarousel, 1)"
+    >
+      <i class="pi pi-chevron-right"></i>
+    </button>
+  </div>
+</section>
     <!-- COMPRA POR CATEGORÍA -->
     <section class="home-section category-section">
       <header class="section-header">
@@ -167,7 +298,22 @@
                   <a class="product-name-link" routerLink="/detalle-producto" [state]="{ productId: product.id }"><h3>{{ product.name }}</h3></a>
                   <p class="product-description">{{ product.description }}</p>
                   <div class="product-price-row">
-                    <strong class="product-price">{{ product.price | currency:'USD':'symbol':'1.2-2' }}</strong>
+                 
+<div class="product-prices">
+  <strong class="product-price">
+    {{ product.price | currency:'USD':'symbol':'1.2-2' }}
+  </strong>
+
+  
+<span class="product-price-bcv">
+  BS. {{ getPrecioBCV(product.price).toLocaleString('es-VE', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  }) }} BCV
+</span>
+
+</div>
+
                     <span class="product-stock-label" [class.product-stock-label_out]="product.quantity <= 0">{{ product.quantity > 0 ? 'En stock' : 'Agotado' }}</span>
                   </div>
                   <button type="button" class="product-add-button" [disabled]="product.quantity <= 0" (click)="addToCart(product)">
@@ -214,7 +360,22 @@
                 <a class="product-name-link" routerLink="/detalle-producto" [state]="{ productId: product.id }"><h3>{{ product.name }}</h3></a>
                 <p class="product-description">{{ product.description }}</p>
                 <div class="product-price-row">
-                  <strong class="product-price">{{ product.price | currency:'USD':'symbol':'1.2-2' }}</strong>
+             
+<div class="product-prices">
+  <strong class="product-price">
+    {{ product.price | currency:'USD':'symbol':'1.2-2' }}
+  </strong>
+
+
+<span class="product-price-bcv">
+  BS. {{ getPrecioBCV(product.price).toLocaleString('es-VE', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  }) }} BCV
+</span>
+
+</div>
+
                   <span class="product-stock-label" [class.product-stock-label_out]="product.quantity <= 0">{{ product.quantity > 0 ? 'En stock' : 'Agotado' }}</span>
                 </div>
                 <button type="button" class="product-add-button" [disabled]="product.quantity <= 0" (click)="addToCart(product)">
@@ -260,7 +421,22 @@
                 <a class="product-name-link" routerLink="/detalle-producto" [state]="{ productId: product.id }"><h3>{{ product.name }}</h3></a>
                 <p class="product-description">{{ product.description }}</p>
                 <div class="product-price-row">
-                  <strong class="product-price">{{ product.price | currency:'USD':'symbol':'1.2-2' }}</strong>
+        
+<div class="product-prices">
+  <strong class="product-price">
+    {{ product.price | currency:'USD':'symbol':'1.2-2' }}
+  </strong>
+
+  
+<span class="product-price-bcv">
+  BS. {{ getPrecioBCV(product.price).toLocaleString('es-VE', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  }) }} BCV
+</span>
+
+</div>
+
                   <span class="product-stock-label" [class.product-stock-label_out]="product.quantity <= 0">{{ product.quantity > 0 ? 'En stock' : 'Agotado' }}</span>
                 </div>
                 <button type="button" class="product-add-button" [disabled]="product.quantity <= 0" (click)="addToCart(product)">
@@ -307,6 +483,55 @@
       </div>
     </section>
   
+    
+<!-- BANNER 3: ANCHO COMPLETO -->
+<section class="promo-wide" aria-label="Promoción destacada">
+  <article class="promo-card promo-card_full">
+
+    <div class="promo-slides">
+      @for (imagen of imagenesBanner3(); track imagen.objectKey; let i = $index) {
+        <div
+          class="promo-slide"
+          [class.promo-slide_active]="i === indiceBanner3()"
+          [style.background-image]="'url(' + imagen.publicUrl + ')'"
+        ></div>
+      }
+    </div>
+
+    @if (imagenesBanner3().length > 1) {
+      <div class="promo-dots" aria-label="Posición del tercer banner">
+        @for (imagen of imagenesBanner3(); track imagen.objectKey; let i = $index) {
+          <span
+            class="promo-dot"
+            [class.promo-dot_active]="i === indiceBanner3()"
+          ></span>
+        }
+      </div>
+    }
+
+    @if (canEditBanners()) {
+      <button
+        type="button"
+        class="promo-edit-button"
+        aria-label="Cambiar imágenes del tercer banner"
+        [disabled]="uploadingBanner()"
+        (click)="promoFile3.click()"
+      >
+        <i class="pi pi-bars"></i>
+      </button>
+
+      <input
+        #promoFile3
+        type="file"
+        accept="image/*"
+        multiple
+        hidden
+        (change)="onPromoImageChange($event, 3)"
+      />
+    }
+
+  </article>
+</section>
 
   <!-- BENEFICIOS DE COMPRA -->
   <section class="benefits-section" aria-label="Beneficios de compra">
@@ -340,7 +565,6 @@
       </div>
     </article>
   </section>
-
 
 
   <!-- FOOTER -->

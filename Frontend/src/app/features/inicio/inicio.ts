@@ -1,6 +1,7 @@
 
 import { CommonModule } from '@angular/common';
 import { forkJoin} from 'rxjs';
+
 import {
   Component,
   computed,
@@ -74,6 +75,14 @@ export class Inicio implements OnInit, OnDestroy {
   private readonly productService = inject(ProductService);
   private readonly cartService = inject(CartService);
 
+  readonly tasaBCV = 885.14; // MOCK: reemplazar por API BCV
+
+getPrecioBCV(precioUSD: number): number {
+  return precioUSD * this.tasaBCV;
+}
+
+  
+
   private readonly bannerService = inject(BannerService);
 readonly authService = inject(AuthService);
 
@@ -82,8 +91,22 @@ readonly bannerError = signal<string | null>(null);
 
 private bannerImages: BannerImage[] = [];
 
-readonly canEditBanners = computed(
-  () => this.authService.user()?.tipo === 'MARKETING'
+
+readonly canEditBanners = computed(() => {
+  const rol = this.authService.user()?.tipo?.trim().toUpperCase();
+
+  return rol === 'ADMIN' || rol === 'MARKETING';
+});
+
+
+readonly canAccessInventory = computed(() => {
+  const rol = this.authService.user()?.tipo?.toUpperCase();
+
+  return rol === 'ADMIN' || rol === 'MARKETING';
+});
+
+readonly canAccessAdmin = computed(
+  () => this.authService.user()?.tipo?.toUpperCase() === 'ADMIN'
 );
   readonly perfilAbierto = signal(false);
 
@@ -103,6 +126,9 @@ cerrarPerfil(): void {
   @ViewChild('categoryCarousel')
   private categoryCarousel?: ElementRef<HTMLElement>;
 
+  @ViewChild('forYouCarousel')
+private forYouCarousel?: ElementRef<HTMLElement>;
+
   @ViewChild('newestCarousel')
   private newestCarousel?: ElementRef<HTMLElement>;
 
@@ -118,6 +144,12 @@ cerrarPerfil(): void {
   readonly featuredSelection = signal<HomeProduct[]>([]);
   readonly recommendedSelection = signal<HomeProduct[]>([]);
 
+  readonly forYouSelection = signal<HomeProduct[]>([]);
+
+readonly forYouProducts = computed(() =>
+  this.filterBySearch(this.forYouSelection())
+);
+
   readonly loading = signal(false);
   readonly errorMessage = signal<string | null>(null);
   readonly searchTerm = signal('');
@@ -127,10 +159,11 @@ cerrarPerfil(): void {
 
   imagenesBanner1 = signal<BannerImage[]>([]);
 imagenesBanner2 = signal<BannerImage[]>([]);
+imagenesBanner3 = signal<BannerImage[]>([]);
 
 indiceBanner1 = signal(0);
 indiceBanner2 = signal(0);
-
+indiceBanner3 = signal(0);
 private intervaloBanners?: ReturnType<typeof setInterval>;
 
   readonly cartTotalItems = this.cartService.totalItems;
@@ -202,24 +235,29 @@ private intervaloBanners?: ReturnType<typeof setInterval>;
       .sort((a, b) => a.price - b.price)
       .slice(0, 10)
   );
+constructor() {
+  effect((onCleanup) => {
+    const overlayOpen =
+      this.perfilAbierto() ||
+      this.wishlistOpen() ||
+      this.cartService.isOpen();
 
-  constructor() {
-    effect(() => {
-      const overlayOpen =
-        this.wishlistOpen() || this.cartService.isOpen();
+    document.documentElement.classList.toggle(
+      'overlay-open',
+      overlayOpen
+    );
 
-      document.documentElement.classList.toggle(
-        'overlay-open',
-        overlayOpen
-      );
+    document.body.classList.toggle(
+      'overlay-open',
+      overlayOpen
+    );
 
-      document.body.classList.toggle(
-        'overlay-open',
-        overlayOpen
-      );
+    onCleanup(() => {
+      document.documentElement.classList.remove('overlay-open');
+      document.body.classList.remove('overlay-open');
     });
-  }
-
+  });
+}
   ngOnInit(): void {
     this.loadProducts();
     this.loadBanners();
@@ -271,7 +309,23 @@ loadBanners(): void {
       }
     }
   });
+this.bannerService.getBanner('home-tercero').subscribe({
+  next: response => {
+    const imagenes = response.data?.activo
+      ? (response.data.imagenes ?? []).filter(
+          (img): img is BannerImage =>
+            !!img?.objectKey && !!img?.publicUrl
+        )
+      : [];
 
+    this.imagenesBanner3.set(imagenes);
+  },
+  error: error => {
+    if (error.status !== 404) {
+      console.error('[BANNER 3] Error:', error);
+    }
+  }
+});
   this.iniciarCarruselBanners();
 }
 private iniciarCarruselBanners(): void {
@@ -281,10 +335,12 @@ private iniciarCarruselBanners(): void {
 
   this.indiceBanner1.set(0);
   this.indiceBanner2.set(0);
+  this.indiceBanner3.set(0);
 
   this.intervaloBanners = setInterval(() => {
     const total1 = this.imagenesBanner1().length;
     const total2 = this.imagenesBanner2().length;
+    
 
     if (total1 > 1) {
       this.indiceBanner1.update(indice => (indice + 1) % total1);
@@ -293,6 +349,11 @@ private iniciarCarruselBanners(): void {
     if (total2 > 1) {
       this.indiceBanner2.update(indice => (indice + 1) % total2);
     }
+    const total3 = this.imagenesBanner3().length;
+
+if (total3 > 1) {
+  this.indiceBanner3.update(indice => (indice + 1) % total3);
+}
   }, 4000);
 }
 
@@ -328,6 +389,13 @@ private iniciarCarruselBanners(): void {
 
   private updateProducts(products: HomeProduct[]): void {
     this.products.set(products);
+
+    this.forYouSelection.set(
+  this.getRandomProducts(
+    products.filter(product => product.quantity > 0),
+    10
+  )
+);
 
     const available = products.filter(
       product => product.quantity > 0
@@ -365,7 +433,7 @@ private iniciarCarruselBanners(): void {
   }
 
   // PROMOCIONES
-onPromoImageChange(event: Event, promo: 1 | 2): void {
+onPromoImageChange(event: Event, promo: 1 | 2 | 3): void {
   const input = event.target as HTMLInputElement;
   const files = Array.from(input.files ?? []);
 
@@ -387,8 +455,12 @@ onPromoImageChange(event: Event, promo: 1 | 2): void {
     return;
   }
 
-  const identificador =
-    promo === 1 ? 'home-principal' : 'home-secundario';
+const identificador =
+  promo === 1
+    ? 'home-principal'
+    : promo === 2
+      ? 'home-secundario'
+      : 'home-tercero';
 
   this.bannerError.set(null);
   this.uploadingBanner.set(true);
@@ -436,13 +508,19 @@ onPromoImageChange(event: Event, promo: 1 | 2): void {
   (img): img is BannerImage => !!img?.objectKey && !!img?.publicUrl
 );
 
+
 if (promo === 1) {
   this.imagenesBanner1.set(imagenesGuardadas);
   this.promoImage1.set(imagenesGuardadas[0]?.publicUrl ?? null);
-} else {
+
+} else if (promo === 2) {
   this.imagenesBanner2.set(imagenesGuardadas);
   this.promoImage2.set(imagenesGuardadas[0]?.publicUrl ?? null);
+
+} else if (promo === 3) {
+  this.imagenesBanner3.set(imagenesGuardadas);
 }
+
 
 this.iniciarCarruselBanners();
 
@@ -543,6 +621,7 @@ this.iniciarCarruselBanners();
   private moveAllCarousels(): void {
     const carousels = [
       this.featuredCarousel?.nativeElement,
+      this.forYouCarousel?.nativeElement,
       this.categoryCarousel?.nativeElement,
       this.newestCarousel?.nativeElement,
       this.recommendedCarousel?.nativeElement,
