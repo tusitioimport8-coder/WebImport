@@ -3,9 +3,11 @@ import ProductRepository from "../repositories/ProductRepository.js";
 import PresupuestoRepository from "../repositories/PresupuestoRepository.js";
 
 class PresupuestoController {
+  constructor(private readonly presupuestoRepository = PresupuestoRepository) {}
+
   async getPresupuestos(req: Request, res: Response) {
     try {
-      const data = await PresupuestoRepository.listarPresupuestos;
+      const data = await this.presupuestoRepository.listarPresupuestos();
       return res.status(200).json({ success: true, data });
     } catch (error: any) {
       return res.status(500).json({
@@ -19,7 +21,7 @@ class PresupuestoController {
   async getPresupuestoPorId(req: Request, res: Response) {
     try {
       const { id } = req.params;
-      const data = await PresupuestoRepository.obtenerPresupuestoPorId(
+      const data = await this.presupuestoRepository.obtenerPresupuestoPorId(
         id.toString(),
       );
       if (!data)
@@ -50,9 +52,8 @@ class PresupuestoController {
           });
         }
       }
-      const nuevoPresupuesto = await PresupuestoRepository.crearPresupuesto(
-        req.body,
-      );
+      const nuevoPresupuesto =
+        await this.presupuestoRepository.crearPresupuesto(req.body);
       return res.status(201).json({
         success: true,
         message: "Presupuesto creado exitosamente",
@@ -72,7 +73,7 @@ class PresupuestoController {
       const { id } = req.params;
       const { estado } = req.body;
       const actualizado =
-        await PresupuestoRepository.actualizarEstadoPresupuesto(
+        await this.presupuestoRepository.actualizarEstadoPresupuesto(
           id.toString(),
           estado,
         );
@@ -97,7 +98,7 @@ class PresupuestoController {
   async eliminarPresupuesto(req: Request, res: Response) {
     try {
       const { id } = req.params;
-      const eliminado = await PresupuestoRepository.eliminarPresupuesto(
+      const eliminado = await this.presupuestoRepository.eliminarPresupuesto(
         id.toString(),
       );
       if (!eliminado)
