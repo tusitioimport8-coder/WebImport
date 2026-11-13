@@ -19,8 +19,11 @@ export class SiteHeader {
   @Input() cartCount = 0;
   @Input() isAuthenticated = false;
   @Input() canAccessAdmin = false;
+  @Input() canAccessPresupuestos = false;
 
   @Input() canAccessInventory = false;
+
+  @Output() searchSubmit = new EventEmitter<void>();
 
   @Output() searchChange = new EventEmitter<string>();
   @Output() wishlistClick = new EventEmitter<void>();

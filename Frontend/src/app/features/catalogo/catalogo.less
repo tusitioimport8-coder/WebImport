@@ -300,9 +300,40 @@
   display: flex;
   align-items: center;
   gap: 4px;
-  flex-wrap: wrap;
   margin-top: auto;
   margin-bottom: 8px;
+}
+
+.product-prices {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+  min-width: 0;
+}
+
+.product-price {
+  color: #fff;
+  font-size: 15px;
+  font-weight: 900;
+}
+
+.product-price-bcv {
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.product-stock-label {
+  margin-left: auto;
+  padding: 2px 5px;
+  border-radius: 10px;
+  background: var(--catalog-green);
+  color: #101010;
+  font-size: 9px;
+  font-weight: 800;
+  white-space: nowrap;
 }
 
 .product-price {

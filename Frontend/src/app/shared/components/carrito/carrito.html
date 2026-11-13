@@ -1,51 +1,25 @@
-<!-- ==========================================
-     FONDO OSCURO
-     ========================================== -->
 
+<!-- FONDO OSCURO -->
 <div
   class="cart-backdrop"
-  [class.cart-backdrop_open]="
-    cartService.isOpen()
-  "
+  [class.cart-backdrop_open]="cartService.isOpen()"
   (click)="close()"
 ></div>
 
-
-<!-- ==========================================
-     PANEL DEL CARRITO
-     ========================================== -->
-
+<!-- PANEL DEL CARRITO -->
 <aside
   class="cart-drawer"
   role="dialog"
   aria-modal="true"
   aria-label="Carrito de compras"
-  [class.cart-drawer_open]="
-    cartService.isOpen()
-  "
-  [attr.aria-hidden]="
-    !cartService.isOpen()
-  "
+  [class.cart-drawer_open]="cartService.isOpen()"
+  [attr.aria-hidden]="!cartService.isOpen()"
 >
-
-  <!-- ========================================
-       CABECERA
-       ======================================== -->
-
   <header class="cart-header">
-
     <div>
-
-      <span class="cart-eyebrow">
-        Tu compra
-      </span>
-
-      <h2>
-        Carrito
-      </h2>
-
+      <span class="cart-eyebrow">Tu compra</span>
+      <h2>Carrito</h2>
     </div>
-
 
     <button
       type="button"
@@ -55,289 +29,342 @@
     >
       <i class="pi pi-times"></i>
     </button>
-
   </header>
 
-
-  <!-- ========================================
-       CONTENIDO
-       ======================================== -->
-
+  <!-- CONTENIDO -->
   <div class="cart-content">
-
-
-    <!-- VACÍO -->
-
     @if (cartService.isEmpty()) {
-
       <div class="empty-cart">
-
         <div class="empty-icon">
           <i class="pi pi-shopping-cart"></i>
         </div>
 
-
-        <h3>
-          Tu carrito está vacío
-        </h3>
-
-
-        <p>
-          Agrega algunos productos
-          para comenzar tu pedido.
-        </p>
-
+        <h3>Tu carrito está vacío</h3>
+        <p>Agrega algunos productos para comenzar tu pedido.</p>
       </div>
-
-
     } @else {
-
-
-      <!-- PRODUCTOS -->
-
       <div class="cart-items">
-
-
-        @for (
-          item of cartService.items();
-          track item.lineId
-        ) {
-
+        @for (item of cartService.items(); track item.lineId) {
           <article class="cart-item">
-
-
             <!-- IMAGEN -->
-
             <div class="item-image">
-
               @if (item.imageUrl) {
-
                 <img
                   [src]="item.imageUrl"
                   [alt]="item.name"
                   loading="lazy"
                   decoding="async"
                 />
-
               } @else {
-
                 <i class="pi pi-image"></i>
-
               }
-
             </div>
 
-
             <!-- INFORMACIÓN -->
-
             <div class="item-info">
-
-
               <div class="item-top">
-
-                <h3>
-                  {{ item.name }}
-                </h3>
-
+                <h3>{{ item.name }}</h3>
 
                 <button
                   type="button"
                   class="remove-button"
                   aria-label="Eliminar producto"
-                  (click)="
-                    cartService.remove(
-                      item.lineId
-                    )
-                  "
+                  (click)="cartService.remove(item.lineId)"
                 >
                   <i class="pi pi-trash"></i>
                 </button>
-
               </div>
 
-
               <!-- TIPO DE PRECIO -->
-
               @if (item.priceType) {
-
                 <span class="item-price-type">
-
                   @switch (item.priceType) {
-
                     @case ('GranMayor') {
                       Gran Mayor
                     }
-
                     @default {
                       {{ item.priceType }}
                     }
-
                   }
-
                 </span>
-
               }
 
-
               <!-- PRECIO -->
-
               <strong class="item-price">
-                {{
-                  item.price
-                    | currency:
-                      'USD':
-                      'symbol':
-                      '1.2-2'
-                }}
+                {{ item.price | currency:'USD':'symbol':'1.2-2' }}
               </strong>
 
-
               <div class="item-bottom">
-
-
                 <!-- CANTIDAD -->
-
                 <div class="quantity-control">
-
                   <button
                     type="button"
                     aria-label="Reducir cantidad"
-                    (click)="
-                      cartService.decrease(
-                        item.lineId
-                      )
-                    "
+                    (click)="cartService.decrease(item.lineId)"
                   >
                     <i class="pi pi-minus"></i>
                   </button>
 
-
-                  <span>
-                    {{ item.quantity }}
-                  </span>
-
+                  <span>{{ item.quantity }}</span>
 
                   <button
                     type="button"
                     aria-label="Aumentar cantidad"
-                    [disabled]="
-                      item.quantity >=
-                      item.stock
-                    "
-                    (click)="
-                      cartService.increase(
-                        item.lineId
-                      )
-                    "
+                    [disabled]="item.quantity >= item.stock"
+                    (click)="cartService.increase(item.lineId)"
                   >
                     <i class="pi pi-plus"></i>
                   </button>
-
                 </div>
 
-
                 <!-- SUBTOTAL -->
-
                 <span class="item-subtotal">
-
                   {{
-                    item.price *
-                      item.quantity
-                      | currency:
-                        'USD':
-                        'symbol':
-                        '1.2-2'
+                    item.price * item.quantity
+                      | currency:'USD':'symbol':'1.2-2'
                   }}
-
                 </span>
-
               </div>
-
             </div>
-
           </article>
-
         }
-
       </div>
-
     }
-
   </div>
 
-
-  <!-- ========================================
-       PIE
-       ======================================== -->
-
+  <!-- PIE DEL CARRITO -->
   @if (!cartService.isEmpty()) {
-
     <footer class="cart-footer">
-
-
-      <!-- RESUMEN -->
-
       <div class="cart-summary">
-
         <div>
-
-          <span>
-            Productos
-          </span>
-
-          <strong>
-            {{ cartService.totalItems() }}
-          </strong>
-
+          <span>Productos</span>
+          <strong>{{ cartService.totalItems() }}</strong>
         </div>
 
-
         <div class="total-row">
-
-          <span>
-            Total
-          </span>
-
+          <span>Total</span>
           <strong>
             {{
               cartService.totalPrice()
-                | currency:
-                  'USD':
-                  'symbol':
-                  '1.2-2'
+                | currency:'USD':'symbol':'1.2-2'
             }}
           </strong>
-
         </div>
-
       </div>
 
+      @if (esFuerzaVentas()) {
+        <button
+          tuiButton
+          type="button"
+          class="whatsapp-button"
+          [disabled]="procesandoPresupuesto()"
+          (click)="abrirFormularioPresupuesto()"
+        >
+          <i class="pi pi-file"></i>
+          Crear presupuesto
+        </button>
 
-    
- <button
-  tuiButton
-  type="button"
-  class="whatsapp-button"
-  (click)="abrirFormulario()"
->
-  <i class="pi pi-whatsapp"></i>
-  Pedir por WhatsApp
-</button>
-
-
+        @if (errorPresupuesto() && !mostrarFormularioPresupuesto()) {
+          <p class="pedido-error" role="alert">
+            {{ errorPresupuesto() }}
+          </p>
+        }
+      } @else {
+        <button
+          tuiButton
+          type="button"
+          class="whatsapp-button"
+          (click)="abrirFormulario()"
+        >
+          <i class="pi pi-whatsapp"></i>
+          Pedir por WhatsApp
+        </button>
+      }
     </footer>
-
   }
-
 </aside>
 
+<!-- FORMULARIO DE PRESUPUESTO -->
+@if (mostrarFormularioPresupuesto()) {
+  <div
+    class="pedido-modal-backdrop"
+    (click)="cerrarFormularioPresupuesto()"
+  ></div>
 
-<!-- ==========================================
-     MODAL DE CONFIRMACIÓN DEL PEDIDO
-     ========================================== -->
+  <section
+    class="pedido-modal"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="formulario-presupuesto-titulo"
+  >
+    <header class="pedido-modal-header">
+      <div>
+        <span class="cart-eyebrow">Fuerza de Ventas</span>
+        <h2 id="formulario-presupuesto-titulo">
+          Crear presupuesto
+        </h2>
+      </div>
 
+      <button
+        type="button"
+        class="close-button"
+        aria-label="Cerrar formulario de presupuesto"
+        [disabled]="procesandoPresupuesto()"
+        (click)="cerrarFormularioPresupuesto()"
+      >
+        <i class="pi pi-times"></i>
+      </button>
+    </header>
+
+    <form
+      class="pedido-modal-content"
+      (ngSubmit)="enviarPresupuesto()"
+    >
+      <label for="presupuesto-nombre">
+        Nombre del cliente *
+      </label>
+
+      <input
+        id="presupuesto-nombre"
+        type="text"
+        name="nombre_cliente"
+        placeholder="Nombre completo o empresa"
+        [(ngModel)]="datosPresupuesto.nombre_cliente"
+        minlength="2"
+        required
+      />
+
+      <label for="presupuesto-telefono">
+        Teléfono del cliente
+      </label>
+
+      <input
+        id="presupuesto-telefono"
+        type="tel"
+        name="telefono_cliente"
+        placeholder="04141234567"
+        [(ngModel)]="datosPresupuesto.telefono_cliente"
+      />
+
+      <label for="presupuesto-descuento">
+        Descuento (USD)
+      </label>
+
+      <input
+        id="presupuesto-descuento"
+        type="number"
+        name="descuento"
+        min="0"
+        step="0.01"
+        [(ngModel)]="datosPresupuesto.descuento"
+      />
+
+      <!-- RESUMEN DEL PRESUPUESTO -->
+      <div class="cart-summary">
+        <div>
+          <span>Productos</span>
+          <strong>{{ cartService.totalItems() }}</strong>
+        </div>
+
+        <div>
+          <span>Subtotal</span>
+          <strong>
+            {{
+              cartService.totalPrice()
+                | currency:'USD':'symbol':'1.2-2'
+            }}
+          </strong>
+        </div>
+
+        <div>
+          <span>Descuento</span>
+          <strong>
+            {{
+              datosPresupuesto.descuento
+                | currency:'USD':'symbol':'1.2-2'
+            }}
+          </strong>
+        </div>
+
+        <div class="total-row">
+          <span>Total del presupuesto</span>
+          <strong>
+            {{
+              (
+                cartService.totalPrice() -
+                (+datosPresupuesto.descuento || 0)
+              ) | currency:'USD':'symbol':'1.2-2'
+            }}
+          </strong>
+        </div>
+      </div>
+
+      @if (errorPresupuesto()) {
+        <p class="pedido-error" role="alert">
+          {{ errorPresupuesto() }}
+        </p>
+      }
+
+      <button
+        tuiButton
+        type="submit"
+        class="whatsapp-button"
+        [disabled]="procesandoPresupuesto()"
+      >
+        <i class="pi pi-file-check"></i>
+
+        {{
+          procesandoPresupuesto()
+            ? 'Registrando presupuesto...'
+            : 'Confirmar presupuesto'
+        }}
+      </button>
+    </form>
+  </section>
+}
+
+<!-- CONFIRMACIÓN DE PRESUPUESTO -->
+@if (presupuestoCreado()) {
+  <div class="pedido-modal-backdrop"></div>
+
+  <section
+    class="pedido-modal"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="presupuesto-modal-titulo"
+  >
+    <header class="pedido-modal-header">
+      <div>
+        <span class="cart-eyebrow">Fuerza de Ventas</span>
+        <h2 id="presupuesto-modal-titulo">
+          Presupuesto registrado
+        </h2>
+      </div>
+    </header>
+
+    <div class="pedido-modal-content">
+      <p>El presupuesto fue creado exitosamente.</p>
+
+      <p>
+        <strong>Número de presupuesto:</strong>
+        {{ presupuestoCreado() }}
+      </p>
+
+      <button
+        tuiButton
+        type="button"
+        class="whatsapp-button"
+        (click)="cerrarConfirmacionPresupuesto()"
+      >
+        <i class="pi pi-check"></i>
+        Aceptar
+      </button>
+    </div>
+  </section>
+}
+
+<!-- MODAL DE CONFIRMACIÓN DEL PEDIDO NORMAL -->
 @if (mostrarFormulario()) {
-
   <div
     class="pedido-modal-backdrop"
     (click)="cerrarFormulario()"
@@ -349,17 +376,10 @@
     aria-modal="true"
     aria-labelledby="pedido-modal-titulo"
   >
-
     <header class="pedido-modal-header">
-
       <div>
-        <span class="cart-eyebrow">
-          Finalizar compra
-        </span>
-
-        <h2 id="pedido-modal-titulo">
-          Datos del pedido
-        </h2>
+        <span class="cart-eyebrow">Finalizar compra</span>
+        <h2 id="pedido-modal-titulo">Datos del pedido</h2>
       </div>
 
       <button
@@ -371,14 +391,12 @@
       >
         <i class="pi pi-times"></i>
       </button>
-
     </header>
 
     <form
       class="pedido-modal-content"
       (ngSubmit)="openWhatsApp()"
     >
-
       <input
         type="text"
         name="nombre_completo"
@@ -423,22 +441,15 @@
         [(ngModel)]="datosPedido.direccion_base"
       />
 
-      <label for="tipo-entrega">
-        Tipo de entrega
-      </label>
+      <label for="tipo-entrega">Tipo de entrega</label>
 
       <select
         id="tipo-entrega"
         name="tipo_entrega"
         [(ngModel)]="datosPedido.tipo_entrega"
       >
-        <option value="retiro">
-          Retiro en sede
-        </option>
-
-        <option value="domicilio">
-          Envío a domicilio
-        </option>
+        <option value="retiro">Retiro en sede</option>
+        <option value="domicilio">Envío a domicilio</option>
       </select>
 
       <textarea
@@ -449,26 +460,16 @@
         rows="3"
       ></textarea>
 
-      <label for="metodo-pago">
-        Método de pago
-      </label>
+      <label for="metodo-pago">Método de pago</label>
 
       <select
         id="metodo-pago"
         name="metodo_pago"
         [(ngModel)]="datosPedido.metodo_pago"
       >
-        <option value="transferencia">
-          Transferencia
-        </option>
-
-        <option value="efectivo">
-          Efectivo
-        </option>
-
-        <option value="pago_movil">
-          Pago móvil
-        </option>
+        <option value="transferencia">Transferencia</option>
+        <option value="efectivo">Efectivo</option>
+        <option value="pago_movil">Pago móvil</option>
       </select>
 
       @if (errorPedido()) {
@@ -491,9 +492,6 @@
             : 'Confirmar pedido por WhatsApp'
         }}
       </button>
-
     </form>
-
   </section>
-
 }

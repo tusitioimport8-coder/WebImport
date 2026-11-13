@@ -1,10 +1,14 @@
 
 import { CommonModule } from '@angular/common';
+import { BcvService } from '../../services/bcv.service';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
   ChangeDetectionStrategy,
   Component,
   computed,
   inject,
+    DestroyRef,
+
   OnInit,
   signal
 } from '@angular/core';
@@ -25,7 +29,7 @@ import {
   ProductService
 } from '../../services/product.service';
 
-type TipoPrecioVisual = ProductPriceType | 'DetalBCV';
+type TipoPrecioVisual = 'DetalBCV' | ProductPriceType;
 
 interface ProductPriceOption {
   type: TipoPrecioVisual;
@@ -52,7 +56,10 @@ interface ProductPriceOption {
 })
 export class DetalleProducto implements OnInit {
 
+  private readonly destroyRef = inject(DestroyRef);
+
   private readonly productService = inject(ProductService);
+  private readonly bcvService = inject(BcvService);
   private readonly cartService = inject(CartService);
   private readonly wishlistService = inject(WishlistService);
 
@@ -62,6 +69,13 @@ export class DetalleProducto implements OnInit {
   readonly canAccessAdmin = computed(() =>
     this.authService.user()?.tipo?.trim().toUpperCase() === 'ADMIN'
   );
+
+  // PRESUPUESTOS: SOLO FUERZA DE VENTAS
+readonly canAccessPresupuestos = computed(() => {
+  const rol = this.authService.user()?.tipo?.trim().toUpperCase();
+
+  return rol === 'F_VENTAS';
+});
 
   readonly canAccessInventory = computed(() => {
     const rol = this.authService.user()?.tipo?.trim().toUpperCase();
@@ -80,14 +94,25 @@ export class DetalleProducto implements OnInit {
   }
 
   // TASA BCV
-  readonly tasaBCV = 885.14;
+readonly tasaBCV = signal<number | null>(null);
 
-  formatearBCV(precioUSD: number): string {
-    return (precioUSD * this.tasaBCV).toLocaleString('es-VE', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    });
+formatearBCV(precioUSD: number): string {
+  const tasa = this.tasaBCV();
+
+  if (
+    tasa === null ||
+    !Number.isFinite(tasa) ||
+    tasa <= 0 ||
+    !Number.isFinite(precioUSD)
+  ) {
+    return 'No disponible';
   }
+
+  return (precioUSD * tasa).toLocaleString('es-VE', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
+}
 
   // HEADER
   readonly headerSearchTerm = signal('');
@@ -125,7 +150,7 @@ export class DetalleProducto implements OnInit {
   readonly product = signal<ApiProduct | null>(null);
   readonly relatedSelection = signal<ApiProduct[]>([]);
 
-  readonly selectedPriceType = signal<TipoPrecioVisual>('Detal');
+ readonly selectedPriceType = signal<TipoPrecioVisual>('DetalBCV');
   readonly quantity = signal(1);
   readonly loading = signal(false);
   readonly errorMessage = signal<string | null>(null);
@@ -138,38 +163,37 @@ export class DetalleProducto implements OnInit {
 
     if (!product) return [];
 
-    const types: {
-      type: TipoPrecioVisual;
-      productType: ProductPriceType;
-      label: string;
-      moneda: 'BCV' | 'Divisas';
-    }[] = [
-      {
-        type: 'DetalBCV',
-        productType: 'Detal',
-        label: 'Detal',
-        moneda: 'BCV'
-      },
-      {
-        type: 'Detal',
-        productType: 'Detal',
-        label: 'Detal',
-        moneda: 'Divisas'
-      },
-      {
-        type: 'Mayor',
-        productType: 'Mayor',
-        label: 'Mayor',
-        moneda: 'Divisas'
-      },
-      {
-        type: 'GranMayor',
-        productType: 'GranMayor',
-        label: 'Gran Mayor',
-        moneda: 'Divisas'
-      }
-    ];
-
+  const types: {
+  type: TipoPrecioVisual;
+  productType: ProductPriceType;
+  label: string;
+  moneda: 'BCV' | 'Divisas';
+}[] = [
+  {
+    type: 'DetalBCV',
+    productType: 'detal_bs',
+    label: 'Detal',
+    moneda: 'BCV'
+  },
+  {
+    type: 'detal_usd',
+    productType: 'detal_usd',
+    label: 'Detal',
+    moneda: 'Divisas'
+  },
+  {
+    type: 'Mayor',
+    productType: 'Mayor',
+    label: 'Mayor',
+    moneda: 'Divisas'
+  },
+  {
+    type: 'GranMayor',
+    productType: 'GranMayor',
+    label: 'Gran Mayor',
+    moneda: 'Divisas'
+  }
+];
     return types.map(({ type, productType, label, moneda }) => {
       const productPrice = product.precios.find(
         price => price.tipo_precio === productType
@@ -217,6 +241,17 @@ export class DetalleProducto implements OnInit {
 
     this.requestedProductId.set(state?.productId ?? null);
     this.loadProducts();
+    this.bcvService.getRate()
+  .pipe(takeUntilDestroyed(this.destroyRef))
+  .subscribe({
+    next: tasa => {
+      this.tasaBCV.set(tasa);
+    },
+    error: error => {
+      console.error('Error al obtener tasa BCV:', error);
+      this.tasaBCV.set(null);
+    }
+  });
   }
 
   // CARGAR PRODUCTOS
@@ -281,7 +316,7 @@ export class DetalleProducto implements OnInit {
       this.getRandomProducts(possibleRelated, 5)
     );
 
-    this.selectedPriceType.set('Detal');
+  this.selectedPriceType.set('DetalBCV');
 
     window.scrollTo({
       top: 0,
@@ -291,7 +326,7 @@ export class DetalleProducto implements OnInit {
 
   // PRECIOS
   selectPrice(type: TipoPrecioVisual): void {
-    if (type !== 'DetalBCV' && type !== 'Detal') return;
+ if (type !== 'DetalBCV' && type !== 'detal_usd') return;
 
     const option = this.priceOptions().find(
       price => price.type === type
@@ -352,9 +387,9 @@ export class DetalleProducto implements OnInit {
         price: this.selectedPrice(),
         stock,
         imageUrl: product.imagen_url,
-        priceType: tipoPrecio === 'DetalBCV'
-          ? 'Detal'
-          : tipoPrecio
+      priceType: tipoPrecio === 'DetalBCV'
+  ? 'detal_bs'
+  : tipoPrecio
       },
       this.quantity()
     );

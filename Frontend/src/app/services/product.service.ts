@@ -3,7 +3,11 @@ import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment.development';
 
-export type ProductPriceType = 'Detal' | 'Mayor' | 'GranMayor';
+export type ProductPriceType =
+  | 'detal_usd'
+  | 'detal_bs'
+  | 'Mayor'
+  | 'GranMayor';
 
 export interface ApiProductPrice {
   id_precio: string;
@@ -22,7 +26,6 @@ export interface ApiProductCategory {
   nombre: string;
   descripcion: string;
 }
-
 export interface ApiProduct {
   id: string;
   sku?: string;
@@ -30,6 +33,7 @@ export interface ApiProduct {
   descripcion?: string;
   descuento_porcentaje: number | string;
   imagen_url?: string;
+  video_url?: string | null;
   stock: number;
   estado: boolean;
   creado_en: string;
@@ -37,7 +41,6 @@ export interface ApiProduct {
 
   categorias?: ApiProductCategory[];
 }
-
 export interface ProductsResponse {
   success: boolean;
   data: ApiProduct[];
@@ -47,19 +50,18 @@ export interface ProductDetailResponse {
   success: boolean;
   data: ApiProduct;
 }
-
 export interface ProductPayload {
   nombre: string;
   descripcion: string;
   imagen_url: string;
+  video_url?: string | null;
   stock: number;
   precios: {
     tipo_precio: ProductPriceType;
     precio: number;
   }[];
-  categorias_ids?: number[];
+  categorias_ids?: string[];
 }
-
 export interface ProductMutationResponse {
   success: boolean;
   message?: string;

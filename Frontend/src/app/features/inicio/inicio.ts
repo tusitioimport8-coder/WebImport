@@ -1,6 +1,7 @@
 
 import { CommonModule } from '@angular/common';
 import { forkJoin} from 'rxjs';
+import { BcvService } from '../../services/bcv.service';
 
 import {
   Component,
@@ -14,7 +15,7 @@ import {
   ViewChild
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 
 
 import { switchMap, map } from 'rxjs';
@@ -75,10 +76,55 @@ export class Inicio implements OnInit, OnDestroy {
   private readonly productService = inject(ProductService);
   private readonly cartService = inject(CartService);
 
-  readonly tasaBCV = 885.14; // MOCK: reemplazar por API BCV
+  private readonly router = inject(Router);
 
-getPrecioBCV(precioUSD: number): number {
-  return precioUSD * this.tasaBCV;
+
+
+irAlCatalogo(event: MouseEvent): void {
+  const elemento = event.target as HTMLElement;
+
+  if (elemento.closest('.promo-edit-button')) {
+    return;
+  }
+
+  this.router.navigate(['/catalogo']);
+}
+
+buscarEnCatalogo(): void {
+  const busqueda = this.searchTerm().trim();
+
+  if (!busqueda) return;
+
+  this.router.navigate(['/catalogo'], {
+    queryParams: { buscar: busqueda }
+  });
+}
+
+private readonly bcvService = inject(BcvService);
+
+readonly tasaBCV = signal<number | null>(null);
+
+getPrecioBCV(precioUSD: number): number | null {
+  const tasa = this.tasaBCV();
+
+  if (tasa === null) {
+    return null;
+  }
+
+  return this.bcvService.convertirABolivares(precioUSD, tasa);
+}
+
+private cargarTasaBCV(): void {
+  this.bcvService.getRate().subscribe({
+    next: tasa => {
+      this.tasaBCV.set(tasa);
+      console.log('[BCV] Tasa obtenida:', tasa);
+    },
+    error: error => {
+      console.error('[BCV] Error al obtener la tasa:', error);
+      this.tasaBCV.set(null);
+    }
+  });
 }
 
   
@@ -105,9 +151,18 @@ readonly canAccessInventory = computed(() => {
   return rol === 'ADMIN' || rol === 'MARKETING';
 });
 
-readonly canAccessAdmin = computed(
-  () => this.authService.user()?.tipo?.toUpperCase() === 'ADMIN'
-);
+readonly canAccessAdmin = computed(() => {
+  const rol = this.authService.user()?.tipo?.trim().toUpperCase();
+
+  return rol === 'ADMIN';
+});
+
+// PRESUPUESTOS: SOLO FUERZA DE VENTAS
+readonly canAccessPresupuestos = computed(() => {
+  const rol = this.authService.user()?.tipo?.trim().toUpperCase();
+
+  return rol === 'F_VENTAS';
+});
   readonly perfilAbierto = signal(false);
 
 abrirPerfil(): void {
@@ -258,10 +313,11 @@ constructor() {
     });
   });
 }
-  ngOnInit(): void {
-    this.loadProducts();
-    this.loadBanners();
-  }
+ngOnInit(): void {
+  this.loadProducts();
+  this.loadBanners();
+  this.cargarTasaBCV();
+}
 
   ngOnDestroy(): void {
     this.stopAutoplay();
@@ -698,30 +754,28 @@ this.iniciarCarruselBanners();
   }
 
   // MAPEO DEL BACKEND
-  private mapApiProduct(
-    product: ApiProduct
-  ): HomeProduct {
-    const mayor = product.precios?.find(
-      price =>
-        price.tipo_precio?.trim().toLowerCase() ===
-        'mayor'
-    );
 
-    return {
-      id: product.id,
-      name: product.nombre,
-      description: product.descripcion ?? '',
-      price: Number(
-        mayor?.precio_final ?? mayor?.precio ?? 0
-      ),
-      quantity: Number(product.stock ?? 0),
-      imageUrl: product.imagen_url,
-      category:
-        product.categorias
-          ?.map(categoria => categoria.nombre)
-          .join(', ') || 'Sin categoría'
-    };
-  }
+private mapApiProduct(product: ApiProduct): HomeProduct {
+  const detalBs = product.precios?.find(
+    price => price.tipo_precio === 'detal_bs'
+  );
+
+  return {
+    id: product.id,
+    name: product.nombre,
+    description: product.descripcion ?? '',
+    price: Number(
+      detalBs?.precio_final ?? detalBs?.precio ?? 0
+    ),
+    quantity: Number(product.stock ?? 0),
+    imageUrl: product.imagen_url,
+    category:
+      product.categorias
+        ?.map(categoria => categoria.nombre)
+        .join(', ') || 'Sin categoría'
+  };
+}
+
 
   // SELECCIÓN ALEATORIA
   private getRandomProducts(

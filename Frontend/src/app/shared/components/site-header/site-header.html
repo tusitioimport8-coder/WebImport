@@ -4,27 +4,30 @@
     <img class="shop-logo" src="/images/logo.png" alt="Tu Sitio Import" />
   </a>
 
-  <div class="search-wrapper">
-    <tui-textfield class="search-control">
-      <input
-        tuiInput
-        type="search"
-        autocomplete="off"
-        placeholder="Buscar productos..."
-        [ngModel]="searchTerm"
-        (ngModelChange)="searchChange.emit($event)"
-      />
-    </tui-textfield>
+  
+<div class="search-wrapper">
+  <tui-textfield class="search-control">
+    <input
+      tuiInput
+      type="search"
+      autocomplete="off"
+      placeholder="Buscar productos..."
+      [ngModel]="searchTerm"
+      (ngModelChange)="searchChange.emit($event)"
+      (keydown.enter)="searchSubmit.emit()"
+    />
+  </tui-textfield>
 
-    <button
-      type="button"
-      class="search-icon-button"
-      aria-label="Buscar productos"
-      (click)="searchChange.emit(searchTerm)"
-    >
-      <img src="/images/buscar.png" alt="" />
-    </button>
-  </div>
+  <button
+    type="button"
+    class="search-icon-button"
+    aria-label="Buscar productos"
+    (click)="searchSubmit.emit()"
+  >
+    <img src="/images/buscar.png" alt="" />
+  </button>
+</div>
+
 
   <div class="toolbar-actions">
     <button
@@ -119,6 +122,22 @@
         class="toolbar-action-image"
       />
       <span class="toolbar-action-label">INVENTARIO</span>
+    </span>
+  </a>
+}
+
+<!-- PRESUPUESTOS: SOLO FUERZA DE VENTAS -->
+@if (canAccessPresupuestos) {
+  <a
+    class="toolbar-action"
+    routerLink="/presupuestos"
+    aria-label="Ver presupuestos"
+  >
+    <span class="toolbar-action-content">
+      <span class="toolbar-action-symbol">
+        <i class="pi pi-file-edit"></i>
+      </span>
+      <span class="toolbar-action-label">PRESUPUESTOS</span>
     </span>
   </a>
 }
