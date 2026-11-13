@@ -76,13 +76,17 @@
                     Editar
                   </button>
 
-                  <button
-                    type="button"
-                    class="delete-button"
-                    (click)="deleteUser(user)"
-                  >
-                    Eliminar
-                  </button>
+                
+@if (!isCurrentUser(user)) {
+  <button
+    type="button"
+    class="delete-button"
+    (click)="deleteUser(user)"
+  >
+    Eliminar
+  </button>
+}
+
                 </div>
               </td>
             </tr>

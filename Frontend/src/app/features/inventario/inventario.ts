@@ -2,6 +2,8 @@ import { CommonModule } from '@angular/common';
 import { switchMap, map, of, finalize, forkJoin, catchError } from 'rxjs';
 import { ProductPayload } from '../../services/product.service';
 import { AuthService } from '../../services/auth';
+import { BcvService } from '../../services/bcv.service';
+import { DestroyRef } from '@angular/core';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -64,6 +66,8 @@ type InventoryViewState = 'loading' | 'error' | 'empty' | 'no-results' | 'conten
 export class Inventario implements OnInit {
 
   private readonly productService = inject(ProductService);
+  private readonly bcvService = inject(BcvService);
+private readonly destroyRef = inject(DestroyRef);
   private readonly categoryService = inject(CategoryService);
   private readonly authService = inject(AuthService);
 
@@ -74,6 +78,22 @@ readonly isMarketing = computed(
   private nextProductSequence = 1;
 
   readonly categories = signal<ApiCategory[]>([]);
+  readonly tasaBCV = signal<number | null>(null);
+
+formatearBCV(precioUSD: number): string {
+  const tasa = this.tasaBCV();
+
+  if (tasa === null || !Number.isFinite(precioUSD)) {
+    return 'No disponible';
+  }
+
+  return this.bcvService
+    .convertirABolivares(precioUSD, tasa)
+    .toLocaleString('es-VE', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
+}
   readonly pageSize = 5;
   readonly statusLabels: Record<InventoryStatus, string> = {
     available: 'Disponible',
@@ -117,9 +137,10 @@ readonly savingProduct = signal(false);
   readonly productForm = this.formBuilder.group({
     name: ['', [Validators.required, Validators.pattern(/\S/), Validators.maxLength(80)]],
     category: this.formBuilder.control<InventoryCategory>('Electrónica', Validators.required),
-    price: [0, [Validators.required, Validators.min(0)]],
-    wholesalePrice: [0, [Validators.required, Validators.min(0)]],
-    bulkPrice: [0, [Validators.required, Validators.min(0)]],
+   price: [0, [Validators.required, Validators.min(0)]],
+priceBCV: [0, [Validators.required, Validators.min(0)]],
+wholesalePrice: [0, [Validators.required, Validators.min(0)]],
+bulkPrice: [0, [Validators.required, Validators.min(0)]],
     quantity: [0, [Validators.required, Validators.min(0)]],
     minimumStock: [0, [Validators.required, Validators.min(0)]],
     description: ['', Validators.maxLength(300)],
@@ -273,9 +294,21 @@ loadCategories(): void {
     });
   }
 
- ngOnInit(): void {
+ngOnInit(): void {
   this.loadProducts();
   this.loadCategories();
+
+  this.bcvService.getRate()
+    .pipe(takeUntilDestroyed(this.destroyRef))
+    .subscribe({
+      next: tasa => {
+        this.tasaBCV.set(tasa);
+      },
+      error: error => {
+        console.error('Error al obtener tasa BCV:', error);
+        this.tasaBCV.set(null);
+      }
+    });
 }
 
   onSearch(event: Event): void {
@@ -348,9 +381,10 @@ onImageSelected(event: Event): void {
     this.productForm.reset({
       name: '',
       category: 'Electrónica',
-      price: 0,
-      wholesalePrice: 0,
-      bulkPrice: 0,
+     price: 0,
+priceBCV: 0,
+wholesalePrice: 0,
+bulkPrice: 0,
       quantity: 0,
       minimumStock: 0,
       description: '',
@@ -465,21 +499,25 @@ saveProduct(): void {
           descripcion: value.description.trim(),
           imagen_url: imageUrl,
           stock: Number(value.quantity),
-categorias_ids: categoryId !== undefined ? [categoryId] : [],
-          precios: [
-            {
-              tipo_precio: 'Detal',
-              precio: Number(value.price)
-            },
-            {
-              tipo_precio: 'Mayor',
-              precio: Number(value.wholesalePrice)
-            },
-            {
-              tipo_precio: 'GranMayor',
-              precio: Number(value.bulkPrice)
-            }
-          ]
+categorias_ids: categoryId !== undefined ? [String(categoryId)] : [],
+       precios: [
+  {
+    tipo_precio: 'detal_usd',
+    precio: Number(value.price)
+  },
+  {
+    tipo_precio: 'detal_bs',
+    precio: Number(value.priceBCV)
+  },
+  {
+    tipo_precio: 'Mayor',
+    precio: Number(value.wholesalePrice)
+  },
+  {
+    tipo_precio: 'GranMayor',
+    precio: Number(value.bulkPrice)
+  }
+]
         };
 
       console.log('MODO:', editingId ? 'EDITAR' : 'CREAR');
@@ -575,9 +613,9 @@ retry(): void {
   }
 
   private mapApiProduct(product: ApiProduct): InventoryProduct {
-  const getPrice = (
-    type: 'Detal' | 'Mayor' | 'GranMayor'
-  ): number => {
+ const getPrice = (
+  type: 'detal_usd' | 'detal_bs' | 'Mayor' | 'GranMayor'
+): number => {
     const found = product.precios?.find(
       (price) =>
         price.tipo_precio?.trim().toLowerCase() ===
@@ -599,9 +637,10 @@ retry(): void {
   product.categorias?.map((categoria) => categoria.nombre).join(', ')
   || 'Sin categoría'
 ) as InventoryCategory,
-    price: getPrice('Detal'),
-    wholesalePrice: getPrice('Mayor'),
-    bulkPrice: getPrice('GranMayor'),
+   price: getPrice('detal_usd'),
+priceBCV: getPrice('detal_bs'),
+wholesalePrice: getPrice('Mayor'),
+bulkPrice: getPrice('GranMayor'),
     quantity,
     minimumStock,
     status: this.resolveStatus(quantity, minimumStock),
@@ -614,9 +653,10 @@ retry(): void {
     this.productForm.reset({
       name: product.name,
       category: product.category,
-      price: product.price,
-      wholesalePrice: product.wholesalePrice,
-      bulkPrice: product.bulkPrice,
+     price: product.price,
+priceBCV: product.priceBCV,
+wholesalePrice: product.wholesalePrice,
+bulkPrice: product.bulkPrice,
       quantity: product.quantity,
       minimumStock: product.minimumStock,
       description: product.description,
@@ -632,9 +672,10 @@ retry(): void {
     return {
       name: value.name.trim(),
       category: value.category,
-      price: Number(value.price),
-      wholesalePrice: Number(value.wholesalePrice),
-      bulkPrice: Number(value.bulkPrice),
+    price: Number(value.price),
+priceBCV: Number(value.priceBCV),
+wholesalePrice: Number(value.wholesalePrice),
+bulkPrice: Number(value.bulkPrice),
       quantity,
       minimumStock,
       status: this.resolveStatus(quantity, minimumStock),

@@ -9,6 +9,8 @@ import {
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
+import { AuthService } from '../../services/auth';
+
 import {
   ApiUser,
   UpdateUserPayload,
@@ -25,6 +27,11 @@ import {
 })
 export class Admin implements OnInit {
   private readonly userService = inject(UserService);
+  readonly authService = inject(AuthService);
+
+isCurrentUser(user: ApiUser): boolean {
+  return this.authService.user()?.id === user.id;
+}
 
   readonly users = signal<ApiUser[]>([]);
   readonly loading = signal(false);
@@ -122,10 +129,15 @@ export class Admin implements OnInit {
     });
   }
 
-  deleteUser(user: ApiUser): void {
-    const confirmed = window.confirm(
-      `¿Eliminar al usuario "${user.nombre_completo}"?`
-    );
+ deleteUser(user: ApiUser): void {
+  if (this.isCurrentUser(user)) {
+    this.errorMessage.set('No puedes eliminar tu propia cuenta.');
+    return;
+  }
+
+  const confirmed = window.confirm(
+    `¿Eliminar al usuario "${user.nombre_completo}"?`
+  );
 
     if (!confirmed) return;
 

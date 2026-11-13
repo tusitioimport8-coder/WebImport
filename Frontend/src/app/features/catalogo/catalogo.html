@@ -8,11 +8,13 @@
   [isAuthenticated]="isAuthenticated()"
   [canAccessAdmin]="canAccessAdmin()"
   [canAccessInventory]="canAccessInventory()"
+  [canAccessPresupuestos]="canAccessPresupuestos()"
   (searchChange)="onSearchChange($event)"
   (wishlistClick)="openWishlist()"
   (cartClick)="openCart()"
   (profileClick)="abrirPerfil()"
 />
+
 
 
 
@@ -167,12 +169,24 @@
 
                 <p class="product-description">{{ product.description }}</p>
 
-                <div class="product-price-row">
-                  <strong class="product-price">
-                    {{ product.price | currency:'USD':'symbol':'1.2-2' }}
-                  </strong>
-                  <span class="product-stock-label">En stock</span>
-                </div>
+  
+<div class="product-price-row">
+  <div class="product-prices">
+    <strong class="product-price">
+      {{ product.priceBCV | currency:'USD':'symbol':'1.2-2' }}
+    </strong>
+
+    @if (getPrecioBCV(product.priceBCV); as precioBs) {
+      <small class="product-price-bcv">
+        Bs. {{ precioBs | number:'1.2-2':'es-VE' }} BCV
+      </small>
+    }
+  </div>
+
+  <span class="product-stock-label">En stock</span>
+</div>
+
+
 
                 <button
                   type="button"

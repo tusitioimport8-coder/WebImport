@@ -4,6 +4,7 @@
   [isAuthenticated]="!!authService.user()"
   [canAccessAdmin]="canAccessAdmin()"
   [canAccessInventory]="canAccessInventory()"
+  [canAccessPresupuestos]="canAccessPresupuestos()"
   [wishlistCount]="wishlistTotalItems()"
   [cartCount]="cartHeaderTotalItems()"
   (searchChange)="onHeaderSearchChange($event)"
@@ -115,7 +116,7 @@
                 [class.price-option_active]="selectedPriceType() === option.type"
                 [disabled]="
                   !option.available ||
-                  (option.type !== 'DetalBCV' && option.type !== 'Detal')
+                (option.type !== 'DetalBCV' && option.type !== 'detal_usd')
                 "
                 (click)="selectPrice(option.type)"
               >

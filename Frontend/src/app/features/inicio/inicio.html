@@ -2,10 +2,15 @@
 <div class="home-page">
   <!-- HEADER -->
 
+
 <app-site-header
   [searchTerm]="searchTerm()"
   [isAuthenticated]="!!authService.user()"
+  [canAccessAdmin]="canAccessAdmin()"
   [canAccessInventory]="canAccessInventory()"
+  (searchSubmit)="buscarEnCatalogo()"
+  [canAccessPresupuestos]="canAccessPresupuestos()"
+
   [wishlistCount]="wishlistTotalItems()"
   [cartCount]="cartTotalItems()"
   (searchChange)="onSearchChange($event)"
@@ -18,7 +23,12 @@
 <section class="promo-grid" aria-label="Promociones">
 
   <!-- BANNER 1 -->
-  <article class="promo-card promo-card_primary">
+<article
+  class="promo-card promo-card_primary"
+  (click)="irAlCatalogo($event)"
+>
+
+
 
     <!-- Imágenes con transición suave -->
     <div class="promo-slides">
@@ -68,7 +78,13 @@
   </article>
 
   <!-- BANNER 2 -->
-  <article class="promo-card promo-card_secondary">
+<article
+  class="promo-card promo-card_secondary"
+  (click)="irAlCatalogo($event)"
+>
+    
+
+
 
     <!-- Imágenes con transición suave -->
     <div class="promo-slides">
@@ -200,19 +216,21 @@
 
             <div class="product-price-row">
      
+
 <div class="product-prices">
   <strong class="product-price">
     {{ product.price | currency:'USD':'symbol':'1.2-2' }}
   </strong>
 
- 
-<span class="product-price-bcv">
-  BS. {{ getPrecioBCV(product.price).toLocaleString('es-VE', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  }) }} BCV
-</span>
-
+  @if (getPrecioBCV(product.price); as precioBs) {
+    <span class="product-price-bcv">
+      Bs. {{ precioBs | number:'1.2-2':'es-VE' }} BCV
+    </span>
+  } @else {
+    <span class="product-price-bcv">
+      Precio en Bs. no disponible
+    </span>
+  }
 </div>
 
 
@@ -298,21 +316,23 @@
                   <a class="product-name-link" routerLink="/detalle-producto" [state]="{ productId: product.id }"><h3>{{ product.name }}</h3></a>
                   <p class="product-description">{{ product.description }}</p>
                   <div class="product-price-row">
-                 
+  
 <div class="product-prices">
   <strong class="product-price">
     {{ product.price | currency:'USD':'symbol':'1.2-2' }}
   </strong>
 
-  
-<span class="product-price-bcv">
-  BS. {{ getPrecioBCV(product.price).toLocaleString('es-VE', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  }) }} BCV
-</span>
-
+  @if (getPrecioBCV(product.price); as precioBs) {
+    <span class="product-price-bcv">
+      Bs. {{ precioBs | number:'1.2-2':'es-VE' }} BCV
+    </span>
+  } @else {
+    <span class="product-price-bcv">
+      Precio en Bs. no disponible
+    </span>
+  }
 </div>
+
 
                     <span class="product-stock-label" [class.product-stock-label_out]="product.quantity <= 0">{{ product.quantity > 0 ? 'En stock' : 'Agotado' }}</span>
                   </div>
@@ -360,20 +380,21 @@
                 <a class="product-name-link" routerLink="/detalle-producto" [state]="{ productId: product.id }"><h3>{{ product.name }}</h3></a>
                 <p class="product-description">{{ product.description }}</p>
                 <div class="product-price-row">
-             
+   
 <div class="product-prices">
   <strong class="product-price">
     {{ product.price | currency:'USD':'symbol':'1.2-2' }}
   </strong>
 
-
-<span class="product-price-bcv">
-  BS. {{ getPrecioBCV(product.price).toLocaleString('es-VE', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  }) }} BCV
-</span>
-
+  @if (getPrecioBCV(product.price); as precioBs) {
+    <span class="product-price-bcv">
+      Bs. {{ precioBs | number:'1.2-2':'es-VE' }} BCV
+    </span>
+  } @else {
+    <span class="product-price-bcv">
+      Precio en Bs. no disponible
+    </span>
+  }
 </div>
 
                   <span class="product-stock-label" [class.product-stock-label_out]="product.quantity <= 0">{{ product.quantity > 0 ? 'En stock' : 'Agotado' }}</span>
@@ -421,21 +442,23 @@
                 <a class="product-name-link" routerLink="/detalle-producto" [state]="{ productId: product.id }"><h3>{{ product.name }}</h3></a>
                 <p class="product-description">{{ product.description }}</p>
                 <div class="product-price-row">
-        
+     
 <div class="product-prices">
   <strong class="product-price">
     {{ product.price | currency:'USD':'symbol':'1.2-2' }}
   </strong>
 
-  
-<span class="product-price-bcv">
-  BS. {{ getPrecioBCV(product.price).toLocaleString('es-VE', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  }) }} BCV
-</span>
-
+  @if (getPrecioBCV(product.price); as precioBs) {
+    <span class="product-price-bcv">
+      Bs. {{ precioBs | number:'1.2-2':'es-VE' }} BCV
+    </span>
+  } @else {
+    <span class="product-price-bcv">
+      Precio en Bs. no disponible
+    </span>
+  }
 </div>
+
 
                   <span class="product-stock-label" [class.product-stock-label_out]="product.quantity <= 0">{{ product.quantity > 0 ? 'En stock' : 'Agotado' }}</span>
                 </div>

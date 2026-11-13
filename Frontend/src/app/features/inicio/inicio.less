@@ -805,3 +805,155 @@
     flex-shrink: 0;
   }
 }
+
+
+/* ==========================================
+   INICIO RESPONSIVE - DOS PRODUCTOS VISIBLES
+   ========================================== */
+
+@media (max-width: 600px) {
+
+  /* Secciones */
+  .home-section {
+    width: calc(100% - 16px);
+    padding: 12px 8px 16px;
+    margin-top: 16px;
+    min-width: 0;
+  }
+
+  /* Contenedor del carrusel */
+  .carousel-shell {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .product-carousel {
+    display: flex;
+    gap: 8px;
+    width: 100%;
+    min-width: 0;
+    padding: 4px 0 10px;
+    box-sizing: border-box;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+  }
+
+  /* Exactamente dos tarjetas */
+  .product-carousel .home-product-card,
+  .featured-section .home-product-card,
+  .compact-section:has(#newestCarousel) .home-product-card {
+    flex: 0 0 calc((100% - 8px) / 2);
+    width: calc((100% - 8px) / 2);
+    min-width: 0;
+    max-width: none;
+    box-sizing: border-box;
+    padding: 5px !important;
+    border-width: 3px;
+    border-radius: 14px;
+    scroll-snap-align: start;
+  }
+
+  /* Imagen */
+  .product-carousel .product-image-area {
+    width: 100%;
+    height: 125px !important;
+    flex: 0 0 125px;
+    border-radius: 10px;
+  }
+
+  .product-carousel .product-image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  /* Información */
+  .product-carousel .product-info {
+    min-width: 0;
+    padding: 7px 2px 3px !important;
+  }
+
+  .product-carousel .product-category {
+    font-size: 9px;
+    margin-bottom: 4px;
+    overflow-wrap: anywhere;
+  }
+
+  .product-carousel .product-info h3 {
+    font-size: 11px !important;
+    line-height: 1.2 !important;
+  }
+
+  .product-carousel .product-description {
+    font-size: 10px !important;
+    line-height: 1.25 !important;
+  }
+
+  /* Precio y disponibilidad */
+  .product-carousel .product-price-row {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+    margin: 7px 0 !important;
+  }
+
+  .product-carousel .product-price {
+    font-size: 16px;
+  }
+
+  .product-carousel .product-price-bcv {
+    font-size: 9px;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  .product-carousel .product-stock-label {
+    font-size: 9px;
+    padding: 4px 7px;
+  }
+
+  /* Botón agregar */
+  .product-carousel .product-add-button {
+    width: 100%;
+    min-width: 0;
+    min-height: 34px !important;
+    padding: 5px 3px !important;
+    font-size: 10px !important;
+    gap: 4px;
+    white-space: normal;
+    text-align: center;
+  }
+
+  /* Favoritos */
+  .product-carousel .wishlist-button {
+    width: 29px;
+    height: 29px;
+    top: 6px;
+    right: 6px;
+  }
+
+  /* Disponibilidad sobre la imagen */
+  .product-carousel .product-availability {
+    font-size: 9px;
+    padding: 4px 6px;
+    left: 5px;
+    bottom: 5px;
+  }
+
+  /* Flechas del carrusel */
+  .product-carousel + .carousel-arrow,
+  .carousel-shell > .carousel-arrow {
+    width: 28px;
+    height: 28px;
+  }
+
+  .carousel-arrow_prev {
+    left: -5px;
+  }
+
+  .carousel-arrow_next {
+    right: -5px;
+  }
+}

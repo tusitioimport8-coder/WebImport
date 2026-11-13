@@ -1,5 +1,8 @@
 
 import { CurrencyPipe } from '@angular/common';
+
+import { DecimalPipe } from '@angular/common';
+import { BcvService } from '../../services/bcv.service';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -42,6 +45,8 @@ import {
   CategoryService,
 } from '../../services/category.service';
 
+import { ActivatedRoute } from '@angular/router';
+
 import { CartService } from '../../services/cart';
 import { WishlistService } from '../../services/wishlist.service';
 
@@ -49,17 +54,16 @@ import { Carrito } from '../../shared/components/carrito/carrito';
 import { Wishlist } from '../../shared/components/wishlist/wishlist';
 import { SiteHeader } from '../../shared/components/site-header/site-header';
 import { SiteFooter } from '../../shared/components/site-footer/site-footer';
-
 export interface CatalogProduct {
   id: string;
   name: string;
   category: string;
   price: number;
+  priceBCV: number;
   quantity: number;
   description: string;
   imageUrl?: string;
 }
-
 export type CatalogSort =
   | 'price-asc'
   | 'price-desc'
@@ -77,6 +81,7 @@ export type CatalogViewState =
   standalone: true,
   imports: [
   CurrencyPipe,
+  DecimalPipe,
   FormsModule,
   RouterLink,
   Wishlist,
@@ -101,6 +106,22 @@ export class Catalogo implements OnInit {
   private readonly categoryService = inject(CategoryService);
   private readonly cartService = inject(CartService);
 
+  private readonly route = inject(ActivatedRoute);
+
+  private readonly bcvService = inject(BcvService);
+
+readonly tasaBCV = signal<number | null>(null);
+
+getPrecioBCV(precioUSD: number): number | null {
+  const tasa = this.tasaBCV();
+
+  if (tasa === null || !Number.isFinite(precioUSD)) {
+    return null;
+  }
+
+  return this.bcvService.convertirABolivares(precioUSD, tasa);
+}
+
   readonly authService = inject(AuthService);
 
 readonly isAuthenticated = computed(() =>
@@ -111,6 +132,13 @@ readonly canAccessAdmin = computed(() => {
   const rol = this.authService.user()?.tipo?.trim().toUpperCase();
 
   return rol === 'ADMIN';
+});
+
+// PRESUPUESTOS: SOLO FUERZA DE VENTAS
+readonly canAccessPresupuestos = computed(() => {
+  const rol = this.authService.user()?.tipo?.trim().toUpperCase();
+
+  return rol === 'F_VENTAS';
 });
 
 // PANEL MI PERFIL
@@ -280,10 +308,24 @@ readonly categories = computed<readonly string[]>(() => {
     return 'content';
   });
 
-  ngOnInit(): void {
-    this.loadProducts();
-    this.loadCategories();
-  }
+ ngOnInit(): void {
+  this.loadProducts();
+  this.loadCategories();
+
+  this.route.queryParamMap.subscribe(params => {
+  const busqueda = params.get('buscar') ?? '';
+
+  this.searchTerm.set(busqueda);
+});
+
+  this.bcvService.getRate().subscribe({
+    next: tasa => this.tasaBCV.set(tasa),
+    error: error => {
+      console.error('Error al obtener tasa BCV:', error);
+      this.tasaBCV.set(null);
+    }
+  });
+}
 
 loadCategories(): void {
   this.categoryService.getCategories().subscribe({
@@ -429,34 +471,30 @@ loadProducts(): void {
   }
 
   // MAPEO DEL BACKEND
-  private mapApiProduct(product: ApiProduct): CatalogProduct {
-    const mayor = product.precios?.find(
-      price =>
-        price.tipo_precio?.trim().toLowerCase() ===
-        'mayor'
-    );
+ 
+private mapApiProduct(product: ApiProduct): CatalogProduct {
+  const detalUsd = product.precios?.find(
+    price => price.tipo_precio === 'detal_usd'
+  );
 
-    const price = Number(
-      mayor?.precio_final ?? mayor?.precio ?? 0
-    );
+  const detalBs = product.precios?.find(
+    price => price.tipo_precio === 'detal_bs'
+  );
 
-    return {
-      id: product.id,
-      name: product.nombre,
+  return {
+    id: product.id,
+    name: product.nombre,
+    category: product.categorias
+      ?.map(categoria => categoria.nombre)
+      .join(', ') || 'Sin categoría',
+    price: Number(detalUsd?.precio_final ?? detalUsd?.precio ?? 0),
+    priceBCV: Number(detalBs?.precio_final ?? detalBs?.precio ?? 0),
+    quantity: Number(product.stock ?? 0),
+    description: product.descripcion ?? '',
+    imageUrl: product.imagen_url,
+  };
+}
 
-      // El endpoint de listado actualmente no
-      // devuelve categorías por producto.
-     category:
-  product.categorias
-    ?.map(categoria => categoria.nombre)
-    .join(', ') || 'Sin categoría',
-
-      price,
-      quantity: Number(product.stock ?? 0),
-      description: product.descripcion ?? '',
-      imageUrl: product.imagen_url,
-    };
-  }
 
   // ORDENAMIENTO
   private compareProducts(

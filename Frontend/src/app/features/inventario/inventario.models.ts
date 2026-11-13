@@ -7,11 +7,13 @@ export type InventoryStatus = (typeof INVENTORY_STATUSES)[number];
 export type InventorySort = 'name-asc' | 'price-asc' | 'price-desc' | 'stock-asc';
 export type InventoryEditorMode = 'create' | 'edit' | 'view';
 
+
 export interface InventoryProduct {
   id: string;
   name: string;
   category: InventoryCategory;
   price: number;
+  priceBCV: number;
   wholesalePrice: number;
   bulkPrice: number;
   imageUrl?: string;
@@ -35,13 +37,16 @@ export interface InventorySummary {
   estimatedValue: number;
 }
 
+
 export interface InventoryFormValue {
   name: string;
   category: InventoryCategory;
   price: number;
+  priceBCV: number;
   wholesalePrice: number;
   bulkPrice: number;
   quantity: number;
   minimumStock: number;
   description: string;
 }
+

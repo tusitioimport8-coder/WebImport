@@ -35,9 +35,11 @@ export class UserService {
   private readonly http = inject(HttpClient);
 
   // Ajustar al prefijo real de las rutas de usuarios.
-  private readonly apiUrl = environment.apiUrl
-    ? `${environment.apiUrl}api/usuarios`
-    : 'http://localhost:5000/api/usuarios';
+
+private readonly apiUrl = environment.apiUrl
+  ? `${environment.apiUrl.replace(/\/+$/, '')}/api/admin/usuarios`
+  : 'http://localhost:5000/api/admin/usuarios';
+
 
   getAllUsers(): Observable<UsersResponse> {
     return this.http.get<UsersResponse>(this.apiUrl, { withCredentials: true });

@@ -7,9 +7,10 @@ import {
 
 export type CartPriceType =
   | 'Detal'
+  | 'detal_usd'
+  | 'detal_bs'
   | 'Mayor'
   | 'GranMayor';
-
 
 export interface CartProduct {
   id: string;

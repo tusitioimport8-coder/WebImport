@@ -182,57 +182,162 @@ background: linear-gradient(
   }
 }
 
+/* ==========================================
+   HEADER RESPONSIVE - TABLET Y MÓVIL
+   ========================================== */
+
 @media (max-width: 820px) {
   .shop-toolbar {
     display: flex;
-    flex-wrap: wrap;
-    padding: .85rem 1rem;
-  }
-
-  .shop-brand {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 14px;
     width: 100%;
+    min-width: 0;
+    padding: 14px 12px 16px;
+    box-sizing: border-box;
   }
 
+  /* Logo */
+  .shop-brand {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .shop-logo {
+    width: 155px;
+    max-width: 100%;
+    height: auto;
+  }
+
+  /* Botones de navegación */
+  .toolbar-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 12px 16px;
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+
+  .toolbar-action {
+    flex: 0 0 auto;
+    min-width: 0;
+  }
+
+  .toolbar-action-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+
+  /* Buscador */
   .search-wrapper {
     order: 3;
-    flex: 1 0 100%;
+    flex: none;
+    width: 100%;
+    min-width: 0;
     max-width: none;
+    margin: 0;
   }
 
-  .toolbar-actions {
+  .search-control {
     width: 100%;
-    justify-content: flex-end;
+    min-width: 0;
+    box-sizing: border-box;
   }
 }
+
+/* ==========================================
+   HEADER RESPONSIVE - TELÉFONOS
+   ========================================== */
 
 @media (max-width: 560px) {
   .shop-toolbar {
-    gap: .75rem;
+    gap: 12px;
+    padding: 12px 10px 14px;
   }
-
-  .toolbar-action-symbol {
-  width: 42px;
-  height: 42px;
-
-  i {
-    font-size: 21px;
-  }
-}
 
   .shop-logo {
-    width: 135px;
+    width: 140px;
   }
 
   .toolbar-actions {
-    gap: 10px;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    align-items: start;
+    justify-items: center;
+    gap: 12px 4px;
+    width: 100%;
   }
 
-  .toolbar-action-image {
-    width: 42px;
-    height: 42px;
+  .toolbar-action {
+    width: 100%;
+    min-width: 0;
+    padding: 0;
+  }
+
+  .toolbar-action-content {
+    width: 100%;
+    min-width: 0;
+    gap: 4px;
+  }
+
+  .toolbar-action-image,
+  .toolbar-action-symbol {
+    width: 40px;
+    height: 40px;
+  }
+
+  .toolbar-action-symbol i {
+    font-size: 20px;
   }
 
   .toolbar-action-label {
+    max-width: 100%;
     font-size: 9px;
+    line-height: 1.2;
+    text-align: center;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  .search-wrapper {
+    width: 100%;
+  }
+
+  .search-icon-button,
+  .search-icon-button img {
+    width: 38px;
+    height: 38px;
+  }
+
+  :host ::ng-deep .search-control input {
+    min-width: 0;
+    padding-right: 52px !important;
   }
 }
+
+/* Pantallas especialmente pequeñas */
+@media (max-width: 350px) {
+  .toolbar-action-image,
+  .toolbar-action-symbol {
+    width: 34px;
+    height: 34px;
+  }
+
+  .toolbar-action-label {
+    font-size: 8px;
+  }
+
+  .toolbar-actions {
+    column-gap: 2px;
+  }
+}
+

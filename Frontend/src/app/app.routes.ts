@@ -1,3 +1,4 @@
+
 import { Routes } from '@angular/router';
 import { Layout } from './core/layout/layout';
 import { Inicio } from './features/inicio/inicio';
@@ -16,10 +17,22 @@ export const routes: Routes = [
       { path: 'catalogo', component: Catalogo },
       { path: 'inventario', component: Inventario },
       { path: 'detalle-producto', component: DetalleProducto },
-      { path: '', redirectTo: 'inicio', pathMatch: 'full' }, 
-       { path: 'admin', component: Admin }
-    ]
+
+      // MÓDULO DE PRESUPUESTOS
+      {
+        path: 'presupuestos',
+        loadComponent: () =>
+          import('./shared/presupuestos/presupuestos').then(
+            (m) => m.Presupuestos
+          ),
+      },
+
+      { path: 'admin', component: Admin },
+      { path: '', redirectTo: 'inicio', pathMatch: 'full' },
+    ],
   },
+
   { path: 'sesion', component: Sesion },
-  { path: '**', redirectTo: 'inicio' }
+
+  { path: '**', redirectTo: 'inicio' },
 ];

@@ -253,8 +253,9 @@
                 <tr>
                   <th scope="col">Producto</th>
                   <th scope="col">Categoría</th>
-                  <th scope="col" class="number-column">Precio detal</th>
-                  <th scope="col" class="number-column">Precio mayor</th>
+               <th scope="col" class="number-column">Detal USD</th>
+<th scope="col" class="number-column">Detal BS</th>
+<th scope="col" class="number-column">Precio mayor</th>
                   <th scope="col" class="number-column">Precio gran mayor</th>
                   <th scope="col" class="number-column">Disponible</th>
                   <th scope="col" class="number-column">Mínimo</th>
@@ -287,9 +288,18 @@
 
                     <td>{{ product.category }}</td>
 
-                    <td class="number-column">
-                      {{ product.price | currency: 'USD' : 'symbol' : '1.2-2' }}
-                    </td>
+         
+<td class="number-column">
+  {{ product.price | currency:'USD':'symbol':'1.2-2' }}
+</td>
+
+<td class="number-column">
+  <div>Bs. {{ formatearBCV(product.priceBCV) }}</div>
+  <small>
+    Ref. {{ product.priceBCV | currency:'USD':'symbol':'1.2-2' }}
+  </small>
+</td>
+
 
                     <td class="number-column">
                       {{
@@ -375,12 +385,23 @@
                     <dd>{{ product.category }}</dd>
                   </div>
 
-                  <div>
-                    <dt>Precio detal</dt>
-                    <dd>
-                      {{ product.price | currency: 'USD' : 'symbol' : '1.2-2' }}
-                    </dd>
-                  </div>
+      
+<div>
+  <dt>Detal USD</dt>
+  <dd>
+    {{ product.price | currency:'USD':'symbol':'1.2-2' }}
+  </dd>
+</div>
+
+<div>
+  <dt>Detal BS</dt>
+  <dd>
+    Bs. {{ formatearBCV(product.priceBCV) }}
+    <small>
+      Ref. {{ product.priceBCV | currency:'USD':'symbol':'1.2-2' }}
+    </small>
+  </dd>
+</div>
 
                   <div>
                     <dt>Precio mayor</dt>
@@ -561,9 +582,9 @@
       </div>
 
       <div class="form-field">
-        <label for="product-price">
-          Precio detal <span aria-hidden="true">*</span>
-        </label>
+       <label for="product-price">
+  Detal divisas (USD) <span aria-hidden="true">*</span>
+</label>
 
         <tui-textfield
           [invalid]="isFieldInvalid('price')"
@@ -584,12 +605,49 @@
           />
         </tui-textfield>
 
+      
+
         @if (isFieldInvalid('price')) {
           <small id="product-price-error" class="field-error">
             Ingresa un precio igual o mayor que cero.
           </small>
         }
       </div>
+
+
+<div class="form-field">
+<label for="product-price-bcv">
+  Detal BS (referencia USD) <span aria-hidden="true">*</span>
+</label>
+
+  <tui-textfield
+    [invalid]="isFieldInvalid('priceBCV')"
+    iconStart="@tui.dollar-sign"
+  >
+    <input
+      id="product-price-bcv"
+      tuiInput
+      type="number"
+      min="0"
+      step="0.01"
+      inputmode="decimal"
+      formControlName="priceBCV"
+      [attr.aria-invalid]="isFieldInvalid('priceBCV')"
+    />
+  </tui-textfield>
+
+  <small>
+  Equivalente: Bs.
+  {{ formatearBCV(productForm.controls.priceBCV.value) }}
+</small>
+
+  @if (isFieldInvalid('priceBCV')) {
+    <small class="field-error">
+      Ingresa un precio igual o mayor que cero.
+    </small>
+  }
+</div>
+
 
       <div class="form-field">
         <label for="product-wholesale-price">
