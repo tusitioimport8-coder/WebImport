@@ -2,6 +2,9 @@
 import { CommonModule } from '@angular/common';
 import { BcvService } from '../../services/bcv.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+
+import { FormsModule } from '@angular/forms';
+import { PedidoService } from '../../services/pedido.service';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -21,7 +24,7 @@ import { Carrito } from '../../shared/components/carrito/carrito';
 
 import { WishlistService } from '../../services/wishlist.service';
 import { AuthService } from '../../services/auth';
-import { CartService } from '../../services/cart';
+import { CartPrices, CartService } from '../../services/cart';
 
 import {
   ApiProduct,
@@ -44,6 +47,7 @@ interface ProductPriceOption {
   standalone: true,
   imports: [
     CommonModule,
+    FormsModule,
     Carrito,
     Wishlist,
     MiPerfil,
@@ -57,6 +61,118 @@ interface ProductPriceOption {
 export class DetalleProducto implements OnInit {
 
   private readonly destroyRef = inject(DestroyRef);
+
+  private readonly pedidoService = inject(PedidoService);
+
+readonly mostrarPedidoDirecto = signal(false);
+readonly enviandoPedidoDirecto = signal(false);
+readonly errorPedidoDirecto = signal('');
+
+readonly totalPedidoDirecto = computed(
+  () => this.selectedPrice() * this.quantity()
+);
+
+pedidoDirecto = {
+  nombre_completo: '',
+  telefono: '',
+  correo: '',
+  sede: '',
+  direccion_base: '',
+  tipo_entrega: '',
+  detalles_entrega: '',
+  metodo_pago: '',
+};
+
+abrirPedidoDirecto(): void {
+  const producto = this.product();
+
+  if (!producto || Number(producto.stock) <= 0) {
+    return;
+  }
+
+  this.errorPedidoDirecto.set('');
+  this.mostrarPedidoDirecto.set(true);
+}
+
+cerrarPedidoDirecto(): void {
+  if (this.enviandoPedidoDirecto()) return;
+
+  this.mostrarPedidoDirecto.set(false);
+}
+
+confirmarPedidoDirecto(): void {
+  const producto = this.product();
+  const datos = this.pedidoDirecto;
+
+  if (!producto || this.enviandoPedidoDirecto()) return;
+
+  if (
+    !datos.nombre_completo.trim() ||
+    !datos.telefono.trim() ||
+    !datos.correo.trim() ||
+    !datos.sede.trim() ||
+    !datos.direccion_base.trim() ||
+    !datos.tipo_entrega ||
+    !datos.metodo_pago
+  ) {
+    this.errorPedidoDirecto.set(
+      'Completa todos los campos obligatorios.'
+    );
+    return;
+  }
+
+  const pedido = {
+    contacto: {
+      nombre_completo: datos.nombre_completo.trim(),
+      telefono: datos.telefono.trim(),
+      correo: datos.correo.trim(),
+      sede: datos.sede.trim(),
+      direccion_base: datos.direccion_base.trim(),
+    },
+    entrega: {
+      tipo: datos.tipo_entrega,
+      detalles: datos.detalles_entrega.trim(),
+    },
+    pago: {
+      metodo: datos.metodo_pago,
+    },
+    items: [
+      {
+        producto_id: producto.id,
+        cantidad: this.quantity(),
+      },
+    ],
+  };
+
+  this.enviandoPedidoDirecto.set(true);
+  this.errorPedidoDirecto.set('');
+
+  this.pedidoService.crearPedido(pedido).subscribe({
+    next: (response) => {
+      this.enviandoPedidoDirecto.set(false);
+
+      const whatsappUrl = response.data?.whatsappUrl;
+
+      if (!whatsappUrl) {
+        this.errorPedidoDirecto.set(
+          'El pedido se procesó, pero no se recibió el enlace de WhatsApp.'
+        );
+        return;
+      }
+
+      window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
+      this.mostrarPedidoDirecto.set(false);
+    },
+    error: (error) => {
+      this.enviandoPedidoDirecto.set(false);
+      console.error('Error al crear pedido directo:', error);
+
+      this.errorPedidoDirecto.set(
+        error.error?.message || 'No se pudo confirmar el pedido.'
+      );
+    },
+  });
+}
 
   private readonly productService = inject(ProductService);
   private readonly bcvService = inject(BcvService);
@@ -371,46 +487,88 @@ formatearBCV(precioUSD: number): string {
   }
 
   // CARRITO
-  addToCart(): void {
-    const product = this.product();
-    if (!product) return;
+  
+addToCart(): void {
+  const product = this.product();
+  if (!product) return;
 
-    const stock = Number(product.stock);
-    if (stock <= 0) return;
+  const stock = Number(product.stock);
+  if (stock <= 0) return;
 
-    const tipoPrecio = this.selectedPriceType();
+  const prices: Partial<Record<
+    'detal_bs' | 'detal_usd' | 'Mayor' | 'GranMayor',
+    number
+  >> = {};
 
-    this.cartService.add(
-      {
-        id: product.id,
-        name: product.nombre,
-        price: this.selectedPrice(),
-        stock,
-        imageUrl: product.imagen_url,
-      priceType: tipoPrecio === 'DetalBCV'
-  ? 'detal_bs'
-  : tipoPrecio
-      },
-      this.quantity()
+  for (const item of product.precios) {
+    const price = Number(
+      item.precio_final ?? item.precio
     );
+
+    if (Number.isFinite(price)) {
+      prices[item.tipo_precio] = price;
+    }
   }
 
-  goToCart(): void {
-    this.cartService.open();
-  }
+  const tipoPrecio = this.selectedPriceType();
+
+  this.cartService.add(
+    {
+      id: product.id,
+      name: product.nombre,
+      price: this.selectedPrice(),
+      stock,
+      imageUrl: product.imagen_url,
+      priceType:
+        tipoPrecio === 'DetalBCV'
+          ? 'detal_bs'
+          : tipoPrecio,
+      prices,
+    },
+    this.quantity()
+  );
+}
+
 
   // PRODUCTOS RELACIONADOS
-  getRelatedPrice(product: ApiProduct): number {
-    const mayor = product.precios.find(
-      price => price.tipo_precio === 'Mayor'
-    );
+  
+getRelatedPrice(product: ApiProduct): number {
+  const precio = product.precios.find(
+    item => item.tipo_precio === 'detal_bs'
+  );
 
-    return Number(
-      mayor?.precio_final ??
-      mayor?.precio ??
-      0
-    );
+  return Number(precio?.precio_final ?? precio?.precio ?? 0);
+}
+
+
+
+addRelatedToCart(product: ApiProduct): void {
+  const stock = Number(product.stock);
+  if (stock <= 0) return;
+
+  const prices: CartPrices = {};
+
+  for (const item of product.precios ?? []) {
+    const price = Number(item.precio_final ?? item.precio);
+
+    if (Number.isFinite(price)) {
+      prices[item.tipo_precio] = price;
+    }
   }
+
+  this.cartService.add({
+    id: product.id,
+    name: product.nombre,
+    price: prices.detal_bs ?? prices.detal_usd ?? 0,
+    stock,
+    imageUrl: product.imagen_url,
+    priceType: 'detal_bs',
+    prices,
+  });
+
+  this.cartService.open();
+}
+
 
   private getRandomProducts(
     products: ApiProduct[],

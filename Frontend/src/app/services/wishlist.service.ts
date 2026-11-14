@@ -1,13 +1,17 @@
 import { Injectable, computed, signal } from '@angular/core';
 import { environment } from '../../environments/environment.development';
+import { CartPriceType, CartPrices } from './cart';
+
 export interface WishlistItem {
   id: string;
   name: string;
   price: number;
   stock: number;
   imageUrl?: string;
-  priceType: 'Mayor';
+  priceType?: CartPriceType;
+  prices?: CartPrices;
 }
+
 
 @Injectable({ providedIn: 'root' })
 export class WishlistService {

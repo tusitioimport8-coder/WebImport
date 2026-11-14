@@ -1,23 +1,40 @@
+
 <section class="sesion">
   <div class="sesion-card">
+
     <div class="sesion-header">
-     <div class="sesion-logo">
-  <img src="/images/logo.png" alt="Tu Sitio Import" />
-</div>
+      <div class="sesion-logo">
+        <img src="/images/logo.png" alt="Tu Sitio Import" />
+      </div>
 
       <h2>
-        {{ modoRegistro() ? 'Crear cuenta' : 'Iniciar sesión' }}
+        {{
+          recuperandoPassword()
+            ? 'Recuperar contraseña'
+            : modoRegistro()
+              ? 'Crear cuenta'
+              : 'Iniciar sesión'
+        }}
       </h2>
 
       <p>
-        {{ modoRegistro()
-          ? 'Regístrate para comenzar a comprar.'
-          : 'Bienvenido de nuevo. Ingresa a tu cuenta.' }}
+        {{
+          recuperandoPassword()
+            ? 'Recupera el acceso a tu cuenta mediante tu correo electrónico.'
+            : modoRegistro()
+              ? 'Regístrate para comenzar a comprar.'
+              : 'Bienvenido de nuevo. Ingresa a tu cuenta.'
+        }}
       </p>
     </div>
 
-    <form (ngSubmit)="enviar()" #sesionForm="ngForm">
-      @if (modoRegistro()) {
+    <form
+      (ngSubmit)="recuperandoPassword() ? recuperarPassword() : enviar()"
+      #sesionForm="ngForm"
+    >
+
+      <!-- NOMBRE: SOLO REGISTRO -->
+      @if (modoRegistro() && !recuperandoPassword()) {
         <div class="campo">
           <label for="nombre">Nombre completo</label>
           <input
@@ -32,6 +49,7 @@
         </div>
       }
 
+      <!-- CORREO -->
       <div class="campo">
         <label for="correo">Correo electrónico</label>
         <input
@@ -41,11 +59,13 @@
           [(ngModel)]="correo"
           placeholder="correo@ejemplo.com"
           autocomplete="email"
+          [readonly]="recuperandoPassword() && codigoEnviado()"
           required
         />
       </div>
 
-      @if (modoRegistro()) {
+      <!-- TELÉFONO: SOLO REGISTRO -->
+      @if (modoRegistro() && !recuperandoPassword()) {
         <div class="campo">
           <label for="telefono">Teléfono (opcional)</label>
           <input
@@ -59,27 +79,82 @@
         </div>
       }
 
-      <div class="campo">
-        <label for="password">Contraseña</label>
-        <input
-          id="password"
-          type="password"
-          name="password"
-          [(ngModel)]="password"
-          placeholder="Introduce tu contraseña"
-          [attr.autocomplete]="modoRegistro() ? 'new-password' : 'current-password'"
-          required
-        />
-      </div>
+      <!-- CONTRASEÑA NORMAL -->
+      @if (!recuperandoPassword()) {
+        <div class="campo">
+          <label for="password">Contraseña</label>
+          <input
+            id="password"
+            type="password"
+            name="password"
+            [(ngModel)]="password"
+            placeholder="Introduce tu contraseña"
+            [attr.autocomplete]="
+              modoRegistro() ? 'new-password' : 'current-password'
+            "
+            required
+          />
+        </div>
 
+        <!-- OLVIDÉ MI CONTRASEÑA -->
+        @if (!modoRegistro()) {
+          <button
+            type="button"
+            class="btn-recuperar"
+            (click)="abrirRecuperacion()"
+          >
+            ¿Olvidaste tu contraseña?
+          </button>
+        }
+      }
+
+      <!-- CÓDIGO Y NUEVA CONTRASEÑA -->
+      @if (recuperandoPassword() && codigoEnviado()) {
+
+        <div class="campo">
+          <label for="codigo">Código de recuperación</label>
+          <input
+            id="codigo"
+            type="text"
+            name="codigo"
+            [(ngModel)]="codigoRecuperacion"
+            placeholder="Código de 6 dígitos"
+            inputmode="numeric"
+            maxlength="6"
+            pattern="[0-9]{6}"
+            autocomplete="one-time-code"
+            required
+          />
+        </div>
+
+        <div class="campo">
+          <label for="nuevaPassword">Nueva contraseña</label>
+          <input
+            id="nuevaPassword"
+            type="password"
+            name="nuevaPassword"
+            [(ngModel)]="nuevaPassword"
+            placeholder="Introduce tu nueva contraseña"
+            autocomplete="new-password"
+            required
+          />
+        </div>
+      }
+
+      <!-- MENSAJES -->
       @if (error()) {
-        <p class="mensaje error" role="alert">{{ error() }}</p>
+        <p class="mensaje error" role="alert">
+          {{ error() }}
+        </p>
       }
 
       @if (mensaje()) {
-        <p class="mensaje exito" role="status">{{ mensaje() }}</p>
+        <p class="mensaje exito" role="status">
+          {{ mensaje() }}
+        </p>
       }
 
+      <!-- BOTÓN PRINCIPAL -->
       <button
         class="btn-principal"
         type="submit"
@@ -87,30 +162,64 @@
       >
         @if (cargando()) {
           Procesando...
+        } @else if (recuperandoPassword()) {
+          {{
+            codigoEnviado()
+              ? 'Restablecer contraseña'
+              : 'Enviar código'
+          }}
         } @else {
-          {{ modoRegistro() ? 'Crear cuenta' : 'Iniciar sesión' }}
+          {{
+            modoRegistro()
+              ? 'Crear cuenta'
+              : 'Iniciar sesión'
+          }}
         }
       </button>
+
+      <!-- VOLVER AL LOGIN -->
+      @if (recuperandoPassword()) {
+        <button
+          type="button"
+          class="btn-recuperar"
+          [disabled]="cargando()"
+          (click)="cerrarRecuperacion()"
+        >
+          Volver a iniciar sesión
+        </button>
+      }
+
     </form>
 
+    <!-- GOOGLE LOGIN -->
+    @if (!recuperandoPassword()) {
+      <div class="google-login">
+        <p class="google-separador">O continúa con</p>
+        <div #googleButton class="google-button"></div>
+      </div>
 
+      <!-- CAMBIAR ENTRE LOGIN Y REGISTRO -->
+      <div class="sesion-footer">
+        <span>
+          {{
+            modoRegistro()
+              ? '¿Ya tienes una cuenta?'
+              : '¿No tienes una cuenta?'
+          }}
+        </span>
 
-<div class="google-login">
-  <p class="google-separador">O continúa con</p>
+        <button
+          type="button"
+          (click)="cambiarModo()"
+        >
+          {{
+            modoRegistro()
+              ? 'Iniciar sesión'
+              : 'Regístrate'
+          }}
+        </button>
+      </div>
+    }
 
-  <div #googleButton class="google-button"></div>
-</div>
-
-
-
-    <div class="sesion-footer">
-      <span>
-        {{ modoRegistro() ? '¿Ya tienes una cuenta?' : '¿No tienes una cuenta?' }}
-      </span>
-
-      <button type="button" (click)="cambiarModo()">
-        {{ modoRegistro() ? 'Iniciar sesión' : 'Regístrate' }}
-      </button>
-    </div>
   </div>
 </section>

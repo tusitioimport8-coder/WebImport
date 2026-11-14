@@ -8,13 +8,22 @@ import {
   output,
 } from '@angular/core';
 
-import { CartPriceType, CartService } from '../../../services/cart';
+
+import {
+  CartPriceType,
+  CartPrices,
+  CartService,
+} from '../../../services/cart';
+
 
 export interface WishlistProduct {
   id: string;
   name: string;
   price: number;
   stock: number;
+
+prices?: CartPrices;
+
   imageUrl?: string;
   priceType?: CartPriceType;
 }
@@ -44,22 +53,24 @@ export class Wishlist {
     this.removeRequested.emit(productId);
   }
 
-  addToCart(product: WishlistProduct): void {
-    this.cartService.add({
-      id: product.id,
-      name: product.name,
-      price: product.price,
-      stock: product.stock,
-      imageUrl: product.imageUrl,
-      priceType: product.priceType,
-    });
+addToCart(product: WishlistProduct): void {
+  this.cartService.add({
+    id: product.id,
+    name: product.name,
+    price: product.price,
+    stock: product.stock,
+    imageUrl: product.imageUrl,
+    priceType: product.priceType,
+    prices: product.prices,
+  });
 
-    this.close();
-    this.cartService.open();
-  }
+  this.close();
+  this.cartService.open();
+}
 
-  addAllToCart(): void {
-  this.items().forEach((product) => {
+
+addAllToCart(): void {
+  this.items().forEach(product => {
     if (product.stock > 0) {
       this.cartService.add({
         id: product.id,
@@ -68,6 +79,7 @@ export class Wishlist {
         stock: product.stock,
         imageUrl: product.imageUrl,
         priceType: product.priceType,
+        prices: product.prices,
       });
     }
   });
@@ -75,6 +87,7 @@ export class Wishlist {
   this.close();
   this.cartService.open();
 }
+
   getQuantityInCart(product: WishlistProduct): number {
     return this.cartService.getQuantity(product.id, product.priceType);
   }
