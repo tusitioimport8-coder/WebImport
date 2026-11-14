@@ -43,6 +43,95 @@
         <p>Agrega algunos productos para comenzar tu pedido.</p>
       </div>
     } @else {
+
+<!-- SELECTOR GLOBAL -->
+<div class="cart-price-selector">
+  <span class="cart-price-title">Tipo de precio</span>
+
+  <div class="cart-price-options">
+    <button
+      type="button"
+      class="cart-price-option"
+      [class.cart-price-option_active]="
+        cartService.priceMode() === 'detal_bs'
+      "
+      (click)="cartService.setPriceMode('detal_bs')"
+    >
+      <span>Detal</span>
+      <small>(BCV)</small>
+    </button>
+
+    <button
+      type="button"
+      class="cart-price-option"
+      [class.cart-price-option_active]="
+        cartService.priceMode() === 'detal_usd'
+      "
+      (click)="cartService.setPriceMode('detal_usd')"
+    >
+      <span>Detal</span>
+      <small>(Divisas)</small>
+    </button>
+  </div>
+
+  @if (cartService.priceMode() === 'detal_bs') {
+    <p class="cart-price-description">
+      Precio Detal BCV fijo, sin importar la cantidad.
+    </p>
+  } @else {
+    <div class="cart-tier-box">
+      <span class="cart-tier-current">
+        @switch (cartService.currentTier()) {
+          @case ('Mayor') {
+            Precio al Mayor
+          }
+          @case ('GranMayor') {
+            Precio al Gran Mayor
+          }
+          @default {
+            Precio Detal Divisas
+          }
+        }
+      </span>
+
+      @if (cartService.nextTier(); as next) {
+        <strong>
+          Te falta para {{ next.name }}
+        </strong>
+
+        <div class="cart-tier-track">
+          <div
+            class="cart-tier-fill"
+            [style.width.%]="next.progress"
+          ></div>
+        </div>
+
+        <p>
+          @if (next.missingUnits > 0) {
+            {{ next.missingUnits }} unidad(es) más
+          } @else {
+            Cantidad alcanzada
+          }
+        </p>
+
+        <p>
+          @if (next.missingAmount > 0) {
+            {{ next.missingAmount
+              | currency:'USD':'symbol':'1.2-2' }}
+            más en monto base
+          } @else {
+            Monto alcanzado
+          }
+        </p>
+      } @else {
+        <strong class="cart-tier-success">
+          ¡Alcanzaste el precio Gran Mayor!
+        </strong>
+      }
+    </div>
+  }
+</div>
+
       <div class="cart-items">
         @for (item of cartService.items(); track item.lineId) {
           <article class="cart-item">
@@ -75,19 +164,28 @@
                 </button>
               </div>
 
-              <!-- TIPO DE PRECIO -->
-              @if (item.priceType) {
-                <span class="item-price-type">
-                  @switch (item.priceType) {
-                    @case ('GranMayor') {
-                      Gran Mayor
-                    }
-                    @default {
-                      {{ item.priceType }}
-                    }
-                  }
-                </span>
-              }
+           
+<!-- TIPO DE PRECIO -->
+<span class="item-price-type">
+  @switch (item.priceType) {
+    @case ('detal_bs') {
+      Precio Detal BCV
+    }
+    @case ('detal_usd') {
+      Precio Detal Divisas
+    }
+    @case ('Mayor') {
+      Precio al Mayor
+    }
+    @case ('GranMayor') {
+      Precio al Gran Mayor
+    }
+    @default {
+      Precio Detal
+    }
+  }
+</span>
+
 
               <!-- PRECIO -->
               <strong class="item-price">
@@ -152,34 +250,38 @@
         </div>
       </div>
 
-      @if (esFuerzaVentas()) {
-        <button
-          tuiButton
-          type="button"
-          class="whatsapp-button"
-          [disabled]="procesandoPresupuesto()"
-          (click)="abrirFormularioPresupuesto()"
-        >
-          <i class="pi pi-file"></i>
-          Crear presupuesto
-        </button>
+     
+@if (puedeCrearPresupuesto()) {
+  <button
+    tuiButton
+    type="button"
+    class="whatsapp-button"
+    [disabled]="procesandoPresupuesto()"
+    (click)="abrirFormularioPresupuesto()"
+  >
+    <i class="pi pi-file"></i>
+    Crear presupuesto
+  </button>
 
-        @if (errorPresupuesto() && !mostrarFormularioPresupuesto()) {
-          <p class="pedido-error" role="alert">
-            {{ errorPresupuesto() }}
-          </p>
-        }
-      } @else {
-        <button
-          tuiButton
-          type="button"
-          class="whatsapp-button"
-          (click)="abrirFormulario()"
-        >
-          <i class="pi pi-whatsapp"></i>
-          Pedir por WhatsApp
-        </button>
-      }
+  @if (errorPresupuesto() && !mostrarFormularioPresupuesto()) {
+    <p class="pedido-error" role="alert">
+      {{ errorPresupuesto() }}
+    </p>
+  }
+}
+
+@if (!esFuerzaVentas()) {
+  <button
+    tuiButton
+    type="button"
+    class="whatsapp-button"
+    (click)="abrirFormulario()"
+  >
+    <i class="pi pi-whatsapp"></i>
+    Pedir por WhatsApp
+  </button>
+}
+
     </footer>
   }
 </aside>
@@ -452,13 +554,7 @@
         <option value="domicilio">Envío a domicilio</option>
       </select>
 
-      <textarea
-        name="detalles_entrega"
-        placeholder="Detalles de entrega (opcional)"
-        aria-label="Detalles de entrega"
-        [(ngModel)]="datosPedido.detalles_entrega"
-        rows="3"
-      ></textarea>
+    
 
       <label for="metodo-pago">Método de pago</label>
 

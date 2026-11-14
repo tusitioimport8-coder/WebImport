@@ -54,6 +54,7 @@ import { Carrito } from '../../shared/components/carrito/carrito';
 import { Wishlist } from '../../shared/components/wishlist/wishlist';
 import { SiteHeader } from '../../shared/components/site-header/site-header';
 import { SiteFooter } from '../../shared/components/site-footer/site-footer';
+
 export interface CatalogProduct {
   id: string;
   name: string;
@@ -63,7 +64,12 @@ export interface CatalogProduct {
   quantity: number;
   description: string;
   imageUrl?: string;
+  prices: Partial<Record<
+    'detal_bs' | 'detal_usd' | 'Mayor' | 'GranMayor',
+    number
+  >>;
 }
+
 export type CatalogSort =
   | 'price-asc'
   | 'price-desc'
@@ -135,11 +141,14 @@ readonly canAccessAdmin = computed(() => {
 });
 
 // PRESUPUESTOS: SOLO FUERZA DE VENTAS
+
+ // PRESUPUESTOS: ADMIN Y FUERZA DE VENTAS
 readonly canAccessPresupuestos = computed(() => {
   const rol = this.authService.user()?.tipo?.trim().toUpperCase();
 
-  return rol === 'F_VENTAS';
+  return rol === 'ADMIN' || rol === 'F_VENTAS';
 });
+
 
 // PANEL MI PERFIL
 readonly perfilAbierto = signal(false);
@@ -426,16 +435,17 @@ loadProducts(): void {
     return this.wishlistService.has(productId);
   }
 
-  toggleWishlist(product: CatalogProduct): void {
-    this.wishlistService.toggle({
-      id: product.id,
-      name: product.name,
-      price: product.price,
-      stock: product.quantity,
-      imageUrl: product.imageUrl,
-      priceType: 'Mayor',
-    });
-  }
+toggleWishlist(product: CatalogProduct): void {
+  this.wishlistService.toggle({
+    id: product.id,
+    name: product.name,
+    price: product.price,
+    stock: product.quantity,
+    imageUrl: product.imageUrl,
+    priceType: 'detal_usd',
+    prices: product.prices,
+  });
+}
 
   // STOCK
   getStockLabel(product: CatalogProduct): string {
@@ -445,26 +455,26 @@ loadProducts(): void {
   }
 
   // CARRITO
-  addToCart(product: CatalogProduct): void {
-    this.cartService.add(
-      {
-        id: product.id,
-        name: product.name,
-        price: product.price,
-        stock: product.quantity,
-        imageUrl: product.imageUrl,
-        priceType: 'Mayor',
-      },
-      1
-    );
-  }
+  
+addToCart(product: CatalogProduct): void {
+  this.cartService.add(
+    {
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      stock: product.quantity,
+      imageUrl: product.imageUrl,
+      priceType: 'detal_usd',
+      prices: product.prices,
+    },
+    1
+  );
+}
 
-  getQuantityInCart(productId: string): number {
-    return this.cartService.getQuantity(
-      productId,
-      'Mayor'
-    );
-  }
+
+getQuantityInCart(productId: string): number {
+  return this.cartService.getQuantity(productId);
+}
 
   openCart(): void {
     this.cartService.open();
@@ -473,13 +483,15 @@ loadProducts(): void {
   // MAPEO DEL BACKEND
  
 private mapApiProduct(product: ApiProduct): CatalogProduct {
-  const detalUsd = product.precios?.find(
-    price => price.tipo_precio === 'detal_usd'
-  );
+  const prices: CatalogProduct['prices'] = {};
 
-  const detalBs = product.precios?.find(
-    price => price.tipo_precio === 'detal_bs'
-  );
+  for (const item of product.precios ?? []) {
+    const price = Number(item.precio_final ?? item.precio);
+
+    if (Number.isFinite(price)) {
+      prices[item.tipo_precio] = price;
+    }
+  }
 
   return {
     id: product.id,
@@ -487,11 +499,12 @@ private mapApiProduct(product: ApiProduct): CatalogProduct {
     category: product.categorias
       ?.map(categoria => categoria.nombre)
       .join(', ') || 'Sin categoría',
-    price: Number(detalUsd?.precio_final ?? detalUsd?.precio ?? 0),
-    priceBCV: Number(detalBs?.precio_final ?? detalBs?.precio ?? 0),
+    price: prices.detal_usd ?? 0,
+    priceBCV: prices.detal_bs ?? 0,
     quantity: Number(product.stock ?? 0),
     description: product.descripcion ?? '',
     imageUrl: product.imagen_url,
+    prices,
   };
 }
 

@@ -36,6 +36,7 @@ import { SiteHeader } from '../../shared/components/site-header/site-header';
 import { MiPerfil } from '../../shared/components/mi-perfil/mi-perfil';
 import { SiteFooter } from '../../shared/components/site-footer/site-footer';
 
+
 export interface HomeProduct {
   id: string;
   name: string;
@@ -44,6 +45,10 @@ export interface HomeProduct {
   quantity: number;
   imageUrl?: string;
   category?: string;
+  prices: Partial<Record<
+    'detal_bs' | 'detal_usd' | 'Mayor' | 'GranMayor',
+    number
+  >>;
 }
 
 export interface HomeCategory {
@@ -158,11 +163,14 @@ readonly canAccessAdmin = computed(() => {
 });
 
 // PRESUPUESTOS: SOLO FUERZA DE VENTAS
+
+// PRESUPUESTOS: ADMIN Y FUERZA DE VENTAS
 readonly canAccessPresupuestos = computed(() => {
   const rol = this.authService.user()?.tipo?.trim().toUpperCase();
 
-  return rol === 'F_VENTAS';
+  return rol === 'ADMIN' || rol === 'F_VENTAS';
 });
+
   readonly perfilAbierto = signal(false);
 
 abrirPerfil(): void {
@@ -202,7 +210,7 @@ private forYouCarousel?: ElementRef<HTMLElement>;
   readonly forYouSelection = signal<HomeProduct[]>([]);
 
 readonly forYouProducts = computed(() =>
-  this.filterBySearch(this.forYouSelection())
+  this.forYouSelection()
 );
 
   readonly loading = signal(false);
@@ -269,21 +277,21 @@ private intervaloBanners?: ReturnType<typeof setInterval>;
     this.products().filter(product => product.quantity > 0)
   );
 
-  readonly filteredProducts = computed(() =>
-    this.filterBySearch(this.availableProducts())
-  );
+readonly filteredProducts = computed(() =>
+  this.availableProducts()
+);
 
-  readonly featuredProducts = computed(() =>
-    this.filterBySearch(this.featuredSelection())
-  );
+readonly featuredProducts = computed(() =>
+  this.featuredSelection()
+);
 
   readonly newestProducts = computed(() =>
     this.filteredProducts().slice(0, 8)
   );
 
-  readonly recommendedProducts = computed(() =>
-    this.filterBySearch(this.recommendedSelection())
-  );
+readonly recommendedProducts = computed(() =>
+  this.recommendedSelection()
+);
 
   readonly valueProducts = computed(() =>
     [...this.filteredProducts()]
@@ -597,19 +605,21 @@ this.iniciarCarruselBanners();
   });
 }
   // CARRITO
-  addToCart(product: HomeProduct): void {
-    this.cartService.add(
-      {
-        id: product.id,
-        name: product.name,
-        price: product.price,
-        stock: product.quantity,
-        imageUrl: product.imageUrl,
-        priceType: 'Mayor'
-      },
-      1
-    );
-  }
+
+addToCart(product: HomeProduct): void {
+  this.cartService.add(
+    {
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      stock: product.quantity,
+      imageUrl: product.imageUrl,
+      priceType: 'detal_bs',
+      prices: product.prices,
+    },
+    1
+  );
+}
 
   openCart(): void {
     this.cartService.open();
@@ -632,22 +642,25 @@ this.iniciarCarruselBanners();
     return this.wishlistService.has(productId);
   }
 
-  toggleWishlist(productId: string): void {
-    const product = this.products().find(
-      item => item.id === productId
-    );
+ 
+toggleWishlist(productId: string): void {
+  const product = this.products().find(
+    item => item.id === productId
+  );
 
-    if (!product) return;
+  if (!product) return;
 
-    this.wishlistService.toggle({
-      id: product.id,
-      name: product.name,
-      price: product.price,
-      stock: product.quantity,
-      imageUrl: product.imageUrl,
-      priceType: 'Mayor'
-    });
-  }
+  this.wishlistService.toggle({
+    id: product.id,
+    name: product.name,
+    price: product.price,
+    stock: product.quantity,
+    imageUrl: product.imageUrl,
+    priceType: 'detal_bs',
+    prices: product.prices,
+  });
+}
+
 
   // CARRUSELES
   scrollCarousel(
@@ -756,23 +769,30 @@ this.iniciarCarruselBanners();
   // MAPEO DEL BACKEND
 
 private mapApiProduct(product: ApiProduct): HomeProduct {
-  const detalBs = product.precios?.find(
-    price => price.tipo_precio === 'detal_bs'
-  );
+  const prices: HomeProduct['prices'] = {};
+
+  for (const item of product.precios ?? []) {
+    const price = Number(
+      item.precio_final ?? item.precio
+    );
+
+    if (Number.isFinite(price)) {
+      prices[item.tipo_precio] = price;
+    }
+  }
 
   return {
     id: product.id,
     name: product.nombre,
     description: product.descripcion ?? '',
-    price: Number(
-      detalBs?.precio_final ?? detalBs?.precio ?? 0
-    ),
+    price: prices.detal_bs ?? 0,
     quantity: Number(product.stock ?? 0),
     imageUrl: product.imagen_url,
     category:
       product.categorias
         ?.map(categoria => categoria.nombre)
-        .join(', ') || 'Sin categoría'
+        .join(', ') || 'Sin categoría',
+    prices,
   };
 }
 
@@ -805,31 +825,5 @@ private mapApiProduct(product: ApiProduct): HomeProduct {
     return shuffled.slice(0, amount);
   }
 
-  // FILTRO
-  private filterBySearch(
-    products: HomeProduct[]
-  ): HomeProduct[] {
-    const search = this.normalizeText(
-      this.searchTerm()
-    );
-
-    if (!search) return products;
-
-    return products.filter(
-      product =>
-        this.normalizeText(product.name).includes(
-          search
-        ) ||
-        this.normalizeText(
-          product.description
-        ).includes(search) ||
-        this.normalizeText(
-          product.category ?? ''
-        ).includes(search)
-    );
-  }
-
-  private normalizeText(value: string): string {
-    return value.trim().toLocaleLowerCase('es');
-  }
+ 
 }

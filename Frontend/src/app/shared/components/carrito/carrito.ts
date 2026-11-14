@@ -46,6 +46,18 @@ export class Carrito {
       'F_VENTAS'
   );
 
+
+readonly esAdmin = computed(
+  () =>
+    this.authService.user()?.tipo?.trim().toUpperCase() ===
+    'ADMIN'
+);
+
+readonly puedeCrearPresupuesto = computed(
+  () => this.esFuerzaVentas() || this.esAdmin()
+);
+
+
   readonly procesandoPresupuesto = signal(false);
   readonly errorPresupuesto = signal('');
   readonly presupuestoCreado = signal('');
@@ -66,7 +78,7 @@ export class Carrito {
 
   abrirFormularioPresupuesto(): void {
     if (
-      !this.esFuerzaVentas() ||
+      !this.puedeCrearPresupuesto() ||
       this.cartService.isEmpty() ||
       this.procesandoPresupuesto()
     ) {
@@ -96,7 +108,6 @@ export class Carrito {
     sede: '',
     direccion_base: '',
     tipo_entrega: 'retiro',
-    detalles_entrega: '',
     metodo_pago: 'transferencia',
   };
 
@@ -199,10 +210,10 @@ export class Carrito {
         sede: datos.sede.trim(),
         direccion_base: datos.direccion_base.trim(),
       },
-      entrega: {
-        tipo: datos.tipo_entrega,
-        detalles: datos.detalles_entrega.trim(),
-      },
+   entrega: {
+  tipo: datos.tipo_entrega,
+  detalles: '',
+},
       pago: {
         metodo: datos.metodo_pago,
       },

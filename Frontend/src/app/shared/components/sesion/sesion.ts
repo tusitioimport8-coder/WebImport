@@ -1,3 +1,4 @@
+
 import {
   Component,
   ElementRef,
@@ -9,6 +10,7 @@ import {
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { environment } from '../../../../environments/environment';
 import { finalize } from 'rxjs';
 import { AuthService } from '../../../services/auth';
 
@@ -55,9 +57,7 @@ export class Sesion implements AfterViewInit {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
 
-  private readonly googleClientId =
-    '936498476946-b7us1qq6a3bt7a7fkeh3uscu51lssb1a.apps.googleusercontent.com';
-
+ private readonly googleClientId = environment.googleClientId;
   @ViewChild('googleButton')
   googleButton?: ElementRef<HTMLDivElement>;
 
@@ -66,21 +66,29 @@ export class Sesion implements AfterViewInit {
   readonly mensaje = signal('');
   readonly error = signal('');
 
+  // RECUPERACIÓN DE CONTRASEÑA
+  readonly recuperandoPassword = signal(false);
+  readonly codigoEnviado = signal(false);
+
   nombre_completo = '';
   correo = '';
   password = '';
   telefono = '';
 
- ngAfterViewInit(): void {
-  this.inicializarGoogle();
-}
+  codigoRecuperacion = '';
+  nuevaPassword = '';
+
+  ngAfterViewInit(): void {
+    this.inicializarGoogle();
+  }
 
   private inicializarGoogle(intentos = 0): void {
     if (!window.google?.accounts?.id) {
       if (intentos < 20) {
         setTimeout(() => this.inicializarGoogle(intentos + 1), 250);
       } else {
-        this.error.set('No se pudo cargar el inicio de sesión con Google.');
+        // Google es opcional: no bloquear otros formularios.
+        console.warn('No se pudo cargar Google Login.');
       }
       return;
     }
@@ -165,6 +173,103 @@ export class Sesion implements AfterViewInit {
     this.password = '';
   }
 
+  // ABRIR RECUPERACIÓN
+  abrirRecuperacion(): void {
+    if (this.cargando()) return;
+
+    this.recuperandoPassword.set(true);
+    this.codigoEnviado.set(false);
+    this.codigoRecuperacion = '';
+    this.nuevaPassword = '';
+    this.password = '';
+    this.error.set('');
+    this.mensaje.set('');
+  }
+
+  // VOLVER AL INICIO DE SESIÓN
+  cerrarRecuperacion(): void {
+    if (this.cargando()) return;
+
+    this.recuperandoPassword.set(false);
+    this.codigoEnviado.set(false);
+    this.modoRegistro.set(false);
+
+    this.codigoRecuperacion = '';
+    this.nuevaPassword = '';
+    this.password = '';
+
+    this.error.set('');
+    this.mensaje.set('');
+  }
+
+  // SOLICITAR CÓDIGO O RESTABLECER CONTRASEÑA
+  recuperarPassword(): void {
+    if (this.cargando()) return;
+
+    this.error.set('');
+    this.mensaje.set('');
+
+    if (!this.correo.trim()) {
+      this.error.set('Introduce tu correo electrónico.');
+      return;
+    }
+
+    if (this.codigoEnviado()) {
+      if (!/^\d{6}$/.test(this.codigoRecuperacion.trim())) {
+        this.error.set('Introduce el código de 6 dígitos.');
+        return;
+      }
+
+      if (!this.nuevaPassword) {
+        this.error.set('Introduce tu nueva contraseña.');
+        return;
+      }
+    }
+
+    this.cargando.set(true);
+
+    const request = this.codigoEnviado()
+      ? this.authService.resetPassword(
+          this.correo.trim(),
+          this.codigoRecuperacion.trim(),
+          this.nuevaPassword
+        )
+      : this.authService.forgotPassword(this.correo.trim());
+
+    request.pipe(
+      finalize(() => this.cargando.set(false))
+    ).subscribe({
+      next: response => {
+        if (!response.success) {
+          this.error.set(
+            response.message || 'No se pudo completar la solicitud.'
+          );
+          return;
+        }
+
+        if (!this.codigoEnviado()) {
+          this.codigoEnviado.set(true);
+          this.mensaje.set(
+            response.message ||
+            'Revisa tu correo. Te enviamos un código de recuperación.'
+          );
+        } else {
+          this.cerrarRecuperacion();
+          this.mensaje.set(
+            'Contraseña actualizada. Ya puedes iniciar sesión.'
+          );
+        }
+      },
+      error: err => {
+        this.error.set(
+          err.error?.message ||
+          'Ocurrió un error al procesar la solicitud.'
+        );
+      }
+    });
+  }
+
+  // INICIO DE SESIÓN Y REGISTRO
   enviar(): void {
     if (this.cargando()) return;
 
@@ -208,7 +313,9 @@ export class Sesion implements AfterViewInit {
           return;
         }
 
-        this.mensaje.set(response.message || 'Operación exitosa.');
+        this.mensaje.set(
+          response.message || 'Operación exitosa.'
+        );
 
         if (this.modoRegistro()) {
           this.modoRegistro.set(false);
