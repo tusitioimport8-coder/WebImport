@@ -1,6 +1,7 @@
 import {
   CrearPedidoRequestDTO,
   GuardarPedidoInput,
+  MetodoPago,
   ProductoDbRecord,
   TipoPrecio,
 } from "../interfaces/Orden.interface.js";
@@ -15,33 +16,39 @@ export class OrderService {
   ) {}
 
   /**
-   * Determina el nivel de precio aplicable según el volumen y monto base
+   * Determina el nivel de precio aplicable según el volumen, monto y método de pago.
+   * Si el pago no es en efectivo, se fuerza estrictamente a detal_bs.
    */
   public calcularTipoPrecio(
     totalUnidades: number,
     montoBaseDetal: number,
+    metodoPago: MetodoPago,
   ): TipoPrecio {
+    if (metodoPago !== "efectivo") {
+      return "detal_bs";
+    }
+
     if (totalUnidades >= 40 && montoBaseDetal >= 200) {
       return "GranMayor";
     }
     if (totalUnidades >= 6 && montoBaseDetal >= 50) {
       return "Mayor";
     }
-    return "Detal";
+    return "detal_bs";
   }
 
   /**
-   * Obtiene el precio unitario buscando el precio base del nivel aplicable
-   * y aplicando el descuento una sola vez.
+   * Obtiene el precio unitario buscando el nivel aplicable.
+   * Si el producto no tiene el precio Mayor o GranMayor, hace fallback automático a detal_bs.
    */
   public obtenerPrecioUnitario(
     producto: ProductoDbRecord,
     tipoPrecio: TipoPrecio,
   ): number {
-    // Buscamos el precio que coincida con el nivel o caemos por defecto en "Detal"
     const precioObj =
       producto.precios?.find((p) => p.tipo_precio === tipoPrecio) ||
-      producto.precios?.find((p) => p.tipo_precio === "Detal");
+      producto.precios?.find((p) => p.tipo_precio === "detal_bs") ||
+      producto.precios?.find((p) => p.tipo_precio === "detal_usd");
 
     const precioBase = Number(precioObj?.precio ?? 0);
     const descuento = Number(producto.descuento_porcentaje || 0);
@@ -58,7 +65,7 @@ export class OrderService {
   ) {
     const { contacto, entrega, pago, items, tipo_documento } = body;
 
-    // 1. Validar existencia de productos y calcular montos base
+    // 1. Validar existencia de productos y calcular montos base usando detal_bs
     let totalUnidades = 0;
     let montoBaseDetal = 0;
     const productosValidados = [];
@@ -73,18 +80,22 @@ export class OrderService {
 
       totalUnidades += item.cantidad;
 
-      // Buscamos el precio 'Detal' dentro del arreglo para escalar correctamente el volumen
-      const precioDetalObj = producto.precios?.find(
-        (p) => p.tipo_precio === "Detal",
-      );
+      const precioDetalObj =
+        producto.precios?.find((p) => p.tipo_precio === "detal_bs") ||
+        producto.precios?.find((p) => p.tipo_precio === "detal_usd");
+
       const precioDetal = Number(precioDetalObj?.precio ?? 0);
 
       montoBaseDetal += precioDetal * item.cantidad;
       productosValidados.push({ producto, cantidad: item.cantidad });
     }
 
-    // 2. Determinar escala de precios (Detal, Mayor, GranMayor)
-    const tipoPrecio = this.calcularTipoPrecio(totalUnidades, montoBaseDetal);
+    // 2. Determinar escala de precios evaluando volumen y método de pago
+    const tipoPrecio = this.calcularTipoPrecio(
+      totalUnidades,
+      montoBaseDetal,
+      pago.metodo,
+    );
 
     // 3. Procesar ítems, calcular subtotales y armar listado para WhatsApp
     let totalPedido = 0;
@@ -122,7 +133,7 @@ export class OrderService {
       datos_entrega: entrega.datos_entrega,
       metodo_pago: pago.metodo,
       total: Number(totalPedido.toFixed(2)),
-      tipo_documento: tipo_documento || "pedido", // Asigna 'pedido' por defecto si viene vacío
+      tipo_documento: tipo_documento || "pedido",
       detalles: detallesProcesados,
     };
 

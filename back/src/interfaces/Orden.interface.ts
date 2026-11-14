@@ -13,7 +13,7 @@ export type EstadoPedido =
   | "completado"
   | "cancelado";
 
-export type TipoPrecio = "Detal" | "Mayor" | "GranMayor";
+export type TipoPrecio = "detal_usd" | "detal_bs" | "Mayor" | "GranMayor";
 
 // ---------------------------------------------------------
 // DATOS DEL CLIENTE Y FORMULARIO (PASOS 1, 2 Y 3)
@@ -44,7 +44,6 @@ export interface PagoPedidoInput {
   metodo: MetodoPago;
 }
 
-// Estructura de cada producto que viene desde el localStorage del Frontend
 export interface ItemLocalStorageInput {
   producto_id: string;
   cantidad: number;
@@ -56,7 +55,6 @@ export interface DetallePedidoInput {
   precio_unitario: number;
 }
 
-// DTO principal que recibe el controlador en el POST /api/pedidos
 export interface CrearPedidoRequestDTO {
   contacto: ContactoPedidoInput;
   entrega: EntregaPedidoInput;
@@ -80,11 +78,6 @@ export interface GuardarPedidoInput {
   tipo_documento: "pedido" | "presupuesto";
 }
 
-// ---------------------------------------------------------
-// ESTRUCTURAS DE BASE DE DATOS (NEON / POSTGRESQL)
-// ---------------------------------------------------------
-
-// Representa una fila cruda de la tabla 'pedidos' en la BD
 export interface PedidoDbRecord {
   id: string;
   id_usuario: string | null;
@@ -94,7 +87,7 @@ export interface PedidoDbRecord {
   sede: string;
   direccion_base: string | null;
   tipo_entrega: TipoEntrega;
-  datos_entrega: string; // En BD se guarda como JSON string o JSONB
+  datos_entrega: string;
   metodo_pago: MetodoPago;
   total: number;
   estado: EstadoPedido;
@@ -102,7 +95,6 @@ export interface PedidoDbRecord {
   actualizado_en?: string;
 }
 
-// Representa una fila cruda de la tabla 'detalles_pedido' en la BD
 export interface DetallePedidoDbRecord {
   id: string;
   id_pedido: string;
@@ -130,7 +122,6 @@ export interface PedidoListadoDbRecord extends Pick<
   | "creado_en"
 > {}
 
-// Estructura del ítem formateado para respuestas al frontend
 export interface ItemPedidoFormateado {
   id_producto: string;
   cantidad: number;
@@ -138,8 +129,6 @@ export interface ItemPedidoFormateado {
   subtotal: number;
 }
 
-// Objeto completo que devuelve el repositorio al consultar un pedido con sus detalles
-// Sub-interfaz para tipar cada elemento del arreglo de precios
 export interface PrecioProductoItemDb {
   id_precio: string;
   tipo_precio: TipoPrecio;
@@ -147,7 +136,6 @@ export interface PrecioProductoItemDb {
   precio_final: number;
 }
 
-// Interfaz actualizada de Producto para que soporte la nueva estructura de la BD
 export interface ProductoDbRecord {
   id: string;
   nombre: string;
@@ -158,7 +146,7 @@ export interface ProductoDbRecord {
   stock: number;
   estado: boolean;
   creado_en: string;
-  precios: PrecioProductoItemDb[]; // 👈 Aquí está la clave para que TypeScript reconozca la propiedad
+  precios: PrecioProductoItemDb[];
 }
 
 export interface PedidoConDetallesResponse {
@@ -177,5 +165,5 @@ export interface PedidoConDetallesResponse {
   creado_en: string;
   actualizado_en?: string;
   detalles: DetallePedidoDbRecord[];
-  productos: ProductoDbRecord[]; // 👈 Aquí está la clave para que TypeScript reconozca la propiedad
+  productos: ProductoDbRecord[];
 }
