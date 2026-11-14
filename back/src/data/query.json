@@ -277,14 +277,23 @@
     "orderArray": ["google_id"]
   },
   "crearUsuarioGoogle": {
-    "query": "INSERT INTO usuarios (nombre, email, google_id, avatar_url) VALUES ($1, $2, $3, $4) RETURNING id, nombre, email, avatar_url, estado, creado_en",
+    "query": "INSERT INTO usuarios (nombre_completo, correo, password_hash, rol, id_google, avatar_url) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id, nombre_completo, correo, rol, id_google, avatar_url, fecha_creacion",
     "structure_params": {
-      "nombre": "string",
-      "email": "string",
-      "google_id": "string",
+      "nombre_completo": "string",
+      "correo": "string",
+      "password_hash": "string",
+      "rol": "string",
+      "id_google": "string",
       "avatar_url": "string"
     },
-    "orderArray": ["nombre", "email", "google_id", "avatar_url"]
+    "orderArray": [
+      "nombre_completo",
+      "correo",
+      "password_hash",
+      "rol",
+      "id_google",
+      "avatar_url"
+    ]
   },
   "vincularGoogleId": {
     "query": "UPDATE usuarios SET google_id = $2, avatar_url = COALESCE(avatar_url, $3) WHERE id = $1 RETURNING id, nombre, email, google_id, avatar_url",
