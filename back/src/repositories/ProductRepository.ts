@@ -14,6 +14,13 @@ class ProductRepository {
   // ==========================================
   // METODOS DE PRODUCTOS (E-commerce)
   // ==========================================
+  async getProductosConCategorias() {
+    const result = await this.db.excecuteNameQuery(
+      "getProductosConCategorias",
+      [],
+    );
+    return result;
+  }
   async getProductos(): Promise<ProductoConDetallesDTO[]> {
     const result = await this.db.excecuteNameQuery("getProductos", {});
     return result || [];

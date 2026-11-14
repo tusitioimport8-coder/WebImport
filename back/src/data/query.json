@@ -91,6 +91,11 @@
       "stock"
     ]
   },
+  "getProductosConCategorias": {
+    "query": "SELECT p.id, p.nombre, p.descripcion, p.descuento_porcentaje, p.imagen_url, p.stock, p.estado, p.creado_en, COALESCE(json_agg(json_build_object('id_precio', pr.id_precio, 'tipo_precio', pr.tipo_precio, 'precio', pr.precio, 'precio_final', ROUND(pr.precio * (1 - p.descuento_porcentaje / 100), 2))) FILTER (WHERE pr.id_precio IS NOT NULL), '[]') AS precios, COALESCE((SELECT json_agg(json_build_object('id_categoria', cat.id, 'nombre_categoria', cat.nombre)) FROM (SELECT DISTINCT c.id, c.nombre FROM producto_categorias sub_pc JOIN categorias c ON sub_pc.categoria_id = c.id WHERE sub_pc.producto_id = p.id) cat), '[]') AS categorias FROM productos p LEFT JOIN precios_productos pr ON p.id = pr.id_producto WHERE p.estado = true GROUP BY p.id ORDER BY p.creado_en DESC",
+    "structure_params": {},
+    "orderArray": []
+  },
   "agregarPrecioProducto": {
     "query": "INSERT INTO precios_productos (id_producto, tipo_precio, precio) VALUES ($1, $2, $3) RETURNING id_precio, tipo_precio, precio",
     "structure_params": {

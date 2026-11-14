@@ -14,7 +14,8 @@ class ProductController {
   // GET /api/productos
   async getProductos(request: Request, response: Response) {
     try {
-      const productos = await this.repository.getProductos();
+      const productos = await this.repository.getProductosConCategorias();
+
       return response.status(200).json({
         success: true,
         data: productos,
