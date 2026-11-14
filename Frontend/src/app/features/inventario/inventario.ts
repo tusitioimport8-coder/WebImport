@@ -499,7 +499,7 @@ saveProduct(): void {
           descripcion: value.description.trim(),
           imagen_url: imageUrl,
           stock: Number(value.quantity),
-categorias_ids: categoryId !== undefined ? [String(categoryId)] : [],
+categorias_ids: categoryId !== undefined ? [Number(categoryId)] : [],
        precios: [
   {
     tipo_precio: 'detal_usd',
@@ -552,6 +552,11 @@ return this.productService.createProduct(payload).pipe(
       },
       error: (error) => {
         console.error('Error al guardar producto:', error);
+
+console.log(
+  'DETALLE DE VALIDACIÓN:',
+  JSON.stringify(error.error?.error, null, 2)
+);
         this.errorMessage.set(
           'No se pudo guardar el producto. Revisa la consola.'
         );

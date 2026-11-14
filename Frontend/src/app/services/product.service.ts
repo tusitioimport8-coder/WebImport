@@ -60,7 +60,7 @@ export interface ProductPayload {
     tipo_precio: ProductPriceType;
     precio: number;
   }[];
-  categorias_ids?: string[];
+ categorias_ids?: number[];
 }
 export interface ProductMutationResponse {
   success: boolean;
