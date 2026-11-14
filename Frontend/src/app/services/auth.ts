@@ -61,6 +61,31 @@ export class AuthService {
     return this.http.post<AuthResponse>(`${this.apiUrl}/register`, data, { withCredentials: true });
   }
 
+
+
+
+  // SOLICITAR CÓDIGO DE RECUPERACIÓN
+  forgotPassword(correo: string): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>(
+      `${this.apiUrl}/forgot-password`,
+      { correo },
+      { withCredentials: true }
+    );
+  }
+
+  // RESTABLECER CONTRASEÑA
+  resetPassword(
+    correo: string,
+    codigo: string,
+    nuevaPassword: string
+  ): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>(
+      `${this.apiUrl}/reset-password`,
+      { correo, codigo, nuevaPassword },
+      { withCredentials: true }
+    );
+  }
+
   logout(): Observable<AuthResponse> {
     return this.http
       .post<AuthResponse>(`${this.apiUrl}/logout`, {}, { withCredentials: true })

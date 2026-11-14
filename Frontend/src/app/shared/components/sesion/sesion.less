@@ -236,3 +236,27 @@ background-image: url('/images/fondo-inicio.png');
   width: 100%;
   min-height: 44px;
 }
+
+
+.btn-recuperar {
+  display: block;
+  margin: 12px auto;
+  padding: 4px 8px;
+  border: none;
+  background: transparent;
+  color: #555;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: center;
+
+  &:hover:not(:disabled) {
+    color: #111;
+    text-decoration: underline;
+  }
+
+  &:disabled {
+    opacity: .5;
+    cursor: not-allowed;
+  }
+}

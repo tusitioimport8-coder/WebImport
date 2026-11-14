@@ -188,15 +188,16 @@
         </div>
 
         <!-- WHATSAPP -->
-        <button
-          type="button"
-          class="buy-whatsapp-button"
-          disabled
-          title="Próximamente"
-        >
-          <i class="pi pi-comments"></i>
-          Comprar por WhatsApp
-        </button>
+      <!-- WHATSAPP -->
+<button
+  type="button"
+  class="buy-whatsapp-button"
+  [disabled]="product.stock <= 0"
+  (click)="abrirPedidoDirecto()"
+>
+  <i class="pi pi-comments"></i>
+  Comprar por WhatsApp
+</button>
 
         <!-- INFORMACIÓN -->
         <div class="product-accordions">
@@ -236,6 +237,75 @@
     </section>
   }
 
+@if (!loading() && !errorMessage() && relatedProducts().length > 0) {
+  <section class="related-section">
+    <header class="related-header">
+      <div>
+        <h2>Productos relacionados</h2>
+        <p>También podrían interesarte</p>
+      </div>
+    </header>
+
+    <div class="related-carousel">
+      @for (item of relatedProducts(); track item.id) {
+        <article class="related-card">
+          <button
+            type="button"
+            class="related-image"
+            (click)="selectProduct(item.id)"
+          >
+            @if (item.imagen_url) {
+              <img [src]="item.imagen_url" [alt]="item.nombre" />
+            } @else {
+              <i class="pi pi-image"></i>
+            }
+          </button>
+
+          <div class="related-info">
+            <button
+              type="button"
+              class="related-name"
+              (click)="selectProduct(item.id)"
+            >
+              {{ item.nombre }}
+            </button>
+
+          
+
+<div class="related-prices">
+  <strong>
+    {{ getRelatedPrice(item) | currency:'USD':'symbol':'1.2-2' }}
+  </strong>
+
+  <small>Detal BCV</small>
+
+  <span class="related-price-bs">
+    Detal Bs:
+    @if (tasaBCV() !== null) {
+      Bs. {{ formatearBCV(getRelatedPrice(item)) }}
+    } @else {
+      No disponible
+    }
+  </span>
+</div>
+
+
+
+            <button
+              type="button"
+              class="related-add"
+              (click)="addRelatedToCart(item)"
+            >
+              <i class="pi pi-shopping-cart"></i>
+              Agregar al carrito
+            </button>
+          </div>
+        </article>
+      }
+    </div>
+  </section>
+}
+
 </main>
 
 <app-carrito></app-carrito>
@@ -251,5 +321,155 @@
   [isOpen]="perfilAbierto()"
   (closeRequested)="cerrarPerfil()"
 ></app-mi-perfil>
+
+<!-- MODAL COMPRA DIRECTA -->
+@if (mostrarPedidoDirecto()) {
+  <div
+    class="pedido-modal-backdrop"
+    (click)="cerrarPedidoDirecto()"
+  ></div>
+
+  <section
+    class="pedido-modal"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="titulo-pedido-directo"
+  >
+    <header class="pedido-modal-header">
+      <div>
+        <span class="cart-eyebrow">COMPRA DIRECTA</span>
+        <h2 id="titulo-pedido-directo">Datos del pedido</h2>
+      </div>
+
+      <button
+        type="button"
+        class="close-button"
+        aria-label="Cerrar formulario"
+        (click)="cerrarPedidoDirecto()"
+      >
+        <i class="pi pi-times"></i>
+      </button>
+    </header>
+
+    <form
+      class="pedido-modal-content pedido-directo-form"
+      (ngSubmit)="confirmarPedidoDirecto()"
+    >
+      <div class="pedido-directo-resumen">
+        <strong>{{ product()?.nombre }}</strong>
+        <span>{{ selectedPriceLabel() }}</span>
+        <span>Cantidad: {{ quantity() }}</span>
+
+        <div class="pedido-directo-total">
+          <span>Total</span>
+          <strong>
+            {{ totalPedidoDirecto() | currency:'USD':'symbol':'1.2-2' }}
+          </strong>
+        </div>
+      </div>
+
+      <label for="directo-nombre">Nombre completo</label>
+      <input
+        id="directo-nombre"
+        name="nombre"
+        type="text"
+        placeholder="Nombre y apellido"
+        [(ngModel)]="pedidoDirecto.nombre_completo"
+        required
+      />
+
+      <label for="directo-telefono">Teléfono</label>
+      <input
+        id="directo-telefono"
+        name="telefono"
+        type="tel"
+        placeholder="04120978657"
+        [(ngModel)]="pedidoDirecto.telefono"
+        required
+      />
+
+      <label for="directo-correo">Correo electrónico</label>
+      <input
+        id="directo-correo"
+        name="correo"
+        type="email"
+        placeholder="correo@ejemplo.com"
+        [(ngModel)]="pedidoDirecto.correo"
+        required
+      />
+
+      <label for="directo-sede">Sede</label>
+      <input
+        id="directo-sede"
+        name="sede"
+        type="text"
+        [(ngModel)]="pedidoDirecto.sede"
+        required
+      />
+
+      <label for="directo-direccion">Dirección</label>
+      <textarea
+        id="directo-direccion"
+        name="direccion"
+        rows="2"
+        [(ngModel)]="pedidoDirecto.direccion_base"
+        required
+      ></textarea>
+
+      <label for="directo-entrega">Tipo de entrega</label>
+      <select
+        id="directo-entrega"
+        name="tipoEntrega"
+        [(ngModel)]="pedidoDirecto.tipo_entrega"
+        required
+      >
+        <option value="" disabled>Selecciona una opción</option>
+        <option value="delivery">Delivery</option>
+        <option value="retiro">Retiro en tienda</option>
+      </select>
+
+      <label for="directo-detalles">Detalles de entrega</label>
+      <textarea
+        id="directo-detalles"
+        name="detallesEntrega"
+        rows="2"
+        placeholder="Referencias o instrucciones adicionales"
+        [(ngModel)]="pedidoDirecto.detalles_entrega"
+      ></textarea>
+
+      <label for="directo-pago">Método de pago</label>
+      <select
+        id="directo-pago"
+        name="metodoPago"
+        [(ngModel)]="pedidoDirecto.metodo_pago"
+        required
+      >
+        <option value="" disabled>Selecciona un método</option>
+        <option value="pago_movil">Pago móvil</option>
+        <option value="transferencia">Transferencia</option>
+        <option value="efectivo">Efectivo</option>
+      </select>
+
+      @if (errorPedidoDirecto()) {
+        <p class="pedido-error" role="alert">
+          {{ errorPedidoDirecto() }}
+        </p>
+      }
+
+      <button
+        type="submit"
+        class="whatsapp-button"
+        [disabled]="enviandoPedidoDirecto()"
+      >
+        <i class="pi pi-whatsapp"></i>
+        {{
+          enviandoPedidoDirecto()
+            ? 'Procesando pedido...'
+            : 'Confirmar pedido por WhatsApp'
+        }}
+      </button>
+    </form>
+  </section>
+}
 
 <app-site-footer />
