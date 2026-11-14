@@ -22,7 +22,7 @@ export const routes: Routes = [
       {
         path: 'presupuestos',
         loadComponent: () =>
-          import('./shared/presupuestos/presupuestos').then(
+          import('./shared/components/presupuestos/presupuestos').then(
             (m) => m.Presupuestos
           ),
       },

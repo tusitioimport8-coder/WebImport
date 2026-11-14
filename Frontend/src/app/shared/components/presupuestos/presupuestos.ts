@@ -1,9 +1,11 @@
 
 import { CurrencyPipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
+import { AuthService } from '../../../services/auth';
 import {
   ChangeDetectionStrategy,
   Component,
+   computed,
   inject,
   signal,
 } from '@angular/core';
@@ -11,7 +13,7 @@ import {
 import {
   Presupuesto,
   PresupuestoService,
-} from '../../services/presupuesto.service';
+} from '../../../services/presupuesto.service';
 
 @Component({
   selector: 'app-presupuestos',
@@ -23,6 +25,13 @@ import {
 })
 export class Presupuestos {
   private readonly presupuestoService = inject(PresupuestoService);
+  private readonly authService = inject(AuthService);
+
+readonly puedeGestionarPresupuestos = computed(() => {
+  const rol = this.authService.user()?.tipo?.trim().toUpperCase();
+
+  return rol === 'ADMIN' || rol === 'F_VENTAS';
+});
 
   readonly presupuestos = signal<Presupuesto[]>([]);
   readonly cargando = signal(false);
@@ -37,6 +46,11 @@ export class Presupuestos {
   }
 
   cargarPresupuestos(): void {
+
+    if (!this.puedeGestionarPresupuestos()) {
+  this.error.set('No tienes permisos para consultar presupuestos.');
+  return;
+}
     this.cargando.set(true);
     this.error.set('');
 
@@ -76,6 +90,10 @@ export class Presupuestos {
   }
 
   eliminarPresupuesto(presupuesto: Presupuesto): void {
+    if (!this.puedeGestionarPresupuestos()) {
+  this.error.set('No tienes permisos para eliminar presupuestos.');
+  return;
+}
     if (this.eliminandoId()) {
       return;
     }
