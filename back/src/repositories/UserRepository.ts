@@ -58,17 +58,20 @@ class UserRepository {
     nombre_completo: string;
     correo: string;
     id_google: string;
+    password_hash: string;
     avatar_url?: string;
     rol?: string;
   }) {
     // Ejecuta la consulta "crearUsuarioGoogle" de query.json
-    const result = await this.db.excecuteNameQuery("crearUsuarioGoogle", [
-      datos.nombre_completo,
-      datos.correo,
-      datos.id_google,
-      datos.avatar_url ?? null,
-      datos.rol,
-    ]);
+    const result = await this.db.excecuteNameQuery("crearUsuarioGoogle", {
+      nombre_completo: datos.nombre_completo,
+      correo: datos.correo,
+      password_hash: datos.password_hash,
+      rol: datos.rol || "cliente",
+      id_google: datos.id_google,
+      avatar_url: datos.avatar_url ?? null,
+    });
+
     return result?.[0] || result;
   }
 

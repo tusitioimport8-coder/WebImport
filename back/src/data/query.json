@@ -301,7 +301,7 @@
     ]
   },
   "vincularGoogleId": {
-    "query": "UPDATE usuarios SET google_id = $2, avatar_url = COALESCE(avatar_url, $3) WHERE id = $1 RETURNING id, nombre, email, google_id, avatar_url",
+    "query": "UPDATE usuarios SET id_google = $2, avatar_url = COALESCE(avatar_url, $3) WHERE id = $1 RETURNING id, nombre_completo, correo, id_google, avatar_url",
     "structure_params": {
       "id": "string",
       "google_id": "string",
