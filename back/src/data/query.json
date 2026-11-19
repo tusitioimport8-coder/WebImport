@@ -46,7 +46,7 @@
     "orderArray": ["nombre_completo", "correo", "telefono", "id"]
   },
   "actualizarPassword": {
-    "query": "UPDATE usuarios SET password_hash = $1 WHERE id = $2",
+    "query": "UPDATE usuarios SET password_hash = $1 WHERE id = $2 RETURNING id, nombre_completo, correo, telefono, rol, fecha_creacion",
     "structure_params": {
       "password_hash": "string",
       "id": "string"
@@ -372,24 +372,32 @@
     },
     "orderArray": ["id"]
   },
-
-  "actualizarPasswordYLimpiarToken": {
-    "query": "UPDATE usuarios SET password_hash = $1, reset_token = NULL, reset_token_expires = NULL WHERE id = $2 RETURNING id, nombre_completo, correo, telefono, rol, fecha_creacion",
-    "structure_params": {
-      "password_hash": "string",
-      "id": "string"
-    },
-    "orderArray": ["password_hash", "id"]
-  },
   "guardarResetToken": {
-    "query": "UPDATE usuarios SET reset_token = $1, reset_token_expires = $2 WHERE id = $3 RETURNING id, nombre_completo, correo, telefono, rol, fecha_creacion",
+    "query": "INSERT INTO password_reset_tokens (usuario_id, token, expires_at) VALUES ($1, $2, $3) RETURNING id, usuario_id, expires_at, usado, creado_en",
     "structure_params": {
-      "reset_token": "string",
-      "reset_token_expires": "Date",
+      "usuario_id": "string",
+      "token": "string",
+      "expires_at": "Date"
+    },
+    "orderArray": ["usuario_id", "token", "expires_at"]
+  },
+
+  "buscarResetTokenValido": {
+    "query": "SELECT id, usuario_id, token, expires_at, usado, creado_en FROM password_reset_tokens WHERE usuario_id = $1 AND token = $2 AND usado = FALSE AND expires_at > NOW() ORDER BY creado_en DESC LIMIT 1",
+    "structure_params": {
+      "usuario_id": "string",
+      "token": "string"
+    },
+    "orderArray": ["usuario_id", "token"]
+  },
+  "marcarResetTokenUsado": {
+    "query": "UPDATE password_reset_tokens SET usado = TRUE WHERE id = $1 RETURNING id, usado",
+    "structure_params": {
       "id": "string"
     },
-    "orderArray": ["reset_token", "reset_token_expires", "id"]
+    "orderArray": ["id"]
   },
+
   "obtenerBannerPorIdentificador": {
     "query": "SELECT * FROM banners WHERE identificador = $1",
     "structure_params": {
