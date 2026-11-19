@@ -1,42 +1,11 @@
-import nodemailer from "nodemailer";
-
-export const enviarCorreoRecuperacion = async (
-  destinatario: string,
-  codigo: string,
-) => {
-  const host = process.env.EMAIL_HOST || "smtp.gmail.com";
-  const port = Number(process.env.EMAIL_PORT) || 587;
-  const user = process.env.EMAIL_USER || process.env.MAIL_USER;
-  const pass = process.env.EMAIL_PASS || process.env.MAIL_PASS;
-
-  if (!user || !pass) {
-    throw new Error(
-      "Faltan credenciales de correo (EMAIL_USER/EMAIL_PASS o MAIL_USER/MAIL_PASS) en el entorno",
-    );
-  }
-
-  const transporter = nodemailer.createTransport({
-    host,
-    port,
-    secure: port === 465,
-    auth: {
-      user,
-      pass,
-    },
-  });
-
-  await transporter.sendMail({
-    from: `"Tu Sitio Import" <${user}>`,
-    to: destinatario,
-    subject: "Tu Sitio Import - Código de recuperación de contraseña",
-    html: `
+const htmlRecuperacion = (codigo: string) => `
   <div style="background-color: #fdf2f8; padding: 30px 15px; font-family: 'Segoe UI', Arial, sans-serif; color: #1f2937;">
     <div style="max-width: 520px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 16px rgba(219, 39, 119, 0.12); border: 1px solid #fbcfe8;">
       
       <!-- Encabezado magenta / rosado -->
       <div style="background: linear-gradient(135deg, #831843 0%, #db2777 55%, #ec4899 100%); padding: 24px 20px; text-align: center;">
         <span style="display: inline-block; background-color: rgba(255, 255, 255, 0.18); color: #fce7f3; font-size: 11px; font-weight: bold; letter-spacing: 1.5px; text-transform: uppercase; padding: 4px 10px; border-radius: 999px; margin-bottom: 8px;">
-          Importaciones &amp; Compras
+          Importaciones & Compras
         </span>
         <h1 style="margin: 0; color: #ffffff; font-size: 24px; letter-spacing: 0.5px;">
           Tu Sitio Import
@@ -85,6 +54,37 @@ export const enviarCorreoRecuperacion = async (
 
     </div>
   </div>
-`,
+`;
+
+export const enviarCorreoRecuperacion = async (
+  destinatario: string,
+  codigo: string,
+) => {
+  const apiKey = process.env.MAIL_RESEND?.trim();
+  const fromEmail = process.env.MAIL_FROM?.trim() || "onboarding@resend.dev";
+
+  if (!apiKey) {
+    throw new Error("Falta la variable de entorno MAIL_RESEND");
+  }
+
+  const response = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      from: `"Tu Sitio Import" <${fromEmail}>`,
+      to: [destinatario],
+      subject: "Tu Sitio Import - Código de recuperación de contraseña",
+      html: htmlRecuperacion(codigo),
+    }),
   });
+
+  if (!response.ok) {
+    const errorBody = await response.text();
+    throw new Error(
+      `Error enviando correo con Resend (${response.status}): ${errorBody}`,
+    );
+  }
 };
