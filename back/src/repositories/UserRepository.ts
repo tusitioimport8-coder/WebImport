@@ -58,17 +58,20 @@ class UserRepository {
     nombre_completo: string;
     correo: string;
     id_google: string;
+    password_hash: string;
     avatar_url?: string;
     rol?: string;
   }) {
     // Ejecuta la consulta "crearUsuarioGoogle" de query.json
-    const result = await this.db.excecuteNameQuery("crearUsuarioGoogle", [
-      datos.nombre_completo,
-      datos.correo,
-      datos.id_google,
-      datos.avatar_url ?? null,
-      datos.rol,
-    ]);
+    const result = await this.db.excecuteNameQuery("crearUsuarioGoogle", {
+      nombre_completo: datos.nombre_completo,
+      correo: datos.correo,
+      password_hash: datos.password_hash,
+      rol: datos.rol || "cliente",
+      id_google: datos.id_google,
+      avatar_url: datos.avatar_url ?? null,
+    });
+
     return result?.[0] || result;
   }
 
@@ -87,14 +90,10 @@ class UserRepository {
   }
 
   async actualizarPasswordYLimpiarToken(id: string, password_hash: string) {
-    // Ejecuta la consulta "actualizarPasswordYLimpiarToken" de query.json
-    const result = await this.db.excecuteNameQuery(
-      "actualizarPasswordYLimpiarToken",
-      {
-        password_hash,
-        id,
-      },
-    );
+    const result = await this.db.excecuteNameQuery("actualizarPassword", {
+      password_hash,
+      id,
+    });
     return result?.[0] || result;
   }
 
@@ -103,15 +102,13 @@ class UserRepository {
     reset_token: string,
     reset_token_expires: Date,
   ) {
-    // Ejecuta la consulta "guardarResetToken" de query.json
     const result = await this.db.excecuteNameQuery("guardarResetToken", {
-      id,
-      reset_token,
-      reset_token_expires,
+      usuario_id: id,
+      token: reset_token,
+      expires_at: reset_token_expires,
     });
     return result?.[0] || result;
   }
-
   /**
    * Obtiene todos los usuarios registrados en el sistema
    */
@@ -134,6 +131,21 @@ class UserRepository {
         id,
       },
     );
+    return result?.[0] || null;
+  }
+
+  async buscarResetTokenValido(usuario_id: string, token: string) {
+    const result = await this.db.excecuteNameQuery("buscarResetTokenValido", {
+      usuario_id,
+      token,
+    });
+    return result?.[0] || null;
+  }
+
+  async marcarResetTokenUsado(id: string) {
+    const result = await this.db.excecuteNameQuery("marcarResetTokenUsado", {
+      id,
+    });
     return result?.[0] || null;
   }
 }

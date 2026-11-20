@@ -46,7 +46,7 @@
     "orderArray": ["nombre_completo", "correo", "telefono", "id"]
   },
   "actualizarPassword": {
-    "query": "UPDATE usuarios SET password_hash = $1 WHERE id = $2",
+    "query": "UPDATE usuarios SET password_hash = $1 WHERE id = $2 RETURNING id, nombre_completo, correo, telefono, rol, fecha_creacion",
     "structure_params": {
       "password_hash": "string",
       "id": "string"
@@ -90,6 +90,11 @@
       "video_url",
       "stock"
     ]
+  },
+  "getProductosConCategorias": {
+    "query": "SELECT p.id, p.nombre, p.descripcion, p.descuento_porcentaje, p.imagen_url, p.stock, p.estado, p.creado_en, COALESCE(json_agg(json_build_object('id_precio', pr.id_precio, 'tipo_precio', pr.tipo_precio, 'precio', pr.precio, 'precio_final', ROUND(pr.precio * (1 - p.descuento_porcentaje / 100), 2))) FILTER (WHERE pr.id_precio IS NOT NULL), '[]') AS precios, COALESCE((SELECT json_agg(json_build_object('id_categoria', cat.id, 'nombre_categoria', cat.nombre)) FROM (SELECT DISTINCT c.id, c.nombre FROM producto_categorias sub_pc JOIN categorias c ON sub_pc.categoria_id = c.id WHERE sub_pc.producto_id = p.id) cat), '[]') AS categorias FROM productos p LEFT JOIN precios_productos pr ON p.id = pr.id_producto WHERE p.estado = true GROUP BY p.id ORDER BY p.creado_en DESC",
+    "structure_params": {},
+    "orderArray": []
   },
   "agregarPrecioProducto": {
     "query": "INSERT INTO precios_productos (id_producto, tipo_precio, precio) VALUES ($1, $2, $3) RETURNING id_precio, tipo_precio, precio",
@@ -277,17 +282,26 @@
     "orderArray": ["google_id"]
   },
   "crearUsuarioGoogle": {
-    "query": "INSERT INTO usuarios (nombre, email, google_id, avatar_url) VALUES ($1, $2, $3, $4) RETURNING id, nombre, email, avatar_url, estado, creado_en",
+    "query": "INSERT INTO usuarios (nombre_completo, correo, password_hash, rol, id_google, avatar_url) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id, nombre_completo, correo, rol, id_google, avatar_url, fecha_creacion",
     "structure_params": {
-      "nombre": "string",
-      "email": "string",
-      "google_id": "string",
+      "nombre_completo": "string",
+      "correo": "string",
+      "password_hash": "string",
+      "rol": "string",
+      "id_google": "string",
       "avatar_url": "string"
     },
-    "orderArray": ["nombre", "email", "google_id", "avatar_url"]
+    "orderArray": [
+      "nombre_completo",
+      "correo",
+      "password_hash",
+      "rol",
+      "id_google",
+      "avatar_url"
+    ]
   },
   "vincularGoogleId": {
-    "query": "UPDATE usuarios SET google_id = $2, avatar_url = COALESCE(avatar_url, $3) WHERE id = $1 RETURNING id, nombre, email, google_id, avatar_url",
+    "query": "UPDATE usuarios SET id_google = $2, avatar_url = COALESCE(avatar_url, $3) WHERE id = $1 RETURNING id, nombre_completo, correo, id_google, avatar_url",
     "structure_params": {
       "id": "string",
       "google_id": "string",
@@ -358,24 +372,32 @@
     },
     "orderArray": ["id"]
   },
-
-  "actualizarPasswordYLimpiarToken": {
-    "query": "UPDATE usuarios SET password_hash = $1, reset_token = NULL, reset_token_expires = NULL WHERE id = $2 RETURNING id, nombre_completo, correo, telefono, rol, fecha_creacion",
-    "structure_params": {
-      "password_hash": "string",
-      "id": "string"
-    },
-    "orderArray": ["password_hash", "id"]
-  },
   "guardarResetToken": {
-    "query": "UPDATE usuarios SET reset_token = $1, reset_token_expires = $2 WHERE id = $3 RETURNING id, nombre_completo, correo, telefono, rol, fecha_creacion",
+    "query": "INSERT INTO password_reset_tokens (usuario_id, token, expires_at) VALUES ($1, $2, $3) RETURNING id, usuario_id, expires_at, usado, creado_en",
     "structure_params": {
-      "reset_token": "string",
-      "reset_token_expires": "Date",
+      "usuario_id": "string",
+      "token": "string",
+      "expires_at": "Date"
+    },
+    "orderArray": ["usuario_id", "token", "expires_at"]
+  },
+
+  "buscarResetTokenValido": {
+    "query": "SELECT id, usuario_id, token, expires_at, usado, creado_en FROM password_reset_tokens WHERE usuario_id = $1 AND token = $2 AND usado = FALSE AND expires_at > NOW() ORDER BY creado_en DESC LIMIT 1",
+    "structure_params": {
+      "usuario_id": "string",
+      "token": "string"
+    },
+    "orderArray": ["usuario_id", "token"]
+  },
+  "marcarResetTokenUsado": {
+    "query": "UPDATE password_reset_tokens SET usado = TRUE WHERE id = $1 RETURNING id, usado",
+    "structure_params": {
       "id": "string"
     },
-    "orderArray": ["reset_token", "reset_token_expires", "id"]
+    "orderArray": ["id"]
   },
+
   "obtenerBannerPorIdentificador": {
     "query": "SELECT * FROM banners WHERE identificador = $1",
     "structure_params": {

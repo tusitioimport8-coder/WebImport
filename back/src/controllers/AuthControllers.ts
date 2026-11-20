@@ -224,7 +224,7 @@ class Auth {
 
   async updateUser(req: Request, res: Response): Promise<Response> {
     try {
-      const usuarioId = await this.resolveUserId(req);
+      const usuarioId = this.resolveUserId(req);
 
       if (!usuarioId) {
         return res.status(400).json({
@@ -474,22 +474,25 @@ class Auth {
       }
 
       const userBD = await this.repository.getUsuarioPorCorreo(normalizedEmail);
-      if (!userBD || !userBD.reset_token || !userBD.reset_token_expires) {
+      if (!userBD) {
         return res
           .status(400)
-          .json({ success: false, message: "Código inválido o expirado" });
+          .json({ success: false, message: "Usuario no registrado" });
       }
+      console.log("Datos a probar:", userBD.id, " Codigo:", codigo);
+      const resetTokenRecord = await this.repository.buscarResetTokenValido(
+        userBD.id,
+        codigo,
+      );
 
-      // Verificar si el código coincide y no ha expirado
-      const isTokenValid = userBD.reset_token === codigo;
-      const isNotExpired = new Date() < new Date(userBD.reset_token_expires);
-
-      if (!isTokenValid || !isNotExpired) {
+      if (!resetTokenRecord) {
         return res.status(400).json({
           success: false,
           message: "El código es incorrecto o ha expirado",
         });
       }
+
+      await this.repository.marcarResetTokenUsado(resetTokenRecord.id);
 
       // Hashear la nueva contraseña
       const hashedPassword = await this.bcrypt.hash(nuevaPassword);
