@@ -21,13 +21,15 @@
 .footer-main {
   display: grid;
   grid-template-columns:
-    minmax(190px, 1fr)
-    minmax(0, 2fr)
-    minmax(190px, 1fr)
-    minmax(190px, 1fr);
+    minmax(260px, 290px)
+    minmax(0, 1fr)
+    260px
+    260px;
   align-items: start;
-  gap: 2rem;
-  width: min(calc(100% - 4rem), 1600px);
+  column-gap: 2rem;
+
+  width: calc(100% - 4rem);
+  max-width: 1800px;
   margin: 0 auto;
   padding: 2rem 0 1.5rem;
   box-sizing: border-box;
@@ -110,8 +112,8 @@
 
 .footer-categories-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  column-gap: 2rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  column-gap: 1.25rem;
   row-gap: .8rem;
   width: 100%;
   min-width: 0;
@@ -135,6 +137,32 @@
 }
 
 /* ATENCIÓN AL CLIENTE */
+/* ATENCIÓN AL CLIENTE */
+
+.footer-main > .footer-column:nth-child(3) {
+  width: 260px;
+  justify-self: end;
+  align-items: flex-end;
+  text-align: right;
+
+  h3 {
+    width: 100%;
+    text-align: right;
+  }
+
+  > a {
+    text-align: right;
+  }
+}
+
+.footer-support {
+  justify-content: flex-end;
+  text-align: right;
+
+  span {
+    align-items: flex-end;
+  }
+}
 
 .footer-support {
   display: flex;
@@ -170,6 +198,18 @@
 
 /* MÉTODOS DE PAGO */
 
+.footer-payments {
+  width: 260px;
+  justify-self: end;
+  align-items: flex-end;
+  text-align: right;
+
+  h3 {
+    width: 100%;
+    text-align: right;
+  }
+}
+
 .footer-payments p {
   margin: 0;
 }
@@ -177,7 +217,9 @@
 .payment-tags {
   display: flex;
   flex-wrap: wrap;
+  justify-content: flex-end;
   gap: .25rem;
+  width: 100%;
 
   span {
     border-radius: 5px;
@@ -188,9 +230,11 @@
 .footer-security {
   display: flex;
   flex-direction: column;
+  align-items: flex-end;
   gap: .2rem;
   margin-top: 1rem;
   font-size: .7rem;
+  text-align: right;
 
   strong {
     font-size: .69rem;
@@ -204,7 +248,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  padding: .85rem max(2rem, calc((100% - 1600px) / 2));
+  padding: .85rem max(2rem, calc((100% - 1800px) / 2));
   border-top: 1px solid #bdadba;
   font-size: .66rem;
 
@@ -222,10 +266,38 @@
 
 /* PANTALLAS MEDIANAS */
 
-@media (max-width: 1250px) {
+@media (max-width: 1400px) {
+  .footer-main {
+    grid-template-columns:
+      minmax(190px, 230px)
+      minmax(0, 1fr)
+      210px
+      210px;
+    column-gap: 1.25rem;
+  }
+
+  .footer-main > .footer-column:nth-child(3),
+  .footer-payments {
+    width: 100%;
+  }
+
+  .footer-categories-grid {
+    column-gap: .85rem;
+  }
+}
+
+/* TABLET HORIZONTAL */
+
+@media (max-width: 1100px) {
   .footer-main {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 2rem;
+  }
+
+  .footer-main > .footer-column:nth-child(3),
+  .footer-payments {
+    width: 100%;
+    justify-self: stretch;
   }
 
   .footer-column {
@@ -233,8 +305,8 @@
   }
 
   .footer-categories-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    column-gap: 1.5rem;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    column-gap: 1rem;
   }
 }
 
@@ -280,6 +352,30 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
     column-gap: 1rem;
     row-gap: .75rem;
+  }
+
+  .footer-main > .footer-column:nth-child(3),
+  .footer-payments {
+    width: 100%;
+    justify-self: stretch;
+  }
+
+  .footer-payments {
+    align-items: flex-start;
+    text-align: left;
+
+    h3 {
+      text-align: left;
+    }
+  }
+
+  .payment-tags {
+    justify-content: flex-start;
+  }
+
+  .footer-security {
+    align-items: flex-start;
+    text-align: left;
   }
 
   .footer-support {

@@ -105,7 +105,7 @@ readonly puedeCrearPresupuesto = computed(
     nombre_completo: '',
     telefono: '',
     correo: '',
-    sede: '',
+    
     direccion_base: '',
     tipo_entrega: 'retiro',
     metodo_pago: 'transferencia',
@@ -181,17 +181,16 @@ readonly puedeCrearPresupuesto = computed(
 
     const datos = this.datosPedido;
 
-    if (
-      !datos.nombre_completo.trim() ||
-      !datos.telefono.trim() ||
-      !datos.correo.trim() ||
-      !datos.sede.trim()
-    ) {
-      this.errorPedido.set(
-        'Completa nombre, teléfono, correo y sede.'
-      );
-      return;
-    }
+ if (
+  !datos.nombre_completo.trim() ||
+  !datos.telefono.trim() ||
+  !datos.correo.trim()
+) {
+  this.errorPedido.set(
+    'Completa nombre, teléfono y correo.'
+  );
+  return;
+}
 
     const itemsAgrupados = new Map<string, number>();
 
@@ -203,13 +202,12 @@ readonly puedeCrearPresupuesto = computed(
     }
 
     const pedido: CrearPedidoRequest = {
-      contacto: {
-        nombre_completo: datos.nombre_completo.trim(),
-        telefono: datos.telefono.trim(),
-        correo: datos.correo.trim(),
-        sede: datos.sede.trim(),
-        direccion_base: datos.direccion_base.trim(),
-      },
+     contacto: {
+  nombre_completo: datos.nombre_completo.trim(),
+  telefono: datos.telefono.trim(),
+  correo: datos.correo.trim(),
+  direccion_base: datos.direccion_base.trim(),
+},
    entrega: {
   tipo: datos.tipo_entrega,
   detalles: '',
