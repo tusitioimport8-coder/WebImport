@@ -639,8 +639,10 @@ retry(): void {
     id: product.id,
     name: product.nombre,
     category: (
-  product.categorias?.map((categoria) => categoria.nombre).join(', ')
-  || 'Sin categoría'
+  product.categorias
+    ?.map((categoria) => categoria.nombre_categoria)
+    .filter(Boolean)
+    .join(', ') || 'Sin categoría'
 ) as InventoryCategory,
    price: getPrice('detal_usd'),
 priceBCV: getPrice('detal_bs'),

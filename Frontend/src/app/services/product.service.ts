@@ -22,9 +22,8 @@ export interface ApiProductPrice {
 }
 
 export interface ApiProductCategory {
-  id: number;
-  nombre: string;
-  descripcion: string;
+  id_categoria: number;
+  nombre_categoria: string;
 }
 export interface ApiProduct {
   id: string;

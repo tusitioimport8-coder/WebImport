@@ -1,3 +1,4 @@
+
 :host {
   display: block;
   width: 100%;
@@ -16,13 +17,13 @@
   padding: .85rem 2rem;
   box-sizing: border-box;
   border-top: 18px solid #baff00;
-background: linear-gradient(
-  to bottom,
-  #ff00b8 0%,
-  #ff00b8 60%,
-  #fa00b3 80%,
-  #ed00aa 90%
-);
+  background: linear-gradient(
+    to bottom,
+    #ff00b8 0%,
+    #ff00b8 60%,
+    #fa00b3 80%,
+    #ed00aa 90%
+  );
   color: #111;
 }
 
@@ -169,17 +170,6 @@ background: linear-gradient(
   color: #fff;
   font-size: .62rem;
   font-weight: 900;
-}
-
-@media (max-width: 1100px) {
-  .shop-toolbar {
-    grid-template-columns: auto 1fr;
-  }
-
-  .toolbar-actions {
-    grid-column: 1 / -1;
-    justify-content: flex-end;
-  }
 }
 
 /* ==========================================
@@ -341,3 +331,130 @@ background: linear-gradient(
   }
 }
 
+/* ==========================================
+   HEADER COMPACTO - PROPORCIONES UNIFORMES
+   ========================================== */
+
+@media (min-width: 821px) {
+ 
+.shop-toolbar {
+  grid-template-columns: 120px minmax(180px, 1fr) auto;
+  gap: 24px;
+  min-height: 70px;
+  padding: 12px 24px;
+}
+
+
+  .shop-brand {
+    min-width: 0;
+  }
+
+  .shop-logo {
+    width: 95px;
+    height: 48px;
+    max-height: 48px;
+    object-fit: contain;
+  }
+
+  .search-wrapper {
+    max-width: 470px;
+  }
+
+  /* Distribución simétrica de los botones */
+  
+.toolbar-actions {
+  grid-column: auto;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 68px;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+}
+
+
+  .toolbar-action {
+    flex: 0 0 auto;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .toolbar-action-content {
+    gap: 3px;
+  }
+
+  .toolbar-action-image,
+  .toolbar-action-symbol {
+    width: 32px;
+    height: 32px;
+  }
+
+  .toolbar-action-symbol i {
+    font-size: 17px;
+  }
+
+  .toolbar-action-label {
+    font-size: 8px;
+    font-weight: 600;
+    line-height: 1.1;
+  }
+}
+
+/* ==========================================
+   BARRA SUPERIOR DE ANUNCIOS
+   ========================================== */
+
+.shop-announcement {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 22px;
+  padding: 3px 12px;
+  box-sizing: border-box;
+  background: #baff00;
+  color: #111;
+  font-size: 10px;
+  font-weight: 800;
+  text-align: center;
+}
+
+.shop-toolbar {
+  border-top: 0 !important;
+}
+
+@media (max-width: 560px) {
+  .shop-announcement {
+    min-height: 24px;
+    font-size: 9px;
+  }
+}
+
+/* ==========================================
+   BUSCADOR MÁS COMPACTO
+   ========================================== */
+
+@media (min-width: 821px) {
+  .search-wrapper {
+    width: 85%;
+    max-width: 400px;
+    justify-self: center;
+  }
+
+  .search-control {
+    height: 34px;
+    min-height: 34px;
+  }
+
+  :host ::ng-deep .search-control input {
+    height: 34px !important;
+    min-height: 34px !important;
+    font-size: 12px !important;
+  }
+
+  .search-icon-button,
+  .search-icon-button img {
+    width: 30px !important;
+    height: 30px !important;
+  }
+}

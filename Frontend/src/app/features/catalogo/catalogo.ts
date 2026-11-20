@@ -254,12 +254,13 @@ readonly categories = computed<readonly string[]>(() => {
 
       // Esta comparación funcionará cuando el listado
       // de productos incluya su categoría.
-   const matchesCategory =
+const matchesCategory =
   category === 'Todas' ||
   product.category
     .split(',')
-    .map(name => name.trim())
-    .includes(category);
+    .some(name =>
+      this.normalizeText(name) === this.normalizeText(category)
+    );
 
       return matchesSearch && matchesCategory;
     });
@@ -320,11 +321,20 @@ readonly categories = computed<readonly string[]>(() => {
  ngOnInit(): void {
   this.loadProducts();
   this.loadCategories();
-
-  this.route.queryParamMap.subscribe(params => {
+this.route.queryParamMap.subscribe(params => {
   const busqueda = params.get('buscar') ?? '';
+  const categoria = params.get('categoria') ?? 'Todas';
 
   this.searchTerm.set(busqueda);
+  this.selectedCategory.set(categoria);
+
+  this.resetPage();
+
+  window.scrollTo({
+    top: 0,
+    left: 0,
+    behavior: 'instant'
+  });
 });
 
   this.bcvService.getRate().subscribe({
@@ -362,6 +372,13 @@ loadProducts(): void {
   this.productService.getProducts().subscribe({
     next: response => {
       const products = response.data ?? [];
+      console.log(
+  'CATEGORÍAS DE PRODUCTOS:',
+  products.map(product => ({
+    nombre: product.nombre,
+    categorias: product.categorias
+  }))
+);
 
       this.products.set(
         products.map(product =>
@@ -496,9 +513,10 @@ private mapApiProduct(product: ApiProduct): CatalogProduct {
   return {
     id: product.id,
     name: product.nombre,
-    category: product.categorias
-      ?.map(categoria => categoria.nombre)
-      .join(', ') || 'Sin categoría',
+   category: product.categorias
+  ?.map(categoria => categoria.nombre_categoria)
+  .filter(Boolean)
+  .join(', ') || 'Sin categoría',
     price: prices.detal_usd ?? 0,
     priceBCV: prices.detal_bs ?? 0,
     quantity: Number(product.stock ?? 0),

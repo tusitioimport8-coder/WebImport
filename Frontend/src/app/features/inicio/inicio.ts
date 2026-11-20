@@ -84,16 +84,39 @@ export class Inicio implements OnInit, OnDestroy {
   private readonly router = inject(Router);
 
 
+readonly estadoBanners = signal<Record<number, {
+  tipo: 'cargando' | 'exito' | 'error';
+  mensaje: string;
+}>>({});
+
+private actualizarEstadoBanner(
+  numero: number,
+  tipo: 'cargando' | 'exito' | 'error',
+  mensaje: string
+): void {
+  this.estadoBanners.update(estados => ({
+    ...estados,
+    [numero]: { tipo, mensaje }
+  }));
+}
+
+
+
 
 irAlCatalogo(event: MouseEvent): void {
   const elemento = event.target as HTMLElement;
 
-  if (elemento.closest('.promo-edit-button')) {
+  if (
+    elemento.closest('.promo-edit-button') ||
+    elemento.closest('input[type="file"]')
+  ) {
+    event.stopPropagation();
     return;
   }
 
   this.router.navigate(['/catalogo']);
 }
+
 
 buscarEnCatalogo(): void {
   const busqueda = this.searchTerm().trim();
@@ -234,44 +257,44 @@ private intervaloBanners?: ReturnType<typeof setInterval>;
   readonly wishlistProducts = this.wishlistService.items;
   readonly wishlistTotalItems = this.wishlistService.totalItems;
 
-  readonly categories: readonly HomeCategory[] = [
-    {
-      label: 'Electrónica',
-      icon: 'pi pi-desktop',
-      image:
-        'https://images.unsplash.com/photo-1498049794561-7780e7231661?w=900&q=80'
-    },
-    {
-      label: 'Accesorios',
-      icon: 'pi pi-shopping-bag',
-      image:
-        'https://images.unsplash.com/photo-1523779917675-b6ed3a42a561?w=900&q=80'
-    },
-    {
-      label: 'Hogar',
-      icon: 'pi pi-home',
-      image:
-        'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=900&q=80'
-    },
-    {
-      label: 'Oficina',
-      icon: 'pi pi-briefcase',
-      image:
-        'https://images.unsplash.com/photo-1497366811353-6870744d04b2?w=900&q=80'
-    },
-    {
-      label: 'Novedades',
-      icon: 'pi pi-star',
-      image:
-        'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=900&q=80'
-    },
-    {
-      label: 'Todos',
-      icon: 'pi pi-th-large',
-      image:
-        'https://images.unsplash.com/photo-1472851294608-062f824d29cc?w=900&q=80'
-    }
-  ];
+ readonly categories: readonly HomeCategory[] = [
+  {
+    label: 'Electrónicos',
+    icon: 'pi pi-desktop',
+    image:
+      'https://images.unsplash.com/photo-1498049794561-7780e7231661?w=900&q=80'
+  },
+  {
+    label: 'Accesorios para celulares',
+    icon: 'pi pi-shopping-bag',
+    image:
+      'https://images.unsplash.com/photo-1523779917675-b6ed3a42a561?w=900&q=80'
+  },
+  {
+    label: 'Hogar',
+    icon: 'pi pi-home',
+    image:
+      'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=900&q=80'
+  },
+  {
+    label: 'Oficina',
+    icon: 'pi pi-briefcase',
+    image:
+      'https://images.unsplash.com/photo-1497366811353-6870744d04b2?w=900&q=80'
+  },
+  {
+    label: 'Smartwatch',
+    icon: 'pi pi-clock',
+    image:
+      'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=900&q=80'
+  },
+  {
+    label: 'Cables y cargadores',
+    icon: 'pi pi-bolt',
+    image:
+      'https://images.unsplash.com/photo-1472851294608-062f824d29cc?w=900&q=80'
+  }
+];
 
   readonly availableProducts = computed(() =>
     this.products().filter(product => product.quantity > 0)
@@ -663,13 +686,25 @@ toggleWishlist(productId: string): void {
 
 
   // CARRUSELES
-  scrollCarousel(
-    carousel: HTMLElement,
-    direction: -1 | 1
-  ): void {
-    this.startAutoplay();
-    this.moveCarousel(carousel, direction);
-  }
+ scrollCarousel(
+  carousel: HTMLElement,
+  direction: -1 | 1
+): void {
+  this.stopAutoplay();
+
+  const card = carousel.firstElementChild as HTMLElement | null;
+
+  const distance = card
+    ? card.getBoundingClientRect().width + 16
+    : carousel.clientWidth / 3;
+
+  carousel.scrollBy({
+    left: distance * direction,
+    behavior: 'smooth'
+  });
+
+  this.startAutoplay();
+}
 
   startAutoplay(): void {
     this.stopAutoplay();
@@ -788,10 +823,10 @@ private mapApiProduct(product: ApiProduct): HomeProduct {
     price: prices.detal_bs ?? 0,
     quantity: Number(product.stock ?? 0),
     imageUrl: product.imagen_url,
-    category:
-      product.categorias
-        ?.map(categoria => categoria.nombre)
-        .join(', ') || 'Sin categoría',
+   category: product.categorias
+  ?.map(categoria => categoria.nombre_categoria)
+  .filter(Boolean)
+  .join(', ') || 'Sin categoría',
     prices,
   };
 }

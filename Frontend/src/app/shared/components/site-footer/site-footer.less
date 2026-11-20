@@ -1,12 +1,13 @@
+
 :host {
   display: block;
   width: 100%;
 }
+
 .site-footer {
   position: relative;
   z-index: 2;
   width: 100%;
-
   background: #fff0f8;
   color: #111;
 
@@ -15,18 +16,33 @@
     0 -18px 38px rgba(45, 0, 40, 0.30);
 }
 
+/* ESTRUCTURA PRINCIPAL */
+
 .footer-main {
   display: grid;
-  grid-template-columns: 1.15fr 1.15fr 1.15fr 1.1fr;
-  gap: 2.5rem;
-  width: min(calc(100% - 4rem), 1440px);
+  grid-template-columns:
+    minmax(190px, 1fr)
+    minmax(0, 2fr)
+    minmax(190px, 1fr)
+    minmax(190px, 1fr);
+  align-items: start;
+  gap: 2rem;
+  width: min(calc(100% - 4rem), 1600px);
   margin: 0 auto;
   padding: 2rem 0 1.5rem;
+  box-sizing: border-box;
+
+  > * {
+    min-width: 0;
+  }
 }
+
+/* LOGO Y DESCRIPCIÓN */
 
 .footer-about {
   .footer-logo {
     width: 172px;
+    max-width: 100%;
     max-height: 90px;
     object-fit: contain;
     object-position: left center;
@@ -50,11 +66,14 @@
   font-weight: 800;
 }
 
+/* COLUMNAS GENERALES */
+
 .footer-column {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: .55rem;
+  min-width: 0;
   padding-top: 1.5rem;
 
   h3 {
@@ -80,13 +99,42 @@
     font-size: .78rem;
     line-height: 1.55;
   }
+}
 
-  .footer-offers {
-    margin-top: auto;
-    color: #f500aa;
-    font-weight: 900;
+/* CATEGORÍAS */
+
+.footer-categories {
+  width: 100%;
+  min-width: 0;
+}
+
+.footer-categories-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 2rem;
+  row-gap: .8rem;
+  width: 100%;
+  min-width: 0;
+  align-items: start;
+
+  a {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    line-height: 1.4;
+    overflow-wrap: break-word;
+    word-break: normal;
+    text-decoration: none;
+    box-sizing: border-box;
+
+    &:hover {
+      color: #f500aa;
+      text-decoration: underline;
+    }
   }
 }
+
+/* ATENCIÓN AL CLIENTE */
 
 .footer-support {
   display: flex;
@@ -94,7 +142,7 @@
   gap: .55rem;
   width: 100%;
   box-sizing: border-box;
-  margin-top: auto;
+  margin-top: 1rem;
   padding: .65rem;
   border-radius: 8px;
   background: #f500aa;
@@ -108,6 +156,7 @@
     display: flex;
     flex-direction: column;
     gap: .1rem;
+    min-width: 0;
   }
 
   strong {
@@ -118,6 +167,8 @@
     font-size: .62rem;
   }
 }
+
+/* MÉTODOS DE PAGO */
 
 .footer-payments p {
   margin: 0;
@@ -138,7 +189,7 @@
   display: flex;
   flex-direction: column;
   gap: .2rem;
-  margin-top: auto;
+  margin-top: 1rem;
   font-size: .7rem;
 
   strong {
@@ -146,17 +197,20 @@
   }
 }
 
+/* BARRA INFERIOR */
+
 .footer-bottom {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  padding: .85rem max(2rem, calc((100% - 1440px) / 2));
+  padding: .85rem max(2rem, calc((100% - 1600px) / 2));
   border-top: 1px solid #bdadba;
   font-size: .66rem;
 
   > span:last-child {
     display: flex;
+    flex-wrap: wrap;
     gap: .8rem;
   }
 
@@ -166,10 +220,35 @@
   }
 }
 
+/* PANTALLAS MEDIANAS */
+
+@media (max-width: 1250px) {
+  .footer-main {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 2rem;
+  }
+
+  .footer-column {
+    padding-top: .5rem;
+  }
+
+  .footer-categories-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 1.5rem;
+  }
+}
+
+/* TABLET */
+
 @media (max-width: 900px) {
   .footer-main {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 1.4rem;
+  }
+
+  .footer-categories-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 1rem;
   }
 
   .footer-column {
@@ -177,20 +256,56 @@
   }
 }
 
+/* TELÉFONOS */
+
 @media (max-width: 560px) {
   .footer-main {
     width: calc(100% - 2rem);
-    grid-template-columns: 1fr 1fr;
-    gap: 1.5rem 1rem;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.5rem;
+    padding: 1.5rem 0;
   }
 
   .footer-about,
+  .footer-categories,
   .footer-payments {
     grid-column: 1 / -1;
   }
 
+  .footer-column {
+    padding-top: 0;
+  }
+
+  .footer-categories-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 1rem;
+    row-gap: .75rem;
+  }
+
+  .footer-support {
+    max-width: 100%;
+  }
+
   .footer-bottom {
     flex-wrap: wrap;
+    justify-content: center;
     padding: 1rem;
+    text-align: center;
+  }
+
+  .footer-bottom > span:last-child {
+    justify-content: center;
+  }
+}
+
+/* PANTALLAS MUY PEQUEÑAS */
+
+@media (max-width: 350px) {
+  .footer-categories-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .footer-main {
+    width: calc(100% - 1.5rem);
   }
 }
