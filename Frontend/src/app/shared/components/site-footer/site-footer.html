@@ -1,33 +1,22 @@
-
 <footer class="site-footer">
   <div class="footer-main">
     <div class="footer-about">
-      <img
-        class="footer-logo"
-        src="/images/logo.png"
-        alt="Tu Sitio Import"
-      />
+      <img class="footer-logo" src="/images/logo.svg" alt="Tu Sitio Import" />
 
       <p>
-        Tu tienda online de confianza para productos importados directos a Venezuela.
-        Variedad, rapidez en entregas y los mejores precios del mercado nacional.
+        Tu tienda online de confianza para productos importados directos a Venezuela. Variedad,
+        rapidez en entregas y los mejores precios del mercado nacional.
       </p>
 
       <span class="footer-guarantee">Garantía 100%</span>
     </div>
 
-    <nav
-      class="footer-column footer-categories"
-      aria-label="Categorías del pie de página"
-    >
+    <nav class="footer-column footer-categories" aria-label="Categorías del pie de página">
       <h3>CATEGORÍAS</h3>
 
       <div class="footer-categories-grid">
         @for (categoria of categorias; track categoria) {
-          <a
-            routerLink="/catalogo"
-            [queryParams]="{ categoria: categoria }"
-          >
+          <a routerLink="/catalogo" [queryParams]="{ categoria: categoria }">
             {{ categoria }}
           </a>
         }
@@ -55,8 +44,6 @@
     <div class="footer-column footer-payments">
       <h3>MÉTODOS DE PAGO</h3>
 
-     
-
       <div class="payment-tags">
         <span>Zelle</span>
         <span>Pago Móvil</span>
@@ -77,10 +64,7 @@
   </div>
 
   <div class="footer-bottom">
-    <span>
-      © 2026 Tu Sitio Import / Tienda Import C.A.
-      Todos los derechos reservados.
-    </span>
+    <span> © 2026 Tu Sitio Import / Tienda Import C.A. Todos los derechos reservados. </span>
 
     <span>
       <a routerLink="/terminos">Términos y Condiciones</a>
