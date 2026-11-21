@@ -167,7 +167,7 @@
                     <table class="detalle-tabla">
                       <thead>
                         <tr>
-                          <th>Producto ID</th>
+                          <th>Producto</th>
                           <th>Tipo de precio</th>
                           <th>Cantidad</th>
                           <th>Precio unitario</th>
@@ -181,9 +181,9 @@
                           track $index
                         ) {
                           <tr>
-                            <td class="producto-id">
-                              {{ detalle.producto_id }}
-                            </td>
+                          <td class="producto-id">
+  {{ nombreProducto(detalle.producto_id) }}
+</td>
 
                             <td>{{ detalle.tipo_precio }}</td>
 

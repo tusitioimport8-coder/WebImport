@@ -2,6 +2,7 @@
 import { CurrencyPipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { AuthService } from '../../../services/auth';
+import { ProductService } from '../../../services/product.service';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -25,6 +26,9 @@ import {
 })
 export class Presupuestos {
   private readonly presupuestoService = inject(PresupuestoService);
+  private readonly productService = inject(ProductService);
+
+readonly nombresProductos = signal<Record<string, string>>({});
   private readonly authService = inject(AuthService);
 
 readonly puedeGestionarPresupuestos = computed(() => {
@@ -41,9 +45,33 @@ readonly puedeGestionarPresupuestos = computed(() => {
   readonly presupuestoExpandido = signal<string | null>(null);
   readonly eliminandoId = signal<string | null>(null);
 
-  constructor() {
-    this.cargarPresupuestos();
-  }
+ constructor() {
+  this.cargarPresupuestos();
+  this.cargarNombresProductos();
+}
+
+cargarNombresProductos(): void {
+  this.productService.getProducts().subscribe({
+    next: (response) => {
+      if (!response.success) return;
+
+      const nombres: Record<string, string> = {};
+
+      for (const producto of response.data ?? []) {
+        nombres[producto.id] = producto.nombre;
+      }
+
+      this.nombresProductos.set(nombres);
+    },
+    error: (error: HttpErrorResponse) => {
+      console.error('ERROR AL CARGAR NOMBRES DE PRODUCTOS:', error);
+    },
+  });
+}
+
+nombreProducto(id: string): string {
+  return this.nombresProductos()[id] ?? `Producto ${id.slice(0, 8)}`;
+}
 
   cargarPresupuestos(): void {
 
