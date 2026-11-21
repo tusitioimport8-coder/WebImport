@@ -1,7 +1,5 @@
-
 <section class="presupuestos-page">
   <div class="presupuestos-container">
-
     <!-- ENCABEZADO -->
     <header class="presupuestos-header">
       <div>
@@ -50,7 +48,6 @@
         <p>Los presupuestos creados aparecerán aquí.</p>
       </div>
     } @else if (presupuestos().length > 0) {
-
       <!-- TOTAL DE REGISTROS -->
       <div class="listado-resumen">
         <span>
@@ -63,12 +60,9 @@
       <div class="presupuestos-lista">
         @for (presupuesto of presupuestos(); track presupuesto.id) {
           <article class="presupuesto-card">
-
             <div class="presupuesto-principal">
               <div class="presupuesto-info">
-                <span class="presupuesto-id">
-                  Presupuesto #{{ presupuesto.id.slice(0, 8) }}
-                </span>
+                <span class="presupuesto-id"> Presupuesto #{{ presupuesto.id.slice(0, 8) }} </span>
 
                 <h2>{{ presupuesto.nombre_cliente }}</h2>
 
@@ -97,19 +91,13 @@
               <div class="presupuesto-totales">
                 <span>Total</span>
                 <strong>
-                  {{
-                    presupuesto.total
-                      | currency:'USD':'symbol':'1.2-2'
-                  }}
+                  {{ presupuesto.total | currency: 'USD' : 'symbol' : '1.2-2' }}
                 </strong>
 
                 @if (presupuesto.descuento > 0) {
                   <small>
                     Descuento:
-                    {{
-                      presupuesto.descuento
-                        | currency:'USD':'symbol':'1.2-2'
-                    }}
+                    {{ presupuesto.descuento | currency: 'USD' : 'symbol' : '1.2-2' }}
                   </small>
                 }
               </div>
@@ -130,12 +118,30 @@
                 ></i>
 
                 {{
-                  presupuestoExpandido() === presupuesto.id
-                    ? 'Ocultar detalles'
-                    : 'Ver detalles'
+                  presupuestoExpandido() === presupuesto.id ? 'Ocultar detalles' : 'Ver detalles'
                 }}
               </button>
 
+              <!-- ENVIAR POR WHATSAPP -->
+              <button
+                type="button"
+                class="btn-whatsapp"
+                [disabled]="enviandoId() !== null"
+                (click)="enviarPorWhatsApp(presupuesto)"
+              >
+                <i
+                  class="pi"
+                  [class.pi-whatsapp]="enviandoId() !== presupuesto.id"
+                  [class.pi-spin]="enviandoId() === presupuesto.id"
+                  [class.pi-spinner]="enviandoId() === presupuesto.id"
+                ></i>
+
+                {{
+                  enviandoId() === presupuesto.id ? 'Generando enlace...' : 'Enviar por WhatsApp'
+                }}
+              </button>
+
+              <!-- ELIMINAR -->
               <button
                 type="button"
                 class="btn-eliminar"
@@ -149,11 +155,7 @@
                   [class.pi-spinner]="eliminandoId() === presupuesto.id"
                 ></i>
 
-                {{
-                  eliminandoId() === presupuesto.id
-                    ? 'Eliminando...'
-                    : 'Eliminar'
-                }}
+                {{ eliminandoId() === presupuesto.id ? 'Eliminando...' : 'Eliminar' }}
               </button>
             </div>
 
@@ -176,30 +178,24 @@
                       </thead>
 
                       <tbody>
-                        @for (
-                          detalle of presupuesto.detalles;
-                          track $index
-                        ) {
+                        @for (detalle of presupuesto.detalles; track $index) {
                           <tr>
-                          <td class="producto-id">
-  {{ nombreProducto(detalle.producto_id) }}
-</td>
+                            <td class="producto-id">
+                              {{ nombreProducto(detalle.producto_id) }}
+                            </td>
 
                             <td>{{ detalle.tipo_precio }}</td>
 
                             <td>{{ detalle.cantidad }}</td>
 
                             <td>
-                              {{
-                                detalle.precio_unitario
-                                  | currency:'USD':'symbol':'1.2-2'
-                              }}
+                              {{ detalle.precio_unitario | currency: 'USD' : 'symbol' : '1.2-2' }}
                             </td>
 
                             <td>
                               {{
                                 detalle.precio_unitario * detalle.cantidad
-                                  | currency:'USD':'symbol':'1.2-2'
+                                  | currency: 'USD' : 'symbol' : '1.2-2'
                               }}
                             </td>
                           </tr>
@@ -214,15 +210,11 @@
                 <div class="detalle-total">
                   <span>Total del presupuesto</span>
                   <strong>
-                    {{
-                      presupuesto.total
-                        | currency:'USD':'symbol':'1.2-2'
-                    }}
+                    {{ presupuesto.total | currency: 'USD' : 'symbol' : '1.2-2' }}
                   </strong>
                 </div>
               </div>
             }
-
           </article>
         }
       </div>

@@ -1,4 +1,3 @@
-
 :host {
   display: block;
   width: 100%;
@@ -392,5 +391,35 @@
   .detalle-total {
     justify-content: space-between;
     gap: 12px;
+  }
+}
+
+.btn-whatsapp {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 8px;
+  background: #25d366;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  i {
+    font-size: 17px;
+  }
+
+  &:hover:not(:disabled) {
+    background: #1ebe5d;
+    transform: translateY(-1px);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
   }
 }

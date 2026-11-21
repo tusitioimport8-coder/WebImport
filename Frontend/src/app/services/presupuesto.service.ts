@@ -1,13 +1,9 @@
-
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment.development';
 
-export type EstadoPresupuesto =
-  | 'proceso'
-  | 'vendido'
-  | 'cancelado';
+export type EstadoPresupuesto = 'proceso' | 'vendido' | 'cancelado';
 
 export interface DetallePresupuesto {
   producto_id: string;
@@ -54,6 +50,22 @@ export interface EliminarPresupuestoResponse {
   message: string;
 }
 
+export interface EnviarPresupuestoRequest {
+  presupuestoId: string;
+  telefonoSolicitado?: string;
+}
+
+export interface EnviarPresupuestoResponse {
+  success: boolean;
+  message: string;
+  data?: {
+    presupuestoId: string;
+    telefono: string;
+    whatsappUrl: string;
+    mensaje: string;
+  };
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -65,53 +77,43 @@ export class PresupuestoService {
     : 'http://localhost:5000/api/presupuestos';
 
   // POST - Crear presupuesto
-  crearPresupuesto(
-    datos: CrearPresupuestoRequest
-  ): Observable<PresupuestoResponse> {
-    return this.http.post<PresupuestoResponse>(
-      this.apiUrl,
-      datos,
-      { withCredentials: true }
-    );
+  crearPresupuesto(datos: CrearPresupuestoRequest): Observable<PresupuestoResponse> {
+    return this.http.post<PresupuestoResponse>(this.apiUrl, datos, { withCredentials: true });
   }
 
   // GET - Listar presupuestos
   listarPresupuestos(): Observable<PresupuestosResponse> {
-    return this.http.get<PresupuestosResponse>(
-      this.apiUrl,
-      { withCredentials: true }
-    );
+    return this.http.get<PresupuestosResponse>(this.apiUrl, { withCredentials: true });
   }
 
   // GET - Obtener presupuesto por ID
-  obtenerPresupuestoPorId(
-    id: string
-  ): Observable<PresupuestoResponse> {
-    return this.http.get<PresupuestoResponse>(
-      `${this.apiUrl}/${encodeURIComponent(id)}`,
-      { withCredentials: true }
-    );
+  obtenerPresupuestoPorId(id: string): Observable<PresupuestoResponse> {
+    return this.http.get<PresupuestoResponse>(`${this.apiUrl}/${encodeURIComponent(id)}`, {
+      withCredentials: true,
+    });
   }
 
   // PATCH - Actualizar estado
-  cambiarEstado(
-    id: string,
-    estado: EstadoPresupuesto
-  ): Observable<PresupuestoResponse> {
+  cambiarEstado(id: string, estado: EstadoPresupuesto): Observable<PresupuestoResponse> {
     return this.http.patch<PresupuestoResponse>(
       `${this.apiUrl}/${encodeURIComponent(id)}/estado`,
       { estado },
-      { withCredentials: true }
+      { withCredentials: true },
     );
   }
 
   // DELETE - Eliminar presupuesto
-  eliminarPresupuesto(
-    id: string
-  ): Observable<EliminarPresupuestoResponse> {
+  eliminarPresupuesto(id: string): Observable<EliminarPresupuestoResponse> {
     return this.http.delete<EliminarPresupuestoResponse>(
       `${this.apiUrl}/${encodeURIComponent(id)}`,
-      { withCredentials: true }
+      { withCredentials: true },
     );
+  }
+
+  // POST - Generar enlace de envío por WhatsApp
+  enviarPresupuesto(datos: EnviarPresupuestoRequest): Observable<EnviarPresupuestoResponse> {
+    return this.http.post<EnviarPresupuestoResponse>(`${this.apiUrl}/enviar`, datos, {
+      withCredentials: true,
+    });
   }
 }
