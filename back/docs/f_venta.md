@@ -355,3 +355,122 @@ DELETE /presupuestos/7f1d4b8e-1a2b-4c3d-9e5f-60718293a4b5
   "error": "Descripción del error"
 }
 ```
+
+---
+
+## Enviar presupuesto por WhatsApp
+
+### `POST /presupuestos/enviar`
+
+### Datos enviados
+
+Se envían los datos en el body de la solicitud. El campo `presupuestoId` es obligatorio y `telefonoSolicitado` es opcional.
+
+```http
+POST /presupuestos/enviar
+Content-Type: application/json
+```
+
+```json
+{
+  "presupuestoId": "507785b7-16d4-4c42-8cd3-c8a1b9a7a16a",
+  "telefonoSolicitado": "04125040788"
+}
+```
+
+**Descripción de los campos:**
+
+- `presupuestoId`: identificador único del presupuesto que se desea enviar.
+- `telefonoSolicitado`: número de teléfono al que se generará el enlace de WhatsApp. Es opcional.
+
+Si no se proporciona `telefonoSolicitado`, el sistema utiliza el teléfono registrado en el presupuesto. Si tampoco existe, utiliza el número configurado en `WHATSAPP_EMPRESA` o, como último recurso, `584129668437`.
+
+El número de teléfono se normaliza automáticamente: si comienza con `0`, se reemplaza por el prefijo `58`.
+
+### Datos recibidos — `200 OK`
+
+Si el presupuesto existe, tiene productos asociados y todos los productos se encuentran registrados, se genera un enlace de WhatsApp con el mensaje del presupuesto.
+
+```json
+{
+  "success": true,
+  "message": "Enlace de WhatsApp generado exitosamente",
+  "data": {
+    "presupuestoId": "507785b7-16d4-4c42-8cd3-c8a1b9a7a16a",
+    "telefono": "584125040788",
+    "whatsappUrl": "https://wa.me/584125040788?text=Hola%20Cliente...",
+    "mensaje": "Hola Cliente, somos *Tu Sitio Import* y este es tu presupuesto:\n\n📋 *Presupuesto Nro.:* 507785B7\n\n🛒 *Productos:*\n• 1x DISPENSADOR - $2.00\n• 1x MASAJEADOR PULPO - $1.00\n\n💰 *Total:* $3.00\n\nSi tienes alguna duda, haznos saber."
+  }
+}
+```
+
+**Descripción de los campos recibidos:**
+
+- `success`: indica si la operación se realizó correctamente.
+- `message`: mensaje descriptivo del resultado.
+- `data.presupuestoId`: identificador del presupuesto enviado.
+- `data.telefono`: número de teléfono normalizado al que se generó el enlace.
+- `data.whatsappUrl`: enlace directo de WhatsApp que permite abrir una conversación con el mensaje del presupuesto previamente cargado.
+- `data.mensaje`: contenido del mensaje generado con la información del presupuesto, incluyendo cliente, productos, cantidades, subtotales y total.
+
+**Importante:** Este endpoint genera el enlace de WhatsApp, pero no envía automáticamente el mensaje. El usuario debe abrir el enlace y confirmar el envío desde WhatsApp.
+
+### ID del presupuesto obligatorio — `400 Bad Request`
+
+Si no se proporciona el identificador del presupuesto:
+
+```json
+{
+  "success": false,
+  "message": "El ID del presupuesto es obligatorio"
+}
+```
+
+### Presupuesto no encontrado — `404 Not Found`
+
+Si el identificador enviado no corresponde a ningún presupuesto registrado:
+
+```json
+{
+  "success": false,
+  "message": "Presupuesto no encontrado"
+}
+```
+
+### Presupuesto sin productos — `400 Bad Request`
+
+Si el presupuesto existe, pero no tiene productos asociados:
+
+```json
+{
+  "success": false,
+  "message": "El presupuesto no tiene productos asociados"
+}
+```
+
+### Producto no encontrado — `404 Not Found`
+
+Si alguno de los productos asociados al presupuesto no existe:
+
+```json
+{
+  "success": false,
+  "message": "Producto con ID 550e8400-e29b-41d4-a716-446655440000 no encontrado"
+}
+```
+
+El identificador mostrado corresponde al producto que no pudo localizarse.
+
+### Error — `500 Internal Server Error`
+
+Si ocurre un error durante la consulta del presupuesto, la verificación de productos o la generación del enlace de WhatsApp:
+
+```json
+{
+  "success": false,
+  "message": "Error al generar el envío del presupuesto por WhatsApp",
+  "error": "Descripción del error"
+}
+```
+
+`error` contiene la descripción del error generado durante la ejecución del proceso.
