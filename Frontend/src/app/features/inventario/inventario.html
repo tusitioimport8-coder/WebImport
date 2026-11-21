@@ -151,6 +151,7 @@
         </select>
       </div>
 
+
       <div class="filter-field">
         <label for="inventory-sort">Ordenar por</label>
 
@@ -163,6 +164,21 @@
           @for (option of sortOptions; track option.value) {
             <option [value]="option.value">{{ option.label }}</option>
           }
+              </select>
+      </div>
+
+      <div class="filter-field">
+        <label for="inventory-page-size">Productos por página</label>
+
+        <select
+          id="inventory-page-size"
+          class="select-control"
+          [value]="pageSize()"
+          (change)="onPageSizeChange($event)"
+        >
+          <option value="5">5 productos</option>
+          <option value="25">25 productos</option>
+          <option value="50">50 productos</option>
         </select>
       </div>
     </div>
@@ -242,7 +258,10 @@
       }
 
       @case ('content') {
-        <div class="table-card">
+       <div
+  class="table-card"
+  [class.table-card--compact]="pageSize() > 5"
+>
           <div class="table-scroll">
             <table>
               <caption class="visually-hidden">
@@ -461,21 +480,21 @@
             }
           </div>
 
-          <footer class="pagination-bar">
-            <p>
-              Mostrando {{ pageRangeStart() }}–{{ pageRangeEnd() }} de
-              {{ filteredProducts().length }} productos
-            </p>
+      <footer class="pagination-bar">
+  <p>
+    Mostrando {{ pageRangeStart() }}–{{ pageRangeEnd() }} de
+    {{ filteredProducts().length }} productos
+  </p>
 
-            @if (pageCount() > 1) {
-              <tui-pagination
-                size="m"
-                [length]="pageCount()"
-                [index]="currentPageIndex()"
-                (indexChange)="onPageChange($event)"
-              />
-            }
-          </footer>
+  @if (pageCount() > 1) {
+    <tui-pagination
+      size="m"
+      [length]="pageCount()"
+      [index]="currentPageIndex()"
+      (indexChange)="onPageChange($event)"
+    />
+  }
+</footer>
         </div>
       }
     }
@@ -542,7 +561,7 @@
 
       <div class="form-field form-field_wide">
         <label for="product-image">
-          Imagen <span>(opcional)</span>
+          Imagen 
         </label>
 
         @if (!editorReadOnly()) {
@@ -563,23 +582,34 @@
         }
       </div>
 
-      <div class="form-field">
-        <label for="product-category">
-          Categoría <span aria-hidden="true">*</span>
-        </label>
+   
+<div class="form-field">
+  <label for="product-category">
+    Categoría <span aria-hidden="true">*</span>
+  </label>
 
-        <select
-          id="product-category"
-          class="select-control"
-          formControlName="category"
-        >
-         @for (category of categories(); track category.id) {
-  <option [value]="category.nombre">
-    {{ category.nombre }}
-  </option>
-}
-        </select>
-      </div>
+  <select
+    id="product-category"
+    class="select-control"
+    formControlName="category"
+    [attr.aria-invalid]="isFieldInvalid('category')"
+  >
+    <option value="" disabled>Selecciona una categoría</option>
+
+    @for (category of categories(); track category.id) {
+      <option [value]="category.nombre">
+        {{ category.nombre }}
+      </option>
+    }
+  </select>
+
+  @if (isFieldInvalid('category')) {
+    <small class="field-error">
+      Selecciona una categoría.
+    </small>
+  }
+</div>
+
 
       <div class="form-field">
        <label for="product-price">
@@ -782,7 +812,7 @@
 
       <div class="form-field form-field_wide">
         <label for="product-description">
-          Descripción <span>(opcional)</span>
+          Descripción 
         </label>
 
         <tui-textfield [invalid]="isFieldInvalid('description')">

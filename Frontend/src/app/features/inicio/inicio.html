@@ -220,12 +220,7 @@
               <i class="pi pi-heart"></i>
             </button>
 
-            <span
-              class="product-availability"
-              [class.product-availability_low]="product.quantity <= 5"
-            >
-              {{ getStockLabel(product) }}
-            </span>
+           
           </div>
 
           <div class="product-info">
@@ -336,10 +331,12 @@
                   <button type="button" class="wishlist-button" [class.wishlist-button_active]="isInWishlist(product.id)" [attr.aria-label]="isInWishlist(product.id) ? 'Quitar de deseos' : 'Agregar a deseos'" (click)="toggleWishlist(product.id)">
                     <i class="pi pi-heart"></i>
                   </button>
-                  <span class="product-availability" [class.product-availability_low]="product.quantity <= 5">{{ getStockLabel(product) }}</span>
+                 
                 </div>
                 <div class="product-info">
-                  <span class="product-category">Sin categoría</span>
+                <span class="product-category">
+  {{ product.category || 'Sin categoría' }}
+</span>
                   <a class="product-name-link" routerLink="/detalle-producto" [state]="{ productId: product.id }"><h3>{{ product.name }}</h3></a>
                   <p class="product-description">{{ product.description }}</p>
                   <div class="product-price-row">
@@ -400,10 +397,12 @@
                 <button type="button" class="wishlist-button" [class.wishlist-button_active]="isInWishlist(product.id)" [attr.aria-label]="isInWishlist(product.id) ? 'Quitar de deseos' : 'Agregar a deseos'" (click)="toggleWishlist(product.id)">
                   <i class="pi pi-heart"></i>
                 </button>
-                <span class="product-availability" [class.product-availability_low]="product.quantity <= 5">{{ getStockLabel(product) }}</span>
+                
               </div>
               <div class="product-info">
-                <span class="product-category">Sin categoría</span>
+              <span class="product-category">
+  {{ product.category || 'Sin categoría' }}
+</span>
                 <a class="product-name-link" routerLink="/detalle-producto" [state]="{ productId: product.id }"><h3>{{ product.name }}</h3></a>
                 <p class="product-description">{{ product.description }}</p>
                 <div class="product-price-row">
@@ -462,10 +461,10 @@
                 <button type="button" class="wishlist-button" [class.wishlist-button_active]="isInWishlist(product.id)" [attr.aria-label]="isInWishlist(product.id) ? 'Quitar de deseos' : 'Agregar a deseos'" (click)="toggleWishlist(product.id)">
                   <i class="pi pi-heart"></i>
                 </button>
-                <span class="product-availability" [class.product-availability_low]="product.quantity <= 5">{{ getStockLabel(product) }}</span>
-              </div>
-              <div class="product-info">
-                <span class="product-category">Sin categoría</span>
+              
+               <span class="product-category">
+  {{ product.category || 'Sin categoría' }}
+</span>
                 <a class="product-name-link" routerLink="/detalle-producto" [state]="{ productId: product.id }"><h3>{{ product.name }}</h3></a>
                 <p class="product-description">{{ product.description }}</p>
                 <div class="product-price-row">

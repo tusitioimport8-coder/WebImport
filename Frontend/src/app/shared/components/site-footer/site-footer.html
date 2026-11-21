@@ -1,8 +1,33 @@
 <footer class="site-footer">
   <div class="footer-main">
     <div class="footer-about">
-      <img class="footer-logo" src="/images/logo.svg" alt="Tu Sitio Import" />
+     <div class="footer-logo-container">
+  <img
+    class="footer-logo"
+    [src]="logoUrl()"
+    alt="Tu Sitio Import"
+  />
 
+  @if (canEditLogo()) {
+    <button
+      type="button"
+      class="promo-edit-button"
+      aria-label="Cambiar logo de la tienda"
+      [disabled]="uploadingLogo()"
+      (click)="logoFile.click()"
+    >
+      <i class="pi pi-bars"></i>
+    </button>
+
+    <input
+      #logoFile
+      type="file"
+      accept="image/png,image/jpeg,image/webp,image/svg+xml"
+      hidden
+      (change)="onLogoChange($event)"
+    />
+  }
+</div>
       <p>
         Tu tienda online de confianza para productos importados directos a Venezuela. Variedad,
         rapidez en entregas y los mejores precios del mercado nacional.
@@ -14,13 +39,22 @@
     <nav class="footer-column footer-categories" aria-label="Categorías del pie de página">
       <h3>CATEGORÍAS</h3>
 
-      <div class="footer-categories-grid">
-        @for (categoria of categorias; track categoria) {
-          <a routerLink="/catalogo" [queryParams]="{ categoria: categoria }">
-            {{ categoria }}
-          </a>
-        }
-      </div>
+    <div class="footer-categories-grid">
+  @for (categoria of categoriasFooter; track categoria) {
+    <a routerLink="/catalogo" [queryParams]="{ categoria: categoria }">
+      {{ categoria }}
+    </a>
+  }
+
+  <a
+    routerLink="/catalogo"
+    class="footer-categories-more"
+    aria-label="Ver todas las categorías"
+    title="Ver todas las categorías"
+  >
+    +
+  </a>
+</div>
     </nav>
 
     <div class="footer-column">
@@ -63,12 +97,9 @@
     </div>
   </div>
 
-  <div class="footer-bottom">
-    <span> © 2026 Tu Sitio Import / Tienda Import C.A. Todos los derechos reservados. </span>
-
-    <span>
-      <a routerLink="/terminos">Términos y Condiciones</a>
-      <a routerLink="/privacidad">Privacidad</a>
-    </span>
-  </div>
+<div class="footer-bottom">
+  <span>
+    © 2026 Tu Sitio Import / Tienda Import C.A. Todos los derechos reservados.
+  </span>
+</div>
 </footer>

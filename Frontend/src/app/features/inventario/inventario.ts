@@ -94,7 +94,7 @@ formatearBCV(precioUSD: number): string {
       maximumFractionDigits: 2
     });
 }
-  readonly pageSize = 5;
+readonly pageSize = signal<5 | 25 | 50>(5);
   readonly statusLabels: Record<InventoryStatus, string> = {
     available: 'Disponible',
     'low-stock': 'Poco stock',
@@ -136,7 +136,7 @@ readonly savingProduct = signal(false);
 
   readonly productForm = this.formBuilder.group({
     name: ['', [Validators.required, Validators.pattern(/\S/), Validators.maxLength(80)]],
-    category: this.formBuilder.control<InventoryCategory>('Electrónica', Validators.required),
+  category: this.formBuilder.control<InventoryCategory>('' as InventoryCategory, Validators.required),
    price: [0, [Validators.required, Validators.min(0)]],
 priceBCV: [0, [Validators.required, Validators.min(0)]],
 wholesalePrice: [0, [Validators.required, Validators.min(0)]],
@@ -237,14 +237,18 @@ loadCategories(): void {
   });
 
   readonly pageCount = computed(() =>
-    Math.max(1, Math.ceil(this.filteredProducts().length / this.pageSize)),
-  );
-  readonly currentPageIndex = computed(() => Math.min(this.pageIndex(), this.pageCount() - 1));
-  readonly visibleProducts = computed(() => {
-    const start = this.currentPageIndex() * this.pageSize;
+  Math.max(1, Math.ceil(this.filteredProducts().length / this.pageSize()))
+);
 
-    return this.filteredProducts().slice(start, start + this.pageSize);
-  });
+readonly currentPageIndex = computed(() =>
+  Math.min(this.pageIndex(), this.pageCount() - 1)
+);
+
+readonly visibleProducts = computed(() => {
+  const start = this.currentPageIndex() * this.pageSize();
+
+  return this.filteredProducts().slice(start, start + this.pageSize());
+});
   readonly hasActiveFilters = computed(() => {
     const filters = this.filters();
 
@@ -255,6 +259,17 @@ loadCategories(): void {
       filters.sort !== 'name-asc'
     );
   });
+
+  onPageSizeChange(event: Event): void {
+  const value = Number(
+    (event.target as HTMLSelectElement).value
+  );
+
+  if (value === 5 || value === 25 || value === 50) {
+    this.pageSize.set(value);
+    this.pageIndex.set(0);
+  }
+}
   readonly viewState = computed<InventoryViewState>(() => {
     if (this.loading()) {
       return 'loading';
@@ -380,7 +395,7 @@ onImageSelected(event: Event): void {
     this.prepareEditor('create');
     this.productForm.reset({
       name: '',
-      category: 'Electrónica',
+   category: '' as InventoryCategory,
      price: 0,
 priceBCV: 0,
 wholesalePrice: 0,
@@ -599,13 +614,18 @@ retry(): void {
     return product.name.charAt(0).toLocaleUpperCase('es');
   }
 
-  pageRangeStart(): number {
-    return this.filteredProducts().length === 0 ? 0 : this.currentPageIndex() * this.pageSize + 1;
-  }
+pageRangeStart(): number {
+  return this.filteredProducts().length === 0
+    ? 0
+    : this.currentPageIndex() * this.pageSize() + 1;
+}
 
-  pageRangeEnd(): number {
-    return Math.min((this.currentPageIndex() + 1) * this.pageSize, this.filteredProducts().length);
-  }
+pageRangeEnd(): number {
+  return Math.min(
+    (this.currentPageIndex() + 1) * this.pageSize(),
+    this.filteredProducts().length
+  );
+}
 
   private prepareEditor(mode: InventoryEditorMode, product?: InventoryProduct): void {
     this.selectedImageFile.set(null);

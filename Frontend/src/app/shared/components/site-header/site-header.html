@@ -1,9 +1,42 @@
 <div class="shop-announcement">ENVÍOS A TODA VENEZUELA · PRECIOS QUE TE SORPRENDEN</div>
 
 <header class="shop-toolbar">
-  <a class="shop-brand" routerLink="/" aria-label="Ir al inicio de Tu Sitio Import">
-    <img class="shop-logo" src="/images/logo.svg" alt="Tu Sitio Import" />
+ 
+<div class="shop-logo-container">
+  <a
+    class="shop-brand"
+    routerLink="/"
+    aria-label="Ir al inicio de Tu Sitio Import"
+  >
+    <img
+      class="shop-logo"
+      [src]="logoUrl()"
+      alt="Tu Sitio Import"
+    />
   </a>
+
+  @if (canEditLogo()) {
+    <button
+      type="button"
+      class="promo-edit-button"
+      aria-label="Cambiar logo de la tienda"
+      title="Cambiar logo"
+      [disabled]="uploadingLogo()"
+      (click)="logoFile.click()"
+    >
+      <i class="pi pi-bars"></i>
+    </button>
+
+    <input
+      #logoFile
+      type="file"
+      accept="image/png,image/jpeg,image/webp"
+      hidden
+      (change)="onLogoChange($event)"
+    />
+  }
+</div>
+
 
   <div class="search-wrapper">
     <tui-textfield class="search-control">
