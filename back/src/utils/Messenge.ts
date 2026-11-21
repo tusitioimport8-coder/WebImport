@@ -47,3 +47,38 @@ export function generarLinkWhatsAppHelper(data: DatosWhatsAppInput): string {
   const mensajeFormateado = encodeURIComponent(mensaje);
   return `https://wa.me/${telefono}?text=${mensajeFormateado}`;
 }
+
+export interface DatosPresupuestoWhatsAppInput {
+  telefonoDestino: string;
+  datosPresupuesto: {
+    idPresupuesto: string;
+    clienteNombre: string;
+    telefonoCliente?: string;
+    items: Array<{ nombre: string; cantidad: number; subtotal: number }>;
+    total: number;
+  };
+}
+
+export function generarLinkPresupuestoWhatsAppHelper(
+  data: DatosPresupuestoWhatsAppInput,
+): { whatsappUrl: string; mensaje: string } {
+  const telefonoLimpio = (data.telefonoDestino || "584129668437").replace(
+    /\D/g,
+    "",
+  );
+  const presupuesto = data.datosPresupuesto;
+
+  let mensaje = `Hola ${presupuesto.clienteNombre}, somos *Tu Sitio Import* y este es tu presupuesto:\n\n`;
+  mensaje += `📋 *Presupuesto Nro.:* ${presupuesto.idPresupuesto.substring(0, 8).toUpperCase()}\n\n`;
+  mensaje += `🛒 *Productos:*\n`;
+
+  for (const item of presupuesto.items) {
+    mensaje += `• ${item.cantidad}x ${item.nombre} - $${item.subtotal.toFixed(2)}\n`;
+  }
+
+  mensaje += `\n💰 *Total:* $${Number(presupuesto.total).toFixed(2)}\n\n`;
+  mensaje += `Si tienes alguna duda, haznos saber.`;
+
+  const whatsappUrl = `https://wa.me/${telefonoLimpio}?text=${encodeURIComponent(mensaje)}`;
+  return { whatsappUrl, mensaje };
+}

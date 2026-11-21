@@ -501,5 +501,12 @@
       "id": "string"
     },
     "orderArray": ["id"]
+  },
+  "obtenerDetallesPorPresupuestoId": {
+    "query": "SELECT id, presupuesto_id, producto_id, cantidad, precio_unitario, tipo_precio FROM presupuesto_detalles WHERE presupuesto_id = $1",
+    "structure_params": {
+      "presupuesto_id": "string"
+    },
+    "orderArray": ["presupuesto_id"]
   }
 }

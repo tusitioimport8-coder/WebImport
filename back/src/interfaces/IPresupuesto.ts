@@ -1,7 +1,7 @@
 export interface IPresupuesto {
   id: string;
   usuario_id: string | null;
-  nombre_completo: string;
+  nombre_cliente: string;
   telefono: string;
   correo: string;
   total: number;

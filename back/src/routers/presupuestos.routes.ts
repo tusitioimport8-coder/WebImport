@@ -24,4 +24,7 @@ router.delete("/:id", (req, res) =>
   presupuestoController.eliminarPresupuesto(req, res),
 );
 
+router.post("/enviar", (req, res) =>
+  presupuestoController.enviarPresupuesto(req, res),
+);
 export default router;

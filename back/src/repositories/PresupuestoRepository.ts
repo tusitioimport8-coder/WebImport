@@ -81,6 +81,23 @@ export class PresupuestoRepository {
     });
     return !!result?.[0];
   }
+
+  async obtenerDetallesPorPresupuestoId(presupuestoId: string): Promise<
+    Array<{
+      id: string;
+      presupuesto_id: string;
+      producto_id: string;
+      cantidad: number;
+      precio_unitario: number;
+      tipo_precio?: string;
+    }>
+  > {
+    const result = await this.db.excecuteNameQuery(
+      "obtenerDetallesPorPresupuestoId",
+      { presupuesto_id: presupuestoId },
+    );
+    return result || [];
+  }
 }
 
 export default new PresupuestoRepository();
