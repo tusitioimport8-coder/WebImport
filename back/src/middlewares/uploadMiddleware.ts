@@ -7,6 +7,7 @@ const ALLOWED_MIME_TYPES = [
   "image/png",
   "image/webp",
   "image/gif",
+  "image/svg+xml",
 ];
 
 export async function solicitarPresignedUrl(req: Request, res: Response) {
