@@ -2,7 +2,7 @@
 
 ## Descripción general
 
-Este módulo permite crear, consultar, actualizar el estado y eliminar
+Este módulo permite crear, consultar, editar, actualizar el estado y eliminar
 presupuestos. La ruta base del módulo es `/presupuestos`.
 
 Todas las rutas requieren uno de estos roles:
@@ -20,6 +20,7 @@ servidor genera uno automáticamente.
 | -------- | -------------------------- | ---------------------------------------------- | ------------------------------------------- |
 | `POST`   | `/presupuestos`            | Cabecera y detalles del presupuesto en el body | Presupuesto creado, incluyendo sus detalles |
 | `GET`    | `/presupuestos`            | Nada                                           | Lista de presupuestos                       |
+| `PATCH`  | `/presupuestos/:id`        | `id` en la URL y campos opcionales en el body  | Presupuesto actualizado, incluyendo detalles |
 | `PATCH`  | `/presupuestos/:id/estado` | `id` en la URL y `estado` en el body           | Presupuesto con el estado actualizado       |
 | `GET`    | `/presupuestos/:id`        | `id` en la URL                                 | Presupuesto solicitado con sus detalles     |
 | `DELETE` | `/presupuestos/:id`        | `id` en la URL                                 | Confirmación de eliminación                 |
@@ -255,6 +256,161 @@ incluir también los demás campos del presupuesto.
   "success": false,
   "message": "Error al actualizar estado",
   "error": "Descripción del error"
+}
+```
+
+---
+
+## Editar un presupuesto
+
+### `PATCH /presupuestos/:id`
+
+Permite modificar datos de la cabecera y reemplazar los detalles existentes del
+presupuesto. Todos los campos del body son opcionales.
+
+### Datos enviados
+
+El `id` se envía como parámetro de la URL. Los datos opcionales se envían en el
+body:
+
+```http
+PATCH /presupuestos/7f1d4b8e-1a2b-4c3d-9e5f-60718293a4b5
+Content-Type: application/json
+```
+
+| Campo              | Tipo      | Obligatorio | Reglas                                                       |
+| ------------------ | --------- | ----------- | ------------------------------------------------------------ |
+| `nombre_cliente`   | `string`  | No          | Debe tener al menos 2 caracteres.                            |
+| `telefono_cliente` | `string`  | No          | Teléfono del cliente. Puede omitirse para conservar el actual. |
+| `descuento`        | `number`  | No          | Debe estar entre `0` y `100`.                                |
+| `total`            | `number`  | No          | Debe ser mayor que `0`.                                      |
+| `estado`           | `string`  | No          | Solo acepta `proceso`, `vendido` o `cancelado`.              |
+| `detalles`         | `array`   | No          | Si se incluye, debe contener al menos un producto.           |
+
+Cada elemento de `detalles` debe tener este formato:
+
+| Campo             | Tipo      | Obligatorio | Reglas                                                                 |
+| ----------------- | --------- | ----------- | ---------------------------------------------------------------------- |
+| `producto_id`     | `string`  | Sí          | Identificador del producto.                                           |
+| `cantidad`        | `number`  | Sí          | Debe ser mayor que `0`.                                                |
+| `precio_unitario` | `number`  | No          | Precio alternativo enviado por el cliente. Puede ser `0` o mayor.      |
+| `tipo_precio`     | `string`  | No          | `detal_usd`, `detal_bs`, `Mayor` o `GranMayor`.                        |
+
+Ejemplo con edición completa:
+
+```json
+{
+  "nombre_cliente": "Comercial El Sol C.A.",
+  "telefono_cliente": "04141234567",
+  "descuento": 10,
+  "total": 900,
+  "estado": "proceso",
+  "detalles": [
+    {
+      "producto_id": "550e8400-e29b-41d4-a716-446655440000",
+      "cantidad": 6,
+      "tipo_precio": "Mayor"
+    },
+    {
+      "producto_id": "660e8400-e29b-41d4-a716-446655440001",
+      "cantidad": 2,
+      "precio_unitario": 25,
+      "tipo_precio": "detal_usd"
+    }
+  ]
+}
+```
+
+También puede enviarse una edición parcial:
+
+```json
+{
+  "telefono_cliente": "04241234567",
+  "estado": "vendido"
+}
+```
+
+Comportamiento de `detalles`:
+
+- Si se envía `detalles`, reemplaza todos los detalles anteriores.
+- Antes de reemplazar los detalles, se verifica que exista cada producto.
+- El servidor obtiene el precio desde el catálogo según `tipo_precio` y
+  `cantidad` cuando el tipo solicitado tiene un precio disponible.
+- Si no se envía `total`, el servidor recalcula el total a partir de los
+  precios de los detalles y aplica el descuento enviado o el descuento actual.
+
+### Datos recibidos — `200 OK`
+
+```json
+{
+  "message": "Presupuesto actualizado correctamente",
+  "data": {
+    "id": "7f1d4b8e-1a2b-4c3d-9e5f-60718293a4b5",
+    "nombre_cliente": "Comercial El Sol C.A.",
+    "telefono_cliente": "04141234567",
+    "descuento": 10,
+    "total": 900,
+    "estado": "proceso",
+    "detalles": [
+      {
+        "id_detalle": "a10e8400-e29b-41d4-a716-446655440010",
+        "producto_id": "550e8400-e29b-41d4-a716-446655440000",
+        "cantidad": 6,
+        "precio_unitario": 80,
+        "tipo_precio": "Mayor"
+      }
+    ]
+  }
+}
+```
+
+### Datos inválidos — `400 Bad Request`
+
+```json
+{
+  "message": "Datos inválidos para editar el presupuesto",
+  "errors": {
+    "formErrors": [],
+    "fieldErrors": {
+      "descuento": ["El número debe ser mayor o igual a 0"]
+    }
+  }
+}
+```
+
+La respuesta `errors` puede variar según el campo que falle.
+
+### ID del presupuesto obligatorio — `400 Bad Request`
+
+Esto ocurre si la ruta no incluye el identificador:
+
+```json
+{
+  "message": "El id del presupuesto es obligatorio"
+}
+```
+
+### Presupuesto no encontrado — `404 Not Found`
+
+```json
+{
+  "message": "Presupuesto no encontrado"
+}
+```
+
+### Producto no encontrado — `404 Not Found`
+
+```json
+{
+  "message": "Producto con ID 550e8400-e29b-41d4-a716-446655440000 no encontrado"
+}
+```
+
+### Error — `500 Internal Server Error`
+
+```json
+{
+  "message": "Error interno al editar el presupuesto"
 }
 ```
 
