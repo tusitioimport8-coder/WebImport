@@ -25,3 +25,24 @@ export const actualizarEstadoPresupuestoSchema = z.object({
     }),
   }),
 });
+
+export const editarPresupuestoSchema = z.object({
+  nombre_cliente: z.string().min(2).optional(),
+  telefono_cliente: z.string().optional(),
+  descuento: z.number().min(0).max(100).optional(),
+  total: z.number().positive().optional(),
+  estado: z.enum(["proceso", "vendido", "cancelado"]).optional(),
+  detalles: z
+    .array(
+      z.object({
+        producto_id: z.string().min(1),
+        cantidad: z.number().positive(),
+        precio_unitario: z.number().nonnegative().optional(),
+        tipo_precio: z
+          .enum(["detal_usd", "detal_bs", "Mayor", "GranMayor"])
+          .optional(),
+      }),
+    )
+    .min(1)
+    .optional(),
+});

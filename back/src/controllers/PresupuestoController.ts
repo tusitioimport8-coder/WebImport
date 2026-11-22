@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import ProductRepository from "../repositories/ProductRepository.js";
 import PresupuestoRepository from "../repositories/PresupuestoRepository.js";
 import { generarLinkPresupuestoWhatsAppHelper } from "../utils/Messenge.js";
+import { editarPresupuestoSchema } from "../utils/validator/presupuesto.validator.js";
 class PresupuestoController {
   constructor(private readonly presupuestoRepository = PresupuestoRepository) {}
 
@@ -183,7 +184,7 @@ class PresupuestoController {
 
       const telefonoRaw =
         telefonoSolicitado ||
-        presupuesto.telefono ||
+        presupuesto.telefono_cliente ||
         process.env.WHATSAPP_EMPRESA ||
         "584129668437";
 
@@ -196,7 +197,7 @@ class PresupuestoController {
         datosPresupuesto: {
           idPresupuesto: presupuesto.id,
           clienteNombre: presupuesto.nombre_cliente,
-          telefonoCliente: presupuesto.telefono,
+          telefonoCliente: presupuesto.telefono_cliente ?? undefined,
           items: itemsVerificados,
           total: Number(presupuesto.total),
         },
@@ -218,6 +219,55 @@ class PresupuestoController {
         message: "Error al generar el envío del presupuesto por WhatsApp",
         error: error.message,
       });
+    }
+  }
+
+  async editarPresupuesto(req: Request, res: Response): Promise<void> {
+    try {
+      const { id } = req.params;
+      if (!id) {
+        res
+          .status(400)
+          .json({ message: "El id del presupuesto es obligatorio" });
+        return;
+      }
+
+      const parsed = editarPresupuestoSchema.safeParse(req.body);
+      if (!parsed.success) {
+        res.status(400).json({
+          message: "Datos inválidos para editar el presupuesto",
+          errors: parsed.error.flatten(),
+        });
+        return;
+      }
+
+      const presupuestoActualizado =
+        await this.presupuestoRepository.editarPresupuesto({
+          id: id.toString(),
+          ...parsed.data,
+        });
+
+      if (!presupuestoActualizado) {
+        res.status(404).json({ message: "Presupuesto no encontrado" });
+        return;
+      }
+
+      res.status(200).json({
+        message: "Presupuesto actualizado correctamente",
+        data: presupuestoActualizado,
+      });
+    } catch (error) {
+      console.error("Error en editarPresupuesto:", error);
+      if (
+        error instanceof Error &&
+        error.message.startsWith("Producto con ID")
+      ) {
+        res.status(404).json({ message: error.message });
+        return;
+      }
+      res
+        .status(500)
+        .json({ message: "Error interno al editar el presupuesto" });
     }
   }
 }

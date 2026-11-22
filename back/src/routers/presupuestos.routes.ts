@@ -19,6 +19,9 @@ router.patch("/:id/estado", (req, res) =>
 router.get("/:id", (req, res) =>
   presupuestoController.getPresupuestoPorId(req, res),
 );
+router.patch("/:id", (req, res) =>
+  presupuestoController.editarPresupuesto(req, res),
+);
 
 router.delete("/:id", (req, res) =>
   presupuestoController.eliminarPresupuesto(req, res),

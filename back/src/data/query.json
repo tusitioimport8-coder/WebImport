@@ -508,5 +508,31 @@
       "presupuesto_id": "string"
     },
     "orderArray": ["presupuesto_id"]
+  },
+  "actualizarPresupuesto": {
+    "query": "UPDATE presupuestos SET nombre_cliente = COALESCE($1, nombre_cliente), telefono_cliente = COALESCE($2, telefono_cliente), descuento = COALESCE($3, descuento), total = COALESCE($4, total), estado = COALESCE($5, estado) WHERE id = $6 RETURNING *",
+    "structure_params": {
+      "nombre_cliente": "string",
+      "telefono_cliente": "string",
+      "descuento": "number",
+      "total": "number",
+      "estado": "string",
+      "id": "string"
+    },
+    "orderArray": [
+      "nombre_cliente",
+      "telefono_cliente",
+      "descuento",
+      "total",
+      "estado",
+      "id"
+    ]
+  },
+  "eliminarDetallesPorPresupuestoId": {
+    "query": "DELETE FROM presupuesto_detalles WHERE presupuesto_id = $1",
+    "structure_params": {
+      "presupuesto_id": "string"
+    },
+    "orderArray": ["presupuesto_id"]
   }
 }
