@@ -21,6 +21,19 @@ export interface CrearPresupuestoRequest {
   detalles: DetallePresupuesto[];
 }
 
+export interface EditarPresupuestoRequest {
+  nombre_cliente?: string;
+  telefono_cliente?: string;
+  descuento?: number;
+  estado?: EstadoPresupuesto;
+  detalles?: {
+    producto_id: string;
+    cantidad: number;
+    tipo_precio: string;
+    precio_unitario?: number;
+  }[];
+}
+
 export interface Presupuesto {
   id: string;
   nombre_cliente: string;
@@ -109,6 +122,17 @@ export class PresupuestoService {
       { withCredentials: true },
     );
   }
+
+editarPresupuesto(
+  id: string,
+  datos: EditarPresupuestoRequest
+): Observable<PresupuestoResponse> {
+  return this.http.patch<PresupuestoResponse>(
+    `${this.apiUrl}/${encodeURIComponent(id)}`,
+    datos,
+    { withCredentials: true }
+  );
+}
 
   // POST - Generar enlace de envío por WhatsApp
   enviarPresupuesto(datos: EnviarPresupuestoRequest): Observable<EnviarPresupuestoResponse> {

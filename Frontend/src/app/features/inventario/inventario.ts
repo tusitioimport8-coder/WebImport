@@ -4,6 +4,7 @@ import { ProductPayload } from '../../services/product.service';
 import { AuthService } from '../../services/auth';
 import { BcvService } from '../../services/bcv.service';
 import { DestroyRef } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -49,6 +50,7 @@ type InventoryViewState = 'loading' | 'error' | 'empty' | 'no-results' | 'conten
   imports: [
     CommonModule,
     ReactiveFormsModule,
+    RouterLink,
     Tag,
     TuiButton,
     TuiCardLarge,
@@ -66,6 +68,7 @@ type InventoryViewState = 'loading' | 'error' | 'empty' | 'no-results' | 'conten
 export class Inventario implements OnInit {
 
   private readonly productService = inject(ProductService);
+  readonly deletingProductId = signal<string | null>(null);
   private readonly bcvService = inject(BcvService);
 private readonly destroyRef = inject(DestroyRef);
   private readonly categoryService = inject(CategoryService);
@@ -145,35 +148,21 @@ bulkPrice: [0, [Validators.required, Validators.min(0)]],
     minimumStock: [0, [Validators.required, Validators.min(0)]],
     description: ['', Validators.maxLength(300)],
   });
+
 loadProducts(): void {
   this.loading.set(true);
   this.errorMessage.set(null);
 
-  this.productService.getProducts().pipe(
-    switchMap((response) => {
-      if (!response.data.length) {
-        return of([] as ApiProduct[]);
-      }
-
-      return forkJoin(
-        response.data.map((product) =>
-          this.productService.getProductById(product.id).pipe(
-            map((detail) => detail.data),
-            catchError(() => of(product))
-          )
-        )
-      );
-    })
-  ).subscribe({
-    next: (products) => {
+  this.productService.getProducts().subscribe({
+    next: response => {
       this.products.set(
-        products.map((product) => this.mapApiProduct(product))
+        response.data.map(product => this.mapApiProduct(product))
       );
 
       this.loading.set(false);
     },
 
-    error: (error) => {
+    error: error => {
       console.error('Error al cargar inventario:', error);
 
       this.errorMessage.set(
@@ -181,8 +170,54 @@ loadProducts(): void {
       );
 
       this.loading.set(false);
-    },
+    }
   });
+}
+
+
+deleteProduct(product: InventoryProduct): void {
+  if (this.isMarketing() || this.deletingProductId() !== null) {
+    return;
+  }
+
+  const confirmado = window.confirm(
+    `¿Estás seguro de que deseas eliminar el producto "${product.name}"?\n\nEsta acción no se puede deshacer.`
+  );
+
+  if (!confirmado) {
+    return;
+  }
+
+  this.deletingProductId.set(product.id);
+
+  this.productService.deleteProduct(product.id)
+    .pipe(
+      takeUntilDestroyed(this.destroyRef),
+      finalize(() => this.deletingProductId.set(null))
+    )
+    .subscribe({
+      next: response => {
+        if (!response.success) {
+          alert('No se pudo eliminar el producto.');
+          return;
+        }
+
+        this.products.update(products =>
+          products.filter(item => item.id !== product.id)
+        );
+
+        alert('Producto eliminado correctamente.');
+      },
+
+      error: error => {
+        console.error('Error al eliminar producto:', error);
+
+        alert(
+          error.error?.message ||
+          'No se pudo eliminar el producto. Intenta nuevamente.'
+        );
+      }
+    });
 }
 
 loadCategories(): void {
@@ -610,9 +645,13 @@ retry(): void {
     }
   }
 
+  
+
   productInitial(product: InventoryProduct): string {
     return product.name.charAt(0).toLocaleUpperCase('es');
   }
+
+  
 
 pageRangeStart(): number {
   return this.filteredProducts().length === 0

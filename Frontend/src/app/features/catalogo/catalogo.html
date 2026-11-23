@@ -148,12 +148,7 @@
                   <i class="pi pi-heart"></i>
                 </button>
 
-                <span
-                  class="product-availability"
-                  [class.product-availability_low]="product.quantity <= 5"
-                >
-                  {{ getStockLabel(product) }}
-                </span>
+              
               </div>
 
               <div class="product-content">
@@ -188,15 +183,26 @@
 
 
 
-                <button
-                  type="button"
-                  class="add-to-cart-btn"
-                  [disabled]="getQuantityInCart(product.id) >= product.quantity"
-                  (click)="addToCart(product)"
-                >
-                  <i class="pi pi-plus"></i>
-                  {{ getQuantityInCart(product.id) > 0 ? 'Agregar otro' : 'Agregar al carrito' }}
-                </button>
+             
+<button
+  type="button"
+  class="add-to-cart-btn"
+  [disabled]="getQuantityInCart(product.id) >= product.quantity"
+  (click)="addToCart(product)"
+>
+  <i class="pi pi-plus"></i>
+
+  {{ getQuantityInCart(product.id) > 0
+    ? 'Agregar otro'
+    : 'Agregar al carrito' }}
+
+  @if (getQuantityInCart(product.id) > 0) {
+    <span class="product-cart-badge">
+      {{ getQuantityInCart(product.id) }}
+    </span>
+  }
+</button>
+
               </div>
             </article>
           }

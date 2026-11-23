@@ -1,17 +1,24 @@
 
+
 import {
   Component,
   ElementRef,
   AfterViewInit,
+  OnInit,
   ViewChild,
   inject,
-  signal
+  signal,
+  computed
 } from '@angular/core';
+
+
+import { BannerService } from '../../../services/banner.service';
+
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { environment } from '../../../../environments/environment';
-import { finalize } from 'rxjs';
+import { finalize, switchMap } from 'rxjs';
 import { AuthService } from '../../../services/auth';
 
 interface GoogleCredentialResponse {
@@ -53,9 +60,106 @@ declare global {
   templateUrl: './sesion.html',
   styleUrl: './sesion.less'
 })
-export class Sesion implements AfterViewInit {
+export class Sesion implements OnInit, AfterViewInit {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
+
+
+private readonly bannerService = inject(BannerService);
+
+readonly logoUrl = signal('/images/logo.png');
+readonly uploadingLogo = signal(false);
+
+readonly canEditLogo = computed(() => {
+  const rol = this.authService.user()?.tipo?.trim().toUpperCase();
+
+  return rol === 'ADMIN' || rol === 'MARKETING';
+});
+
+ngOnInit(): void {
+  this.loadLogo();
+}
+
+loadLogo(): void {
+  this.bannerService.getBanner('home-logo').subscribe({
+    next: response => {
+      const imagen = response.data?.activo
+        ? response.data.imagenes?.[0]
+        : null;
+
+      if (imagen?.publicUrl) {
+        this.logoUrl.set(imagen.publicUrl);
+      }
+    },
+    error: error => {
+      if (error.status !== 404) {
+        console.error('Error cargando logo de sesión:', error);
+      }
+    }
+  });
+}
+
+onLogoChange(event: Event): void {
+  const input = event.target as HTMLInputElement;
+  const file = input.files?.[0];
+
+  input.value = '';
+
+  if (!file || !this.canEditLogo() || this.uploadingLogo()) {
+    return;
+  }
+const tiposPermitidos = [
+  'image/png',
+  'image/jpeg',
+  'image/webp',
+  'image/svg+xml'
+];
+
+if (!tiposPermitidos.includes(file.type)) {
+  alert('Selecciona una imagen PNG, JPG, WEBP o SVG.');
+  return;
+}
+  this.uploadingLogo.set(true);
+
+  this.bannerService.requestUploadUrl(file).pipe(
+    switchMap(response => {
+      if (!response.success || !response.data) {
+        throw new Error('No se pudo preparar la subida del logo.');
+      }
+
+      const { uploadUrl, publicUrl, objectKey } = response.data;
+
+      return this.bannerService.uploadImage(uploadUrl, file).pipe(
+        switchMap(() =>
+          this.bannerService.saveBanner('home-logo', [
+            { objectKey, publicUrl }
+          ])
+        )
+      );
+    }),
+    finalize(() => this.uploadingLogo.set(false))
+  ).subscribe({
+    next: response => {
+      if (!response.success) {
+        alert('No se pudo guardar el nuevo logo.');
+        return;
+      }
+
+      const nuevaUrl = response.data?.imagenes?.[0]?.publicUrl;
+
+      if (nuevaUrl) {
+        this.logoUrl.set(nuevaUrl);
+      } else {
+        this.loadLogo();
+      }
+    },
+    error: error => {
+      console.error('Error subiendo logo de sesión:', error);
+      alert('No se pudo actualizar el logo.');
+    }
+  });
+}
+
 
  private readonly googleClientId = environment.googleClientId;
   @ViewChild('googleButton')

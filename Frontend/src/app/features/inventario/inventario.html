@@ -1,11 +1,24 @@
 <section class="inventory" aria-labelledby="inventory-title">
-  <header class="page-header">
+  
+<header class="page-header">
+  <div class="header-titulo">
+    <a
+      routerLink="/inicio"
+      class="btn-volver"
+      title="Volver al inicio"
+      aria-label="Volver al inicio"
+    >
+      <i class="pi pi-arrow-left"></i>
+    </a>
+
     <div>
+
       <p class="eyebrow">Control de existencias</p>
       <h1 id="inventory-title">Inventario</h1>
       <p class="page-description">
         Administra los productos, existencias y estados de disponibilidad.
       </p>
+      </div>
     </div>
 
     <button
@@ -350,23 +363,43 @@
                     </td>
 
                     <td>
-                      <div class="table-actions">
-                      
-                        <button
-                          appearance="flat"
-                          tuiIconButton
-                          type="button"
-                          size="s"
-                          title="Editar producto"
-                          [attr.aria-label]="'Editar ' + product.name"
-                          (click)="openEdit(product)"
-                        >
-                          <i
-                            class="pi pi-pencil action-icon"
-                            aria-hidden="true"
-                          ></i>
-                        </button>
-                      </div>
+                    
+<div class="table-actions">
+  <button
+    appearance="flat"
+    tuiIconButton
+    type="button"
+    size="s"
+    title="Editar producto"
+    [attr.aria-label]="'Editar ' + product.name"
+    (click)="openEdit(product)"
+  >
+    <i
+      class="pi pi-pencil action-icon"
+      aria-hidden="true"
+    ></i>
+  </button>
+
+  @if (!isMarketing()) {
+    <button
+      appearance="flat"
+      tuiIconButton
+      type="button"
+      size="s"
+      title="Eliminar producto"
+      [attr.aria-label]="'Eliminar ' + product.name"
+      [disabled]="deletingProductId() !== null"
+      (click)="deleteProduct(product)"
+    >
+      <i
+        class="pi pi-trash action-icon"
+        style="color: #dc2626;"
+        aria-hidden="true"
+      ></i>
+    </button>
+  }
+</div>
+
                     </td>
                   </tr>
                 }
@@ -453,29 +486,52 @@
                   </div>
                 </dl>
 
-                <footer>
-                  <button
-                    appearance="flat"
-                    tuiButton
-                    type="button"
-                    size="s"
-                    (click)="openView(product)"
-                  >
-                    <i class="pi pi-eye" aria-hidden="true"></i>
-                    <span>Ver</span>
-                  </button>
+               
+<footer>
+  <button
+    appearance="flat"
+    tuiButton
+    type="button"
+    size="s"
+    (click)="openView(product)"
+  >
+    <i class="pi pi-eye" aria-hidden="true"></i>
+    <span>Ver</span>
+  </button>
 
-                  <button
-                    appearance="secondary"
-                    tuiButton
-                    type="button"
-                    size="s"
-                    (click)="openEdit(product)"
-                  >
-                    <i class="pi pi-pencil" aria-hidden="true"></i>
-                    <span>Editar</span>
-                  </button>
-                </footer>
+  <button
+    appearance="secondary"
+    tuiButton
+    type="button"
+    size="s"
+    (click)="openEdit(product)"
+  >
+    <i class="pi pi-pencil" aria-hidden="true"></i>
+    <span>Editar</span>
+  </button>
+
+  @if (!isMarketing()) {
+    <button
+      appearance="flat"
+      tuiButton
+      type="button"
+      size="s"
+      [disabled]="deletingProductId() !== null"
+      (click)="deleteProduct(product)"
+    >
+      <i
+        class="pi pi-trash"
+        style="color: #dc2626;"
+        aria-hidden="true"
+      ></i>
+
+      <span style="color: #dc2626;">
+        {{ deletingProductId() === product.id ? 'Eliminando...' : 'Eliminar' }}
+      </span>
+    </button>
+  }
+</footer>
+
               </article>
             }
           </div>
