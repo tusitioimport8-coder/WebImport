@@ -264,14 +264,23 @@
               </span>
             </div>
 
-            <button
-              type="button"
-              class="product-add-button"
-              [disabled]="product.quantity <= 0"
-              (click)="addToCart(product)"
-            >
-              <i class="pi pi-plus"></i> Agregar al carrito
-            </button>
+       
+<button
+  type="button"
+  class="product-add-button"
+  [disabled]="product.quantity <= 0"
+  (click)="addToCart(product)"
+>
+  <i class="pi pi-plus"></i>
+  Agregar al carrito
+
+  @if (getCantidadEnCarrito(product.id) > 0) {
+    <span class="product-cart-badge">
+      {{ getCantidadEnCarrito(product.id) }}
+    </span>
+  }
+</button>
+
           </div>
         </article>
       }
@@ -360,9 +369,23 @@
 
                     <span class="product-stock-label" [class.product-stock-label_out]="product.quantity <= 0">{{ product.quantity > 0 ? 'En stock' : 'Agotado' }}</span>
                   </div>
-                  <button type="button" class="product-add-button" [disabled]="product.quantity <= 0" (click)="addToCart(product)">
-                    <i class="pi pi-plus"></i> Agregar al carrito
-                  </button>
+                
+<button
+  type="button"
+  class="product-add-button"
+  [disabled]="product.quantity <= 0"
+  (click)="addToCart(product)"
+>
+  <i class="pi pi-plus"></i>
+  Agregar al carrito
+
+  @if (getCantidadEnCarrito(product.id) > 0) {
+    <span class="product-cart-badge">
+      {{ getCantidadEnCarrito(product.id) }}
+    </span>
+  }
+</button>
+
                 </div>
               </article>
             }
@@ -425,9 +448,23 @@
 
                   <span class="product-stock-label" [class.product-stock-label_out]="product.quantity <= 0">{{ product.quantity > 0 ? 'En stock' : 'Agotado' }}</span>
                 </div>
-                <button type="button" class="product-add-button" [disabled]="product.quantity <= 0" (click)="addToCart(product)">
-                  <i class="pi pi-plus"></i> Agregar al carrito
-                </button>
+             
+<button
+  type="button"
+  class="product-add-button"
+  [disabled]="product.quantity <= 0"
+  (click)="addToCart(product)"
+>
+  <i class="pi pi-plus"></i>
+  Agregar al carrito
+
+  @if (getCantidadEnCarrito(product.id) > 0) {
+    <span class="product-cart-badge">
+      {{ getCantidadEnCarrito(product.id) }}
+    </span>
+  }
+</button>
+
               </div>
             </article>
           }
@@ -461,6 +498,9 @@
                 <button type="button" class="wishlist-button" [class.wishlist-button_active]="isInWishlist(product.id)" [attr.aria-label]="isInWishlist(product.id) ? 'Quitar de deseos' : 'Agregar a deseos'" (click)="toggleWishlist(product.id)">
                   <i class="pi pi-heart"></i>
                 </button>
+                </div>
+
+<div class="product-info">
               
                <span class="product-category">
   {{ product.category || 'Sin categoría' }}
@@ -488,9 +528,23 @@
 
                   <span class="product-stock-label" [class.product-stock-label_out]="product.quantity <= 0">{{ product.quantity > 0 ? 'En stock' : 'Agotado' }}</span>
                 </div>
-                <button type="button" class="product-add-button" [disabled]="product.quantity <= 0" (click)="addToCart(product)">
-                  <i class="pi pi-plus"></i> Agregar al carrito
-                </button>
+                
+<button
+  type="button"
+  class="product-add-button"
+  [disabled]="product.quantity <= 0"
+  (click)="addToCart(product)"
+>
+  <i class="pi pi-plus"></i>
+  Agregar al carrito
+
+  @if (getCantidadEnCarrito(product.id) > 0) {
+    <span class="product-cart-badge">
+      {{ getCantidadEnCarrito(product.id) }}
+    </span>
+  }
+</button>
+
               </div>
             </article>
           }
@@ -514,18 +568,62 @@
         <button type="button" class="carousel-arrow carousel-arrow_prev" aria-label="Categorías anteriores" (click)="scrollCarousel(categoryCarousel, -1)">
           <i class="pi pi-chevron-left"></i>
         </button>
-        <div #categoryCarousel class="category-carousel">
-          @for (category of categories; track category.label) {
-            <a class="visual-category-card" routerLink="/catalogo" [queryParams]="{ categoria: category.label }">
-              <img [src]="category.image" [alt]="category.label" loading="lazy" decoding="async" />
-              <div class="visual-category-overlay">
-                <span class="visual-category-icon"><i [class]="category.icon"></i></span>
-                <div><span>Explorar</span><h3>{{ category.label }}</h3></div>
-                <i class="pi pi-arrow-right"></i>
-              </div>
-            </a>
-          }
+   
+<div #categoryCarousel class="category-carousel">
+  @for (category of categories; track category.label) {
+    <div class="visual-category-wrapper">
+
+      <a
+        class="visual-category-card"
+        routerLink="/catalogo"
+        [queryParams]="{ categoria: category.label }"
+      >
+        <img
+          [src]="getCategoryImage(category)"
+          [alt]="category.label"
+          loading="lazy"
+          decoding="async"
+        />
+
+        <div class="visual-category-overlay">
+          <span class="visual-category-icon">
+            <i [class]="category.icon"></i>
+          </span>
+
+          <div>
+            <span>Explorar</span>
+            <h3>{{ category.label }}</h3>
+          </div>
+
+          <i class="pi pi-arrow-right"></i>
         </div>
+      </a>
+
+      @if (canEditBanners()) {
+        <button
+          type="button"
+          class="promo-edit-button category-edit-button"
+          [attr.aria-label]="'Cambiar imagen de ' + category.label"
+          title="Cambiar imagen de categoría"
+          [disabled]="uploadingCategoryImage() !== null"
+          (click)="$event.stopPropagation(); categoryFile.click()"
+        >
+          <i class="pi pi-bars"></i>
+        </button>
+
+        <input
+          #categoryFile
+          type="file"
+          accept="image/jpeg,image/png,image/webp,image/gif"
+          hidden
+          (change)="onCategoryImageChange($event, category)"
+        />
+      }
+
+    </div>
+  }
+</div>
+
         <button type="button" class="carousel-arrow carousel-arrow_next" aria-label="Categorías siguientes" (click)="scrollCarousel(categoryCarousel, 1)">
           <i class="pi pi-chevron-right"></i>
         </button>

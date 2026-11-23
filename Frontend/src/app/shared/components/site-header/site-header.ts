@@ -33,7 +33,7 @@ import { BannerService } from '../../../services/banner.service';
 export class SiteHeader implements OnInit {
 
   // =========================================
-  // INPUTS ORIGINALES
+  // INPUTS
   // =========================================
 
   @Input() searchTerm = '';
@@ -45,7 +45,7 @@ export class SiteHeader implements OnInit {
   @Input() canAccessInventory = false;
 
   // =========================================
-  // OUTPUTS ORIGINALES
+  // OUTPUTS
   // =========================================
 
   @Output() searchSubmit = new EventEmitter<void>();
@@ -68,12 +68,10 @@ export class SiteHeader implements OnInit {
   // =========================================
 
   readonly logoUrl = signal('/images/logo.svg');
-
   readonly uploadingLogo = signal(false);
-
   readonly logoError = signal<string | null>(null);
 
-  // Solo ADMIN y MARKETING pueden cambiar el logo
+  // Solo ADMIN y MARKETING pueden editar
   readonly canEditLogo = computed(() => {
     const rol = this.authService.user()?.tipo?.trim().toUpperCase();
 
@@ -81,7 +79,7 @@ export class SiteHeader implements OnInit {
   });
 
   // =========================================
-  // CARGAR LOGO AL INICIAR
+  // CARGAR LOGO
   // =========================================
 
   ngOnInit(): void {
@@ -111,12 +109,11 @@ export class SiteHeader implements OnInit {
   }
 
   // =========================================
-  // CAMBIAR LOGO DESDE EL BOTON VERDE
+  // CAMBIAR LOGO
   // =========================================
 
   onLogoChange(event: Event): void {
     const input = event.target as HTMLInputElement;
-
     const file = input.files?.[0];
 
     input.value = '';
@@ -129,20 +126,20 @@ export class SiteHeader implements OnInit {
       return;
     }
 
-    // Formatos admitidos
+    // PNG, JPG, WEBP y SVG
     const tiposPermitidos = [
       'image/png',
       'image/jpeg',
-      'image/webp'
+      'image/webp',
+      'image/svg+xml'
     ];
 
     if (!tiposPermitidos.includes(file.type)) {
       this.logoError.set(
-        'Selecciona una imagen PNG, JPG o WEBP.'
+        'Selecciona una imagen PNG, JPG, WEBP o SVG.'
       );
 
       alert(this.logoError());
-
       return;
     }
 
@@ -166,13 +163,13 @@ export class SiteHeader implements OnInit {
           objectKey
         } = response.data;
 
-        // PASO 2: Subir imagen a S3
+        // PASO 2: Subir archivo
         return this.bannerService.uploadImage(
           uploadUrl,
           file
         ).pipe(
 
-          // PASO 3: Guardar logo en backend
+          // PASO 3: Guardar referencia del logo
           switchMap(() =>
             this.bannerService.saveBanner(
               'home-logo',
@@ -190,10 +187,7 @@ export class SiteHeader implements OnInit {
 
     ).subscribe({
 
-      // =====================================
       // SUBIDA EXITOSA
-      // =====================================
-
       next: response => {
 
         if (!response.success) {
@@ -202,9 +196,7 @@ export class SiteHeader implements OnInit {
           );
 
           alert(this.logoError());
-
           this.uploadingLogo.set(false);
-
           return;
         }
 
@@ -221,10 +213,7 @@ export class SiteHeader implements OnInit {
         this.uploadingLogo.set(false);
       },
 
-      // =====================================
-      // ERROR DE SUBIDA
-      // =====================================
-
+      // ERROR
       error: error => {
 
         console.error(
@@ -237,7 +226,6 @@ export class SiteHeader implements OnInit {
         );
 
         alert(this.logoError());
-
         this.uploadingLogo.set(false);
       }
 

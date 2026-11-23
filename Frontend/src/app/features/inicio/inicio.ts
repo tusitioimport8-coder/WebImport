@@ -81,6 +81,9 @@ export class Inicio implements OnInit, OnDestroy {
   private readonly productService = inject(ProductService);
   private readonly cartService = inject(CartService);
 
+  readonly categoryImages = signal<Record<string, string>>({});
+readonly uploadingCategoryImage = signal<string | null>(null);
+
   private readonly router = inject(Router);
 
 
@@ -101,6 +104,130 @@ private actualizarEstadoBanner(
 }
 
 
+
+private getCategoryBannerKey(category: HomeCategory): string {
+  return 'home-categoria-' +
+    category.label
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-|-$/g, '');
+}
+
+getCategoryImage(category: HomeCategory): string {
+  return this.categoryImages()[category.label] || category.image;
+}
+
+loadCategoryImages(): void {
+  for (const category of this.categories) {
+    const key = this.getCategoryBannerKey(category);
+
+    this.bannerService.getBanner(key).subscribe({
+      next: response => {
+        const imagen = response.data?.activo
+          ? response.data.imagenes?.[0]
+          : null;
+
+        if (imagen?.publicUrl) {
+          this.categoryImages.update(images => ({
+            ...images,
+            [category.label]: imagen.publicUrl
+          }));
+        }
+      },
+      error: error => {
+        if (error.status !== 404) {
+          console.error(
+            'Error cargando imagen de categoría:',
+            category.label,
+            error
+          );
+        }
+      }
+    });
+  }
+}
+
+onCategoryImageChange(
+  event: Event,
+  category: HomeCategory
+): void {
+  const input = event.target as HTMLInputElement;
+  const file = input.files?.[0];
+
+  input.value = '';
+
+  if (
+    !file ||
+    !this.canEditBanners() ||
+    this.uploadingCategoryImage() !== null
+  ) {
+    return;
+  }
+
+  const tiposPermitidos = [
+    'image/jpeg',
+    'image/png',
+    'image/webp',
+    'image/gif'
+  ];
+
+  if (!tiposPermitidos.includes(file.type)) {
+    alert('Selecciona una imagen JPG, PNG, WEBP o GIF.');
+    return;
+  }
+
+  this.uploadingCategoryImage.set(category.label);
+
+  const key = this.getCategoryBannerKey(category);
+
+  this.bannerService.requestUploadUrl(file).pipe(
+    switchMap(response => {
+      if (!response.success || !response.data) {
+        throw new Error(
+          'No se pudo preparar la subida de la imagen.'
+        );
+      }
+
+      const { uploadUrl, publicUrl, objectKey } = response.data;
+
+      return this.bannerService.uploadImage(uploadUrl, file).pipe(
+        switchMap(() =>
+          this.bannerService.saveBanner(key, [
+            { objectKey, publicUrl }
+          ])
+        )
+      );
+    })
+  ).subscribe({
+    next: response => {
+      if (response.success) {
+        const nuevaUrl = response.data?.imagenes?.[0]?.publicUrl;
+
+        if (nuevaUrl) {
+          this.categoryImages.update(images => ({
+            ...images,
+            [category.label]: nuevaUrl
+          }));
+        }
+      } else {
+        alert('No se pudo guardar la imagen de categoría.');
+      }
+
+      this.uploadingCategoryImage.set(null);
+    },
+    error: error => {
+      console.error(
+        'Error subiendo imagen de categoría:',
+        error
+      );
+
+      alert('No se pudo actualizar la imagen de categoría.');
+      this.uploadingCategoryImage.set(null);
+    }
+  });
+}
 
 
 irAlCatalogo(event: MouseEvent): void {
@@ -347,9 +474,9 @@ constructor() {
 ngOnInit(): void {
   this.loadProducts();
   this.loadBanners();
+  this.loadCategoryImages();
   this.cargarTasaBCV();
 }
-
   ngOnDestroy(): void {
     this.stopAutoplay();
     if (this.intervaloBanners) {
@@ -627,6 +754,11 @@ this.iniciarCarruselBanners();
     }
   });
 }
+
+getCantidadEnCarrito(productId: string): number {
+  return this.cartService.getQuantity(productId);
+}
+
   // CARRITO
 
 addToCart(product: HomeProduct): void {
@@ -665,6 +797,7 @@ addToCart(product: HomeProduct): void {
     return this.wishlistService.has(productId);
   }
 
+  
  
 toggleWishlist(productId: string): void {
   const product = this.products().find(

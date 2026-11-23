@@ -1,7 +1,11 @@
+
 <section class="presupuestos-page">
   <div class="presupuestos-container">
-    <!-- ENCABEZADO -->
+
     <header class="presupuestos-header">
+      <a routerLink="/inicio" class="btn-volver" title="Volver al inicio">
+  <i class="pi pi-arrow-left"></i>
+</a>
       <div>
         <span class="presupuestos-eyebrow">Fuerza de Ventas</span>
         <h1>Presupuestos</h1>
@@ -11,7 +15,7 @@
       <button
         type="button"
         class="btn-actualizar"
-        [disabled]="cargando()"
+        [disabled]="cargando() || guardando()"
         (click)="cargarPresupuestos()"
       >
         <i class="pi pi-refresh"></i>
@@ -19,7 +23,6 @@
       </button>
     </header>
 
-    <!-- MENSAJES -->
     @if (error()) {
       <div class="mensaje mensaje-error" role="alert">
         <i class="pi pi-exclamation-circle"></i>
@@ -34,35 +37,33 @@
       </div>
     }
 
-    <!-- CARGANDO -->
     @if (cargando()) {
       <div class="estado-vacio">
         <i class="pi pi-spin pi-spinner"></i>
         <p>Cargando presupuestos...</p>
       </div>
     } @else if (presupuestos().length === 0 && !error()) {
-      <!-- SIN PRESUPUESTOS -->
       <div class="estado-vacio">
         <i class="pi pi-file"></i>
         <h2>No hay presupuestos registrados</h2>
         <p>Los presupuestos creados aparecerán aquí.</p>
       </div>
     } @else if (presupuestos().length > 0) {
-      <!-- TOTAL DE REGISTROS -->
+
       <div class="listado-resumen">
-        <span>
-          Total de presupuestos:
-          <strong>{{ presupuestos().length }}</strong>
-        </span>
+        Total de presupuestos:
+        <strong>{{ presupuestos().length }}</strong>
       </div>
 
-      <!-- LISTADO -->
       <div class="presupuestos-lista">
         @for (presupuesto of presupuestos(); track presupuesto.id) {
           <article class="presupuesto-card">
+
             <div class="presupuesto-principal">
               <div class="presupuesto-info">
-                <span class="presupuesto-id"> Presupuesto #{{ presupuesto.id.slice(0, 8) }} </span>
+                <span class="presupuesto-id">
+                  Presupuesto #{{ presupuesto.id.slice(0, 8) }}
+                </span>
 
                 <h2>{{ presupuesto.nombre_cliente }}</h2>
 
@@ -91,23 +92,22 @@
               <div class="presupuesto-totales">
                 <span>Total</span>
                 <strong>
-                  {{ presupuesto.total | currency: 'USD' : 'symbol' : '1.2-2' }}
+                  {{ presupuesto.total | currency:'USD':'symbol':'1.2-2' }}
                 </strong>
 
                 @if (presupuesto.descuento > 0) {
                   <small>
-                    Descuento:
-                    {{ presupuesto.descuento | currency: 'USD' : 'symbol' : '1.2-2' }}
+                    Descuento: {{ presupuesto.descuento }}%
                   </small>
                 }
               </div>
             </div>
 
-            <!-- ACCIONES -->
             <div class="presupuesto-acciones">
               <button
                 type="button"
                 class="btn-detalle"
+                [disabled]="guardando()"
                 [attr.aria-expanded]="presupuestoExpandido() === presupuesto.id"
                 (click)="alternarDetalle(presupuesto.id)"
               >
@@ -116,17 +116,31 @@
                   [class.pi-eye]="presupuestoExpandido() !== presupuesto.id"
                   [class.pi-eye-slash]="presupuestoExpandido() === presupuesto.id"
                 ></i>
-
                 {{
-                  presupuestoExpandido() === presupuesto.id ? 'Ocultar detalles' : 'Ver detalles'
+                  presupuestoExpandido() === presupuesto.id
+                    ? 'Ocultar detalles'
+                    : 'Ver detalles'
                 }}
               </button>
 
-              <!-- ENVIAR POR WHATSAPP -->
+              <button
+                type="button"
+                class="btn-editar"
+                [disabled]="guardando()"
+                (click)="iniciarEdicion(presupuesto)"
+              >
+                <i class="pi pi-pencil"></i>
+                {{
+                  editandoId() === presupuesto.id
+                    ? 'Cancelar edición'
+                    : 'Editar'
+                }}
+              </button>
+
               <button
                 type="button"
                 class="btn-whatsapp"
-                [disabled]="enviandoId() !== null"
+                [disabled]="enviandoId() !== null || guardando()"
                 (click)="enviarPorWhatsApp(presupuesto)"
               >
                 <i
@@ -135,17 +149,17 @@
                   [class.pi-spin]="enviandoId() === presupuesto.id"
                   [class.pi-spinner]="enviandoId() === presupuesto.id"
                 ></i>
-
                 {{
-                  enviandoId() === presupuesto.id ? 'Generando enlace...' : 'Enviar por WhatsApp'
+                  enviandoId() === presupuesto.id
+                    ? 'Generando enlace...'
+                    : 'Enviar por WhatsApp'
                 }}
               </button>
 
-              <!-- ELIMINAR -->
               <button
                 type="button"
                 class="btn-eliminar"
-                [disabled]="eliminandoId() !== null"
+                [disabled]="eliminandoId() !== null || guardando()"
                 (click)="eliminarPresupuesto(presupuesto)"
               >
                 <i
@@ -154,12 +168,217 @@
                   [class.pi-spin]="eliminandoId() === presupuesto.id"
                   [class.pi-spinner]="eliminandoId() === presupuesto.id"
                 ></i>
-
-                {{ eliminandoId() === presupuesto.id ? 'Eliminando...' : 'Eliminar' }}
+                {{
+                  eliminandoId() === presupuesto.id
+                    ? 'Eliminando...'
+                    : 'Eliminar'
+                }}
               </button>
             </div>
 
-            <!-- DETALLES -->
+            @if (editandoId() === presupuesto.id) {
+              <form
+                class="presupuesto-edicion"
+                (submit)="$event.preventDefault(); guardarEdicion()"
+              >
+                <h3>Editar presupuesto</h3>
+
+                <div class="edicion-grid">
+
+                  <label class="edicion-campo">
+                    <span>Nombre del cliente</span>
+                    <input
+                      type="text"
+                      [ngModel]="edicionNombre()"
+                      (ngModelChange)="edicionNombre.set($event)"
+                      name="nombre_cliente"
+                      required
+                      minlength="2"
+                    />
+                  </label>
+
+                  <label class="edicion-campo">
+                    <span>Teléfono del cliente</span>
+                    <input
+                      type="tel"
+                      [ngModel]="edicionTelefono()"
+                      (ngModelChange)="edicionTelefono.set($event)"
+                      name="telefono_cliente"
+                    />
+                  </label>
+
+                  <label class="edicion-campo">
+                    <span>Descuento (%)</span>
+                    <input
+                      type="number"
+                      min="0"
+                      max="100"
+                      step="0.01"
+                      [ngModel]="edicionDescuento()"
+                      (ngModelChange)="edicionDescuento.set(+$event)"
+                      name="descuento"
+                    />
+                  </label>
+
+                  <label class="edicion-campo">
+                    <span>Estado</span>
+                    <select
+                      [ngModel]="edicionEstado()"
+                      (ngModelChange)="edicionEstado.set($event)"
+                      name="estado"
+                    >
+                      <option value="proceso">Proceso</option>
+                      <option value="vendido">Vendido</option>
+                      <option value="cancelado">Cancelado</option>
+                    </select>
+                  </label>
+
+                </div>
+
+                <div class="edicion-productos">
+                  <div class="edicion-productos-header">
+                    <h4>Productos del presupuesto</h4>
+
+                    <button
+                      type="button"
+                      class="btn-agregar-producto"
+                      [disabled]="productosDisponibles().length === 0"
+                      (click)="agregarProducto()"
+                    >
+                      <i class="pi pi-plus"></i>
+                      Agregar producto
+                    </button>
+                  </div>
+
+                  @for (detalle of edicionDetalles(); track $index; let i = $index) {
+                    <div class="edicion-producto">
+
+                      <div class="edicion-campo selector-producto">
+                        <span>Producto</span>
+
+                        <button
+                          type="button"
+                          class="selector-producto-boton"
+                          (click)="abrirSelectorProducto(i)"
+                        >
+                          <span>
+                            {{ nombreProducto(detalle.producto_id) }}
+                          </span>
+                          <i class="pi pi-chevron-down"></i>
+                        </button>
+
+                        @if (selectorProductoAbierto() === i) {
+                          <div class="selector-producto-dropdown">
+
+                            <div class="selector-producto-busqueda">
+                              <i class="pi pi-search"></i>
+
+                              <input
+                                type="text"
+                                placeholder="Buscar producto..."
+                                [ngModel]="buscadorProducto()"
+                                (ngModelChange)="buscadorProducto.set($event)"
+                                [name]="'buscar_producto_' + i"
+                                autocomplete="off"
+                              />
+                            </div>
+
+                            <div class="selector-producto-opciones">
+                              @for (producto of filtrarProductos(); track producto.id) {
+                                <button
+                                  type="button"
+                                  class="selector-producto-opcion"
+                                  [class.seleccionado]="producto.id === detalle.producto_id"
+                                  (click)="seleccionarProducto(i, producto.id)"
+                                >
+                                  {{ producto.nombre }}
+
+                                  @if (producto.id === detalle.producto_id) {
+                                    <i class="pi pi-check"></i>
+                                  }
+                                </button>
+                              } @empty {
+                                <div class="selector-producto-vacio">
+                                  No se encontraron productos.
+                                </div>
+                              }
+                            </div>
+
+                          </div>
+                        }
+                      </div>
+
+                      <label class="edicion-campo">
+                        <span>Tipo de precio</span>
+                        <select
+                          [ngModel]="detalle.tipo_precio"
+                          (ngModelChange)="actualizarDetalle(i, 'tipo_precio', $event)"
+                          [name]="'tipo_precio_' + i"
+                        >
+                          @for (tipo of tiposPrecio; track tipo) {
+                            <option [value]="tipo">{{ tipo }}</option>
+                          }
+                        </select>
+                      </label>
+
+                      <label class="edicion-campo">
+                        <span>Cantidad</span>
+                        <input
+                          type="number"
+                          min="1"
+                          step="1"
+                          [ngModel]="detalle.cantidad"
+                          (ngModelChange)="actualizarDetalle(i, 'cantidad', +$event)"
+                          [name]="'cantidad_' + i"
+                        />
+                      </label>
+
+                      <button
+                        type="button"
+                        class="btn-quitar-producto"
+                        [disabled]="edicionDetalles().length <= 1"
+                        (click)="quitarProducto(i)"
+                        aria-label="Quitar producto"
+                      >
+                        <i class="pi pi-trash"></i>
+                      </button>
+
+                    </div>
+                  }
+                </div>
+
+                <p class="edicion-nota">
+                  El total se recalculará en el servidor según los
+                  productos, precios disponibles y descuento.
+                </p>
+
+                <div class="edicion-acciones">
+                  <button
+                    type="button"
+                    class="btn-cancelar-edicion"
+                    [disabled]="guardando()"
+                    (click)="cancelarEdicion()"
+                  >
+                    Cancelar
+                  </button>
+
+                  <button
+                    type="submit"
+                    class="btn-guardar-edicion"
+                    [disabled]="guardando()"
+                  >
+                    <i
+                      class="pi"
+                      [class.pi-save]="!guardando()"
+                      [class.pi-spinner]="guardando()"
+                      [class.pi-spin]="guardando()"
+                    ></i>
+                    {{ guardando() ? 'Guardando...' : 'Guardar cambios' }}
+                  </button>
+                </div>
+              </form>
+            }
+
             @if (presupuestoExpandido() === presupuesto.id) {
               <div class="presupuesto-detalles">
                 <h3>Productos del presupuesto</h3>
@@ -185,17 +404,19 @@
                             </td>
 
                             <td>{{ detalle.tipo_precio }}</td>
-
                             <td>{{ detalle.cantidad }}</td>
 
                             <td>
-                              {{ detalle.precio_unitario | currency: 'USD' : 'symbol' : '1.2-2' }}
+                              {{
+                                detalle.precio_unitario
+                                  | currency:'USD':'symbol':'1.2-2'
+                              }}
                             </td>
 
                             <td>
                               {{
                                 detalle.precio_unitario * detalle.cantidad
-                                  | currency: 'USD' : 'symbol' : '1.2-2'
+                                  | currency:'USD':'symbol':'1.2-2'
                               }}
                             </td>
                           </tr>
@@ -210,14 +431,16 @@
                 <div class="detalle-total">
                   <span>Total del presupuesto</span>
                   <strong>
-                    {{ presupuesto.total | currency: 'USD' : 'symbol' : '1.2-2' }}
+                    {{ presupuesto.total | currency:'USD':'symbol':'1.2-2' }}
                   </strong>
                 </div>
               </div>
             }
+
           </article>
         }
       </div>
     }
+
   </div>
 </section>

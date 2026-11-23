@@ -101,6 +101,13 @@ export class ProductService {
       withCredentials: true,
     });
   }
+
+  deleteProduct(id: string): Observable<{ success: boolean; message?: string }> {
+  return this.http.delete<{ success: boolean; message?: string }>(
+    `${this.apiUrl}/${id}`,
+    { withCredentials: true }
+  );
+}
   getProductUploadUrl(file: File): Observable<ProductUploadUrlResponse> {
     return this.http.post<ProductUploadUrlResponse>(
       `${this.apiUrl}/upload-url`,
