@@ -92,7 +92,7 @@
 
 .filters-grid {
   display: grid;
- grid-template-columns: 2fr repeat(4, minmax(0, 1fr));
+  grid-template-columns: 2fr repeat(4, minmax(0, 1fr));
   gap: 0.85rem;
   align-items: end;
 }
@@ -330,7 +330,6 @@ th {
  * visualmente su icono por una X.
  */
 
-
 @media (max-width: 1100px) {
   .summary-grid,
   .filters-grid {
@@ -381,7 +380,6 @@ th {
     text-align: center;
   }
 }
-
 
 /* ==========================================
    INVENTARIO - RESTAURAR COLORES Y TARJETAS
@@ -448,10 +446,10 @@ th {
   color: #111 !important;
 }
 
-/* Etiquetas del formulario sobre fondo oscuro */
+/* Etiquetas del formulario sobre fondo blanco */
 .form-field > label,
 .field-label {
-  color: #ffffff !important;
+  color: #111111 !important;
 }
 
 /* Selectores */
@@ -499,7 +497,6 @@ th {
    ========================================== */
 
 .filter-field_search {
-
   tui-textfield {
     background: #ffffff !important;
     color: #111111 !important;
@@ -524,8 +521,6 @@ th {
     color: #111111 !important;
   }
 }
-
-
 
 /* ==========================================
    INVENTARIO - CORRECCIÓN DE CONTRASTE
@@ -577,7 +572,6 @@ th {
 .inventory .product-card dd {
   color: #111111 !important;
 }
-
 
 /* ==========================================
    INVENTARIO - COLORES Y SOMBRAS DE REFERENCIA
@@ -683,7 +677,6 @@ th {
   box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18) !important;
 }
 
-
 /* Centrar encabezados y contenido de la tabla */
 .inventory .table-card {
   th,
@@ -701,7 +694,6 @@ th {
     justify-content: center;
   }
 }
-
 
 /* Fondos blancos del inventario */
 :host {
@@ -736,7 +728,6 @@ th {
     background: #ccff00 !important;
   }
 }
-
 
 /* INVENTARIO - TEXTOS NEGROS */
 .inventory {
@@ -782,7 +773,6 @@ th {
     color: #fff !important;
   }
 }
-
 
 /* Filas compactas al mostrar 25 o 50 productos */
 
@@ -836,7 +826,6 @@ th {
   }
 }
 
-
 /* ==========================================
    FORMULARIO AGREGAR / EDITAR PRODUCTO
    ========================================== */
@@ -844,77 +833,84 @@ th {
 ::ng-deep tui-dialog,
 ::ng-deep [data-appearance='inventory-dialog'],
 ::ng-deep [data-appearance*='inventory-dialog'],
-::ng-deep [data-appearance='inventory-dialog'],
 ::ng-deep .inventory-dialog {
-  background: #1b1b20 !important;
-  color: #f9fafb !important;
+  background: #ffffff !important;
+  color: #111111 !important;
 
   .product-form {
-    background: #1b1b20;
-    color: #f9fafb !important;
+    background: #ffffff;
+    color: #111111 !important;
     font-family: Arial, Helvetica, sans-serif;
   }
 
   .form-introduction {
-    color: #d1d5db !important;
+    color: #444444 !important;
     font-size: 15px;
     line-height: 1.5;
     margin-bottom: 1.2rem;
   }
 
   .form-field > label,
+  .form-field label,
   .field-label,
   .form-field > label span {
-    color: #f9fafb !important;
+    color: #111111 !important;
     font-size: 14px;
     font-weight: 600;
   }
 
   .form-field > label.price-label {
-    color: #d9f99d !important;
+    color: #238636 !important;
   }
 
   .form-field > label.stock-label {
-    color: #93c5fd !important;
+    color: #238636 !important;
   }
 
-  /* CAMPOS OSCUROS CON TEXTO BLANCO */
+  label[for='product-name'],
+  label[for='product-category'],
+  label[for='product-image'],
+  label[for='product-description'] {
+    color: #111111 !important;
+  }
+
+  /* CAMPOS BLANCOS CON TEXTO NEGRO */
 
   .form-field tui-textfield,
   tui-textfield {
-    background: #2b2b34 !important;
-    color: #f9fafb !important;
-    border: 1px solid #454550 !important;
+    background: #ffffff !important;
+    color: #111111 !important;
+    border: 1px solid #a3a3a3 !important;
     border-radius: 12px !important;
 
-    --tui-background-base: #2b2b34;
-    --tui-background-elevation-1: #2b2b34;
-    --tui-text-primary: #f9fafb;
-    --tui-text-secondary: #d1d5db;
+    --tui-background-base: #ffffff;
+    --tui-background-elevation-1: #ffffff;
+    --tui-text-primary: #111111;
+    --tui-text-secondary: #555555;
   }
 
   .form-field input[tuiInput],
   .form-field textarea[tuiTextarea] {
-    background: #2b2b34 !important;
-    color: #ffffff !important;
-    -webkit-text-fill-color: #ffffff !important;
-    caret-color: #ffffff !important;
+    background: #ffffff !important;
+    color: #111111 !important;
+    -webkit-text-fill-color: #111111 !important;
+    caret-color: #111111 !important;
 
     &::placeholder {
-      color: #d1d5db !important;
+      color: #777777 !important;
       opacity: 1;
     }
   }
 
-  /* SELECTOR FUCSIA, NUNCA VERDE */
+  /* SELECTOR */
 
   .form-field .select-control {
     width: 100%;
     min-height: 56px;
     padding: 0 1rem;
-    background: #f600bd !important;
-    color: #ffffff !important;
-    border: none !important;
+    background: #ffffff !important;
+    color: #111111 !important;
+    border: 1px solid #a3a3a3 !important;
     border-radius: 12px !important;
     font-family: inherit;
     font-size: 14px;
@@ -935,14 +931,14 @@ th {
   /* ARCHIVO */
 
   .form-field input[type='file'] {
-    color: #ffffff !important;
+    color: #111111 !important;
     font-size: 14px;
   }
 
   .form-field input[type='file']::file-selector-button {
     padding: 0.55rem 0.85rem;
     margin-right: 0.5rem;
-    background: #f600bd;
+    background: #238636;
     color: #ffffff;
     border: none;
     border-radius: 8px;
@@ -954,12 +950,12 @@ th {
   .form-field > small:not(.field-error) {
     display: block;
     margin-top: 0.4rem;
-    color: #dddddd !important;
+    color: #555555 !important;
     font-size: 13px;
   }
 
   .field-error {
-    color: #ff8f8f !important;
+    color: #c62828 !important;
     font-size: 12px;
   }
 
@@ -970,10 +966,10 @@ th {
     align-items: center;
     min-height: 56px;
     padding: 0 0.85rem;
-    background: #2b2b34;
-    border: 1px solid #454550;
+    background: #ffffff;
+    border: 1px solid #a3a3a3;
     border-radius: 12px;
-    color: #f9fafb;
+    color: #111111;
   }
 
   /* BOTONES INFERIORES */
@@ -981,10 +977,26 @@ th {
   .form-actions {
     margin-top: 1.5rem;
     padding-top: 1rem;
-    border-top: 1px solid #555555;
+    border-top: 1px solid #dddddd;
+
+    button[type='button'] {
+      background: #d32f2f !important;
+      color: #ffffff !important;
+      border: 1px solid #d32f2f !important;
+    }
+
+    button[type='submit'] {
+      background: #238636 !important;
+      color: #ffffff !important;
+      border: 1px solid #238636 !important;
+    }
+
+    button:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
+    }
   }
 }
-
 
 /* BOTÓN VOLVER AL INICIO */
 
