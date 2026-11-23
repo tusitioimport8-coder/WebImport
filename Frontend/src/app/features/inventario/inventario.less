@@ -172,6 +172,35 @@ th {
   gap: 0.7rem;
 }
 
+.inventory .table-card .product-cell {
+  justify-content: flex-start;
+  text-align: left;
+
+  .product-image {
+    flex-shrink: 0;
+  }
+
+  > div {
+    flex: 1;
+    min-width: 0;
+    text-align: left;
+  }
+
+  strong {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+  }
+
+  span {
+    max-width: 100%;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+}
+
 .product-cell span {
   display: block;
 }
@@ -812,16 +841,22 @@ th {
    FORMULARIO AGREGAR / EDITAR PRODUCTO
    ========================================== */
 
+::ng-deep tui-dialog,
+::ng-deep [data-appearance='inventory-dialog'],
+::ng-deep [data-appearance*='inventory-dialog'],
 ::ng-deep [data-appearance='inventory-dialog'],
 ::ng-deep .inventory-dialog {
+  background: #1b1b20 !important;
+  color: #f9fafb !important;
 
   .product-form {
-    color: #ffffff !important;
+    background: #1b1b20;
+    color: #f9fafb !important;
     font-family: Arial, Helvetica, sans-serif;
   }
 
   .form-introduction {
-    color: #dddddd !important;
+    color: #d1d5db !important;
     font-size: 15px;
     line-height: 1.5;
     margin-bottom: 1.2rem;
@@ -830,33 +865,43 @@ th {
   .form-field > label,
   .field-label,
   .form-field > label span {
-    color: #ffffff !important;
+    color: #f9fafb !important;
     font-size: 14px;
     font-weight: 600;
   }
 
+  .form-field > label.price-label {
+    color: #d9f99d !important;
+  }
+
+  .form-field > label.stock-label {
+    color: #93c5fd !important;
+  }
+
   /* CAMPOS OSCUROS CON TEXTO BLANCO */
 
-  .form-field tui-textfield {
-    background: #383838 !important;
-    color: #ffffff !important;
-    border: 1px solid #555555 !important;
+  .form-field tui-textfield,
+  tui-textfield {
+    background: #2b2b34 !important;
+    color: #f9fafb !important;
+    border: 1px solid #454550 !important;
     border-radius: 12px !important;
 
-    --tui-background-base: #383838;
-    --tui-background-elevation-1: #383838;
-    --tui-text-primary: #ffffff;
-    --tui-text-secondary: #cccccc;
+    --tui-background-base: #2b2b34;
+    --tui-background-elevation-1: #2b2b34;
+    --tui-text-primary: #f9fafb;
+    --tui-text-secondary: #d1d5db;
   }
 
   .form-field input[tuiInput],
   .form-field textarea[tuiTextarea] {
+    background: #2b2b34 !important;
     color: #ffffff !important;
     -webkit-text-fill-color: #ffffff !important;
     caret-color: #ffffff !important;
 
     &::placeholder {
-      color: #bbbbbb !important;
+      color: #d1d5db !important;
       opacity: 1;
     }
   }
@@ -925,10 +970,10 @@ th {
     align-items: center;
     min-height: 56px;
     padding: 0 0.85rem;
-    background: #383838;
-    border: 1px solid #555555;
+    background: #2b2b34;
+    border: 1px solid #454550;
     border-radius: 12px;
-    color: #ffffff;
+    color: #f9fafb;
   }
 
   /* BOTONES INFERIORES */
