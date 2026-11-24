@@ -29,8 +29,14 @@ export class BcvService {
   private readonly http = inject(HttpClient);
   private readonly apiUrl = 'https://datos.cromstudio.com.ve/tasa';
 
+  private fetchRate(): Observable<BcvRateResponse> {
+    return this.http.get<BcvRateResponse>(this.apiUrl, {
+      params: { _t: Date.now() },
+    });
+  }
+
   getRate(): Observable<number> {
-    return this.http.get<BcvRateResponse>(this.apiUrl).pipe(
+    return this.fetchRate().pipe(
       map((response) => {
         const tasa = Number(response?.tasas?.USD);
 
@@ -49,7 +55,7 @@ export class BcvService {
   }
 
   getRateDetails(): Observable<BcvRateDetails> {
-    return this.http.get<BcvRateResponse>(this.apiUrl).pipe(
+    return this.fetchRate().pipe(
       map((response) => {
         const usd = Number(response?.tasas?.USD);
         const eur = Number(response?.tasas?.EUR);

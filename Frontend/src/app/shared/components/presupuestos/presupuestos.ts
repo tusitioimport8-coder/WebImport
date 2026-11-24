@@ -1,14 +1,7 @@
-
 import { CurrencyPipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { RouterLink } from '@angular/router';
-import {
-  ChangeDetectionStrategy,
-  Component,
-  computed,
-  inject,
-  signal,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
 import { AuthService } from '../../../services/auth';
@@ -29,7 +22,7 @@ interface ProductoSeleccionable {
 @Component({
   selector: 'app-presupuestos',
   standalone: true,
-imports: [CurrencyPipe, FormsModule, RouterLink],
+  imports: [CurrencyPipe, FormsModule, RouterLink],
   templateUrl: './presupuestos.html',
   styleUrl: './presupuestos.less',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -40,6 +33,7 @@ export class Presupuestos {
   private readonly authService = inject(AuthService);
 
   readonly puedeGestionarPresupuestos = computed(() => {
+    console.log('Verificando permisos para gestionar presupuestos...');
     const rol = this.authService.user()?.tipo?.trim().toUpperCase();
     return rol === 'ADMIN' || rol === 'F_VENTAS';
   });
@@ -53,29 +47,27 @@ export class Presupuestos {
   readonly productosDisponibles = signal<ProductoSeleccionable[]>([]);
 
   readonly buscadorProducto = signal('');
-readonly selectorProductoAbierto = signal<number | null>(null);
+  readonly selectorProductoAbierto = signal<number | null>(null);
 
-filtrarProductos(): ProductoSeleccionable[] {
-  const busqueda = this.buscadorProducto().trim().toLowerCase();
+  filtrarProductos(): ProductoSeleccionable[] {
+    const busqueda = this.buscadorProducto().trim().toLowerCase();
 
-  return this.productosDisponibles().filter(producto =>
-    producto.nombre.toLowerCase().includes(busqueda)
-  );
-}
+    return this.productosDisponibles().filter((producto) =>
+      producto.nombre.toLowerCase().includes(busqueda),
+    );
+  }
 
-abrirSelectorProducto(index: number): void {
-  this.selectorProductoAbierto.set(
-    this.selectorProductoAbierto() === index ? null : index
-  );
+  abrirSelectorProducto(index: number): void {
+    this.selectorProductoAbierto.set(this.selectorProductoAbierto() === index ? null : index);
 
-  this.buscadorProducto.set('');
-}
+    this.buscadorProducto.set('');
+  }
 
-seleccionarProducto(index: number, productoId: string): void {
-  this.actualizarDetalle(index, 'producto_id', productoId);
-  this.selectorProductoAbierto.set(null);
-  this.buscadorProducto.set('');
-}
+  seleccionarProducto(index: number, productoId: string): void {
+    this.actualizarDetalle(index, 'producto_id', productoId);
+    this.selectorProductoAbierto.set(null);
+    this.buscadorProducto.set('');
+  }
 
   readonly presupuestoExpandido = signal<string | null>(null);
   readonly eliminandoId = signal<string | null>(null);
@@ -91,12 +83,7 @@ seleccionarProducto(index: number, productoId: string): void {
   readonly edicionEstado = signal<EstadoPresupuesto>('proceso');
   readonly edicionDetalles = signal<DetallePresupuesto[]>([]);
 
-  readonly tiposPrecio = [
-    'detal_usd',
-    'detal_bs',
-    'Mayor',
-    'GranMayor',
-  ];
+  readonly tiposPrecio = ['detal_usd', 'detal_bs', 'Mayor', 'GranMayor'];
 
   constructor() {
     this.cargarPresupuestos();
@@ -105,7 +92,7 @@ seleccionarProducto(index: number, productoId: string): void {
 
   cargarNombresProductos(): void {
     this.productService.getProducts().subscribe({
-      next: response => {
+      next: (response) => {
         if (!response.success) return;
 
         const nombres: Record<string, string> = {};
@@ -121,13 +108,13 @@ seleccionarProducto(index: number, productoId: string): void {
         }
 
         this.nombresProductos.set(nombres);
-       this.productosDisponibles.set(
-  productos.sort((a, b) =>
-    a.nombre.localeCompare(b.nombre, 'es', {
-      sensitivity: 'base'
-    })
-  )
-);
+        this.productosDisponibles.set(
+          productos.sort((a, b) =>
+            a.nombre.localeCompare(b.nombre, 'es', {
+              sensitivity: 'base',
+            }),
+          ),
+        );
       },
       error: (error: HttpErrorResponse) => {
         console.error('ERROR AL CARGAR PRODUCTOS:', error);
@@ -140,7 +127,7 @@ seleccionarProducto(index: number, productoId: string): void {
   }
 
   productoExiste(id: string): boolean {
-    return this.productosDisponibles().some(producto => producto.id === id);
+    return this.productosDisponibles().some((producto) => producto.id === id);
   }
 
   cargarPresupuestos(): void {
@@ -153,7 +140,7 @@ seleccionarProducto(index: number, productoId: string): void {
     this.error.set('');
 
     this.presupuestoService.listarPresupuestos().subscribe({
-      next: response => {
+      next: (response) => {
         this.cargando.set(false);
 
         if (!response.success) {
@@ -172,17 +159,13 @@ seleccionarProducto(index: number, productoId: string): void {
           url: error.url,
         });
 
-        this.error.set(
-          error.error?.message ?? 'No se pudieron cargar los presupuestos.'
-        );
+        this.error.set(error.error?.message ?? 'No se pudieron cargar los presupuestos.');
       },
     });
   }
 
   alternarDetalle(id: string): void {
-    this.presupuestoExpandido.update(actual =>
-      actual === id ? null : id
-    );
+    this.presupuestoExpandido.update((actual) => (actual === id ? null : id));
   }
 
   // INICIAR O CANCELAR EDICIÓN
@@ -205,9 +188,7 @@ seleccionarProducto(index: number, productoId: string): void {
     this.edicionDescuento.set(Number(presupuesto.descuento ?? 0));
     this.edicionEstado.set(presupuesto.estado ?? 'proceso');
 
-    this.edicionDetalles.set(
-      (presupuesto.detalles ?? []).map(detalle => ({ ...detalle }))
-    );
+    this.edicionDetalles.set((presupuesto.detalles ?? []).map((detalle) => ({ ...detalle })));
   }
 
   cancelarEdicion(): void {
@@ -220,14 +201,10 @@ seleccionarProducto(index: number, productoId: string): void {
   actualizarDetalle(
     index: number,
     campo: 'producto_id' | 'cantidad' | 'tipo_precio',
-    valor: string | number
+    valor: string | number,
   ): void {
-    this.edicionDetalles.update(detalles =>
-      detalles.map((detalle, i) =>
-        i === index
-          ? { ...detalle, [campo]: valor }
-          : detalle
-      )
+    this.edicionDetalles.update((detalles) =>
+      detalles.map((detalle, i) => (i === index ? { ...detalle, [campo]: valor } : detalle)),
     );
   }
 
@@ -236,7 +213,7 @@ seleccionarProducto(index: number, productoId: string): void {
 
     if (!producto) return;
 
-    this.edicionDetalles.update(detalles => [
+    this.edicionDetalles.update((detalles) => [
       ...detalles,
       {
         producto_id: producto.id,
@@ -250,9 +227,7 @@ seleccionarProducto(index: number, productoId: string): void {
   quitarProducto(index: number): void {
     if (this.edicionDetalles().length <= 1) return;
 
-    this.edicionDetalles.update(detalles =>
-      detalles.filter((_, i) => i !== index)
-    );
+    this.edicionDetalles.update((detalles) => detalles.filter((_, i) => i !== index));
   }
 
   guardarEdicion(): void {
@@ -277,11 +252,12 @@ seleccionarProducto(index: number, productoId: string): void {
 
     if (
       detalles.length === 0 ||
-      detalles.some(detalle =>
-        !detalle.producto_id ||
-        !Number.isInteger(Number(detalle.cantidad)) ||
-        Number(detalle.cantidad) <= 0 ||
-        !this.tiposPrecio.includes(detalle.tipo_precio)
+      detalles.some(
+        (detalle) =>
+          !detalle.producto_id ||
+          !Number.isInteger(Number(detalle.cantidad)) ||
+          Number(detalle.cantidad) <= 0 ||
+          !this.tiposPrecio.includes(detalle.tipo_precio),
       )
     ) {
       this.error.set('Revisa los productos y sus cantidades.');
@@ -293,7 +269,7 @@ seleccionarProducto(index: number, productoId: string): void {
       telefono_cliente: this.edicionTelefono().trim(),
       descuento,
       estado: this.edicionEstado(),
-      detalles: detalles.map(detalle => ({
+      detalles: detalles.map((detalle) => ({
         producto_id: detalle.producto_id,
         cantidad: Number(detalle.cantidad),
         tipo_precio: detalle.tipo_precio,
@@ -305,20 +281,16 @@ seleccionarProducto(index: number, productoId: string): void {
     this.mensaje.set('');
 
     this.presupuestoService.editarPresupuesto(id, datos).subscribe({
-      next: response => {
+      next: (response) => {
         this.guardando.set(false);
 
         if (!response.data) {
-          this.error.set(
-            response.message ?? 'No se recibió el presupuesto actualizado.'
-          );
+          this.error.set(response.message ?? 'No se recibió el presupuesto actualizado.');
           return;
         }
 
-        this.presupuestos.update(lista =>
-          lista.map(presupuesto =>
-            presupuesto.id === id ? response.data! : presupuesto
-          )
+        this.presupuestos.update((lista) =>
+          lista.map((presupuesto) => (presupuesto.id === id ? response.data! : presupuesto)),
         );
 
         this.editandoId.set(null);
@@ -334,9 +306,7 @@ seleccionarProducto(index: number, productoId: string): void {
           url: error.url,
         });
 
-        this.error.set(
-          error.error?.message ?? 'No se pudo actualizar el presupuesto.'
-        );
+        this.error.set(error.error?.message ?? 'No se pudo actualizar el presupuesto.');
       },
     });
   }
@@ -351,7 +321,7 @@ seleccionarProducto(index: number, productoId: string): void {
     if (this.eliminandoId() || this.guardando()) return;
 
     const confirmado = window.confirm(
-      `¿Seguro que deseas eliminar el presupuesto de "${presupuesto.nombre_cliente}"?\n\nEsta acción no se puede deshacer.`
+      `¿Seguro que deseas eliminar el presupuesto de "${presupuesto.nombre_cliente}"?\n\nEsta acción no se puede deshacer.`,
     );
 
     if (!confirmado) return;
@@ -361,19 +331,15 @@ seleccionarProducto(index: number, productoId: string): void {
     this.mensaje.set('');
 
     this.presupuestoService.eliminarPresupuesto(presupuesto.id).subscribe({
-      next: response => {
+      next: (response) => {
         this.eliminandoId.set(null);
 
         if (!response.success) {
-          this.error.set(
-            response.message || 'No se pudo eliminar el presupuesto.'
-          );
+          this.error.set(response.message || 'No se pudo eliminar el presupuesto.');
           return;
         }
 
-        this.presupuestos.update(lista =>
-          lista.filter(item => item.id !== presupuesto.id)
-        );
+        this.presupuestos.update((lista) => lista.filter((item) => item.id !== presupuesto.id));
 
         if (this.presupuestoExpandido() === presupuesto.id) {
           this.presupuestoExpandido.set(null);
@@ -394,18 +360,13 @@ seleccionarProducto(index: number, productoId: string): void {
           url: error.url,
         });
 
-        this.error.set(
-          error.error?.message ?? 'No se pudo eliminar el presupuesto.'
-        );
+        this.error.set(error.error?.message ?? 'No se pudo eliminar el presupuesto.');
       },
     });
   }
 
   cantidadProductos(presupuesto: Presupuesto): number {
-    return (presupuesto.detalles ?? []).reduce(
-      (total, detalle) => total + detalle.cantidad,
-      0
-    );
+    return (presupuesto.detalles ?? []).reduce((total, detalle) => total + detalle.cantidad, 0);
   }
 
   // WHATSAPP
@@ -423,48 +384,44 @@ seleccionarProducto(index: number, productoId: string): void {
     const ventana = window.open('about:blank', '_blank');
 
     if (!ventana) {
-      this.error.set(
-        'No se pudo abrir WhatsApp. Verifica los permisos de ventanas emergentes.'
-      );
+      this.error.set('No se pudo abrir WhatsApp. Verifica los permisos de ventanas emergentes.');
       return;
     }
 
     ventana.opener = null;
     this.enviandoId.set(presupuesto.id);
 
-    this.presupuestoService.enviarPresupuesto({
-      presupuestoId: presupuesto.id,
-      telefonoSolicitado: presupuesto.telefono_cliente || undefined,
-    }).subscribe({
-      next: response => {
-        this.enviandoId.set(null);
+    this.presupuestoService
+      .enviarPresupuesto({
+        presupuestoId: presupuesto.id,
+        telefonoSolicitado: presupuesto.telefono_cliente || undefined,
+      })
+      .subscribe({
+        next: (response) => {
+          this.enviandoId.set(null);
 
-        if (!response.success || !response.data?.whatsappUrl) {
+          if (!response.success || !response.data?.whatsappUrl) {
+            ventana.close();
+
+            this.error.set(response.message || 'No se pudo generar el enlace de WhatsApp.');
+            return;
+          }
+
+          ventana.location.href = response.data.whatsappUrl;
+          this.mensaje.set('Enlace de WhatsApp generado correctamente.');
+        },
+        error: (error: HttpErrorResponse) => {
+          this.enviandoId.set(null);
           ventana.close();
 
-          this.error.set(
-            response.message || 'No se pudo generar el enlace de WhatsApp.'
-          );
-          return;
-        }
+          console.error('ERROR AL ENVIAR PRESUPUESTO POR WHATSAPP:', {
+            status: error.status,
+            respuesta: error.error,
+            url: error.url,
+          });
 
-        ventana.location.href = response.data.whatsappUrl;
-        this.mensaje.set('Enlace de WhatsApp generado correctamente.');
-      },
-      error: (error: HttpErrorResponse) => {
-        this.enviandoId.set(null);
-        ventana.close();
-
-        console.error('ERROR AL ENVIAR PRESUPUESTO POR WHATSAPP:', {
-          status: error.status,
-          respuesta: error.error,
-          url: error.url,
-        });
-
-        this.error.set(
-          error.error?.message ?? 'No se pudo generar el enlace de WhatsApp.'
-        );
-      },
-    });
+          this.error.set(error.error?.message ?? 'No se pudo generar el enlace de WhatsApp.');
+        },
+      });
   }
 }

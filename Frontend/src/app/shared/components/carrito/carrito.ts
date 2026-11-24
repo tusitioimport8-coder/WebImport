@@ -278,7 +278,7 @@ readonly puedeCrearPresupuesto = computed(
   // REGISTRAR PRESUPUESTO DE FUERZA DE VENTAS
   enviarPresupuesto(): void {
     if (
-      !this.esFuerzaVentas() ||
+      !this.puedeCrearPresupuesto() ||
       !this.mostrarFormularioPresupuesto() ||
       this.cartService.isEmpty() ||
       this.procesandoPresupuesto()

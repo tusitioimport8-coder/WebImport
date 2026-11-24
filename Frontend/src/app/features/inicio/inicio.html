@@ -1,837 +1,903 @@
-
 <div class="home-page">
   <!-- HEADER -->
 
+  <app-site-header
+    [searchTerm]="searchTerm()"
+    [isAuthenticated]="!!authService.user()"
+    [canAccessAdmin]="canAccessAdmin()"
+    [canAccessInventory]="canAccessInventory()"
+    (searchSubmit)="buscarEnCatalogo()"
+    [canAccessPresupuestos]="canAccessPresupuestos()"
+    [wishlistCount]="wishlistTotalItems()"
+    [cartCount]="cartTotalItems()"
+    (searchChange)="onSearchChange($event)"
+    (wishlistClick)="openWishlist()"
+    (cartClick)="openCart()"
+    (profileClick)="abrirPerfil()"
+  />
 
-<app-site-header
-  [searchTerm]="searchTerm()"
-  [isAuthenticated]="!!authService.user()"
-  [canAccessAdmin]="canAccessAdmin()"
-  [canAccessInventory]="canAccessInventory()"
-  (searchSubmit)="buscarEnCatalogo()"
-  [canAccessPresupuestos]="canAccessPresupuestos()"
-
-  [wishlistCount]="wishlistTotalItems()"
-  [cartCount]="cartTotalItems()"
-  (searchChange)="onSearchChange($event)"
-  (wishlistClick)="openWishlist()"
-  (cartClick)="openCart()"
-  (profileClick)="abrirPerfil()"
-/>
-
-<!-- PROMOCIONES -->
-<section class="promo-grid" aria-label="Promociones">
-
-  <!-- BANNER 1 -->
-<article
-  class="promo-card promo-card_primary"
-  (click)="irAlCatalogo($event)"
->
-
-
-
-    <!-- Imágenes con transición suave -->
-    <div class="promo-slides">
-      @for (imagen of imagenesBanner1(); track imagen.objectKey; let i = $index) {
-        <div
-          class="promo-slide"
-          [class.promo-slide_active]="i === indiceBanner1()"
-          [style.background-image]="'url(' + imagen.publicUrl + ')'"
-        ></div>
-      }
-    </div>
-
-    <!-- Punticos del banner 1 -->
-    @if (imagenesBanner1().length > 1) {
-      <div class="promo-dots" aria-label="Posición del primer banner">
+  <!-- PROMOCIONES -->
+  <section class="promo-grid" aria-label="Promociones">
+    <!-- BANNER 1 -->
+    <article class="promo-card promo-card_primary" (click)="irAlCatalogo($event)">
+      <!-- Imágenes con transición suave -->
+      <div class="promo-slides">
         @for (imagen of imagenesBanner1(); track imagen.objectKey; let i = $index) {
-         <span
-  class="promo-dot"
-  [class.promo-dot_active]="i === indiceBanner1()"
-></span>
+          <div
+            class="promo-slide"
+            [class.promo-slide_active]="i === indiceBanner1()"
+            [style.background-image]="'url(' + imagen.publicUrl + ')'"
+          ></div>
         }
       </div>
-    }
 
-    <!-- Botón para subir imágenes -->
-    @if (canEditBanners()) {
-      <button
-        type="button"
-        class="promo-edit-button"
-        aria-label="Cambiar imagen del primer banner"
-        [disabled]="uploadingBanner()"
-        
-(click)="$event.stopPropagation(); promoFile1.click()"
-
-      >
-        <i class="pi pi-bars"></i>
-      </button>
-
-      <input
-        #promoFile1
-        type="file"
-        accept="image/*"
-        multiple
-        hidden
-        (change)="onPromoImageChange($event, 1)"
-      />
-    }
-
-  </article>
-
-
-@if (estadoBanners()[1]; as estado) {
-  <p
-    class="promo-upload-status"
-    [class.exito]="estado.tipo === 'exito'"
-    [class.error]="estado.tipo === 'error'"
-    role="status"
-  >
-    {{ estado.mensaje }}
-  </p>
-}
-
-  <!-- BANNER 2 -->
-<article
-  class="promo-card promo-card_secondary"
-  (click)="irAlCatalogo($event)"
->
-    
-
-
-
-    <!-- Imágenes con transición suave -->
-    <div class="promo-slides">
-      @for (imagen of imagenesBanner2(); track imagen.objectKey; let i = $index) {
-        <div
-          class="promo-slide"
-          [class.promo-slide_active]="i === indiceBanner2()"
-          [style.background-image]="'url(' + imagen.publicUrl + ')'"
-        ></div>
-      }
-    </div>
-
-    <!-- Punticos del banner 2 -->
-    @if (imagenesBanner2().length > 1) {
-      <div class="promo-dots" aria-label="Posición del segundo banner">
-        @for (imagen of imagenesBanner2(); track imagen.objectKey; let i = $index) {
-        <span
-  class="promo-dot"
-  [class.promo-dot_active]="i === indiceBanner2()"
-></span>
-        }
-      </div>
-    }
-
-    <!-- Botón para subir imágenes -->
-    @if (canEditBanners()) {
-      <button
-        type="button"
-        class="promo-edit-button"
-        aria-label="Cambiar imagen del segundo banner"
-        [disabled]="uploadingBanner()"
-     
-(click)="$event.stopPropagation(); promoFile2.click()"
-
-      >
-        <i class="pi pi-bars"></i>
-      </button>
-
-      <input
-        #promoFile2
-        type="file"
-        accept="image/*"
-        multiple
-        hidden
-        (change)="onPromoImageChange($event, 2)"
-      />
-    }
-
-  </article>
-
-@if (estadoBanners()[2]; as estado) {
-  <p
-    class="promo-upload-status"
-    [class.exito]="estado.tipo === 'exito'"
-    [class.error]="estado.tipo === 'error'"
-    role="status"
-  >
-    {{ estado.mensaje }}
-  </p>
-}
-
-</section>
-
-<!-- PARA TI -->
-<section class="home-section compact-section">
-  <header class="section-header">
-    <div>
-      <span class="section-eyebrow">Seleccionados para ti</span>
-      <h2>Para ti</h2>
-    </div>
-  </header>
-
-  <div class="carousel-shell compact-carousel">
-    <button
-      type="button"
-      class="carousel-arrow carousel-arrow_prev"
-      aria-label="Productos anteriores"
-      (click)="scrollCarousel(forYouCarousel, -1)"
-    >
-      <i class="pi pi-chevron-left"></i>
-    </button>
-
-    <div #forYouCarousel class="product-carousel">
-      @for (product of forYouProducts(); track product.id) {
-        <article
-          class="home-product-card"
-          (mouseenter)="stopAutoplay()"
-          (mouseleave)="startAutoplay()"
-        >
-          <div class="product-image-area">
-            <a
-              class="product-image-link"
-              routerLink="/detalle-producto"
-              [state]="{ productId: product.id }"
-              [attr.aria-label]="'Ver detalle de ' + product.name"
-            >
-              @if (product.imageUrl) {
-                <img
-                  class="product-image"
-                  [src]="product.imageUrl"
-                  [alt]="product.name"
-                  loading="lazy"
-                  decoding="async"
-                />
-              } @else {
-                <div class="image-placeholder">
-                  <i class="pi pi-image"></i>
-                </div>
-              }
-            </a>
-
-            <button
-              type="button"
-              class="wishlist-button"
-              [class.wishlist-button_active]="isInWishlist(product.id)"
-              [attr.aria-label]="isInWishlist(product.id) ? 'Quitar de deseos' : 'Agregar a deseos'"
-              (click)="toggleWishlist(product.id)"
-            >
-             <i class="pi"
-   [class.pi-heart]="!isInWishlist(product.id)"
-   [class.pi-heart-fill]="isInWishlist(product.id)">
-</i>
-            </button>
-
-           
-          </div>
-
-          <div class="product-info">
-            <span class="product-category">{{ product.category || 'Sin categoría' }}</span>
-
-            <a
-              class="product-name-link"
-              routerLink="/detalle-producto"
-              [state]="{ productId: product.id }"
-            >
-              <h3>{{ product.name }}</h3>
-            </a>
-
-            <p class="product-description">{{ product.description }}</p>
-
-            <div class="product-price-row">
-     
-
-<div class="product-prices">
-  <strong class="product-price">
-    {{ product.price | currency:'USD':'symbol':'1.2-2' }}
-  </strong>
-
-  @if (getPrecioBCV(product.price); as precioBs) {
-    <span class="product-price-bcv">
-      Bs. {{ precioBs | number:'1.2-2':'es-VE' }} BCV
-    </span>
-  } @else {
-    <span class="product-price-bcv">
-      Precio en Bs. no disponible
-    </span>
-  }
-</div>
-
-
-              <span
-                class="product-stock-label"
-                [class.product-stock-label_out]="product.quantity <= 0"
-              >
-                {{ product.quantity > 0 ? 'En stock' : 'Agotado' }}
-              </span>
-            </div>
-
-  <div class="product-cart-actions">
-
-  @if (getCantidadEnCarrito(product.id) > 0) {
-    <button
-      type="button"
-      class="product-minus-button"
-      title="Quitar una unidad"
-      aria-label="Quitar una unidad del carrito"
-      (click)="quitarDelCarrito(product.id)"
-    >
-      <i class="pi pi-minus"></i>
-    </button>
-  }
-
-  <button
-    type="button"
-    class="product-add-button"
-    [disabled]="getCantidadEnCarrito(product.id) >= product.quantity"
-    (click)="addToCart(product)"
-  >
-    <i class="pi pi-plus"></i>
-    Agregar al carrito
-
-    @if (getCantidadEnCarrito(product.id) > 0) {
-      <span class="product-cart-badge">
-        {{ getCantidadEnCarrito(product.id) }}
-      </span>
-    }
-  </button>
-
-</div>
-          </div>
-        </article>
-      }
-    </div>
-
-    <button
-      type="button"
-      class="carousel-arrow carousel-arrow_next"
-      aria-label="Productos siguientes"
-      (click)="scrollCarousel(forYouCarousel, 1)"
-    >
-      <i class="pi pi-chevron-right"></i>
-    </button>
-  </div>
-</section>
-    <!-- COMPRA POR CATEGORÍA -->
-    <section class="home-section category-section">
-      <header class="section-header">
-        <div>
-          <span class="section-eyebrow">Explora fácilmente</span>
-          <h2>Compra por categoría</h2>
-          <p>Elige una sección y encuentra lo que buscas.</p>
-        </div>
-      </header>
-      <div class="category-grid">
-        @for (category of categories; track category.label) {
-          <a class="category-card" routerLink="/catalogo" [queryParams]="{ categoria: category.label }">
-            <span class="category-icon"><i [class]="category.icon"></i></span>
-            <span class="category-name">{{ category.label }}</span>
-            <i class="pi pi-chevron-right category-arrow"></i>
-          </a>
-        }
-      </div>
-    </section>
-
-    <!-- NOVEDADES: OCULTO TEMPORALMENTE -->
-    @if (false) {
-      <section class="home-section compact-section">
-        <header class="section-header">
-          <div><span class="section-eyebrow">Recién agregados</span><h2>Novedades</h2></div>
-        </header>
-        <div class="carousel-shell compact-carousel">
-          <button type="button" class="carousel-arrow carousel-arrow_prev" (click)="scrollCarousel(newestCarousel, -1)">
-            <i class="pi pi-chevron-left"></i>
-          </button>
-          <div #newestCarousel class="product-carousel">
-            @for (product of newestProducts(); track product.id) {
-              <article class="home-product-card" (mouseenter)="stopAutoplay()" (mouseleave)="startAutoplay()">
-                <div class="product-image-area">
-                  <a class="product-image-link" routerLink="/detalle-producto" [state]="{ productId: product.id }" [attr.aria-label]="'Ver detalle de ' + product.name">
-                    @if (product.imageUrl) {
-                      <img class="product-image" [src]="product.imageUrl" [alt]="product.name" loading="lazy" decoding="async" />
-                    } @else {
-                      <div class="image-placeholder"><i class="pi pi-image"></i></div>
-                    }
-                  </a>
-                  <button type="button" class="wishlist-button" [class.wishlist-button_active]="isInWishlist(product.id)" [attr.aria-label]="isInWishlist(product.id) ? 'Quitar de deseos' : 'Agregar a deseos'" (click)="toggleWishlist(product.id)">
-                    <i class="pi"
-   [class.pi-heart]="!isInWishlist(product.id)"
-   [class.pi-heart-fill]="isInWishlist(product.id)">
-</i>
-                  </button>
-                 
-                </div>
-                <div class="product-info">
-                <span class="product-category">
-  {{ product.category || 'Sin categoría' }}
-</span>
-                  <a class="product-name-link" routerLink="/detalle-producto" [state]="{ productId: product.id }"><h3>{{ product.name }}</h3></a>
-                  <p class="product-description">{{ product.description }}</p>
-                  <div class="product-price-row">
-  
-<div class="product-prices">
-  <strong class="product-price">
-    {{ product.price | currency:'USD':'symbol':'1.2-2' }}
-  </strong>
-
-  @if (getPrecioBCV(product.price); as precioBs) {
-    <span class="product-price-bcv">
-      Bs. {{ precioBs | number:'1.2-2':'es-VE' }} BCV
-    </span>
-  } @else {
-    <span class="product-price-bcv">
-      Precio en Bs. no disponible
-    </span>
-  }
-</div>
-
-
-                    <span class="product-stock-label" [class.product-stock-label_out]="product.quantity <= 0">{{ product.quantity > 0 ? 'En stock' : 'Agotado' }}</span>
-                  </div>
-  <div class="product-cart-actions">
-
-  @if (getCantidadEnCarrito(product.id) > 0) {
-    <button
-      type="button"
-      class="product-minus-button"
-      title="Quitar una unidad"
-      aria-label="Quitar una unidad del carrito"
-      (click)="quitarDelCarrito(product.id)"
-    >
-      <i class="pi pi-minus"></i>
-    </button>
-  }
-
-  <button
-    type="button"
-    class="product-add-button"
-    [disabled]="getCantidadEnCarrito(product.id) >= product.quantity"
-    (click)="addToCart(product)"
-  >
-    <i class="pi pi-plus"></i>
-    Agregar al carrito
-
-    @if (getCantidadEnCarrito(product.id) > 0) {
-      <span class="product-cart-badge">
-        {{ getCantidadEnCarrito(product.id) }}
-      </span>
-    }
-  </button>
-
-</div>
-
-                </div>
-              </article>
-            }
-          </div>
-          <button type="button" class="carousel-arrow carousel-arrow_next" (click)="scrollCarousel(newestCarousel, 1)">
-            <i class="pi pi-chevron-right"></i>
-          </button>
-        </div>
-      </section>
-    }
-
-    <!-- RECOMENDADOS -->
-    <section class="home-section compact-section">
-      <header class="section-header">
-        <div><span class="section-eyebrow">Más para descubrir</span><h2>Recomendados para ti</h2></div>
-      </header>
-      <div class="carousel-shell compact-carousel">
-        <button type="button" class="carousel-arrow carousel-arrow_prev" (click)="scrollCarousel(recommendedCarousel, -1)">
-          <i class="pi pi-chevron-left"></i>
-        </button>
-        <div #recommendedCarousel class="product-carousel">
-          @for (product of recommendedProducts(); track product.id) {
-            <article class="home-product-card" (mouseenter)="stopAutoplay()" (mouseleave)="startAutoplay()">
-              <div class="product-image-area">
-                <a class="product-image-link" routerLink="/detalle-producto" [state]="{ productId: product.id }" [attr.aria-label]="'Ver detalle de ' + product.name">
-                  @if (product.imageUrl) {
-                    <img class="product-image" [src]="product.imageUrl" [alt]="product.name" loading="lazy" decoding="async" />
-                  } @else {
-                    <div class="image-placeholder"><i class="pi pi-image"></i></div>
-                  }
-                </a>
-                <button type="button" class="wishlist-button" [class.wishlist-button_active]="isInWishlist(product.id)" [attr.aria-label]="isInWishlist(product.id) ? 'Quitar de deseos' : 'Agregar a deseos'" (click)="toggleWishlist(product.id)">
-                <i class="pi"
-   [class.pi-heart]="!isInWishlist(product.id)"
-   [class.pi-heart-fill]="isInWishlist(product.id)">
-</i>
-                </button>
-                
-              </div>
-              <div class="product-info">
-              <span class="product-category">
-  {{ product.category || 'Sin categoría' }}
-</span>
-                <a class="product-name-link" routerLink="/detalle-producto" [state]="{ productId: product.id }"><h3>{{ product.name }}</h3></a>
-                <p class="product-description">{{ product.description }}</p>
-                <div class="product-price-row">
-   
-<div class="product-prices">
-  <strong class="product-price">
-    {{ product.price | currency:'USD':'symbol':'1.2-2' }}
-  </strong>
-
-  @if (getPrecioBCV(product.price); as precioBs) {
-    <span class="product-price-bcv">
-      Bs. {{ precioBs | number:'1.2-2':'es-VE' }} BCV
-    </span>
-  } @else {
-    <span class="product-price-bcv">
-      Precio en Bs. no disponible
-    </span>
-  }
-</div>
-
-                  <span class="product-stock-label" [class.product-stock-label_out]="product.quantity <= 0">{{ product.quantity > 0 ? 'En stock' : 'Agotado' }}</span>
-                </div>
- <div class="product-cart-actions">
-
-  @if (getCantidadEnCarrito(product.id) > 0) {
-    <button
-      type="button"
-      class="product-minus-button"
-      title="Quitar una unidad"
-      aria-label="Quitar una unidad del carrito"
-      (click)="quitarDelCarrito(product.id)"
-    >
-      <i class="pi pi-minus"></i>
-    </button>
-  }
-
-  <button
-    type="button"
-    class="product-add-button"
-    [disabled]="getCantidadEnCarrito(product.id) >= product.quantity"
-    (click)="addToCart(product)"
-  >
-    <i class="pi pi-plus"></i>
-    Agregar al carrito
-
-    @if (getCantidadEnCarrito(product.id) > 0) {
-      <span class="product-cart-badge">
-        {{ getCantidadEnCarrito(product.id) }}
-      </span>
-    }
-  </button>
-
-</div>
-              </div>
-            </article>
+      <!-- Punticos del banner 1 -->
+      @if (imagenesBanner1().length > 1) {
+        <div class="promo-dots" aria-label="Posición del primer banner">
+          @for (imagen of imagenesBanner1(); track imagen.objectKey; let i = $index) {
+            <span class="promo-dot" [class.promo-dot_active]="i === indiceBanner1()"></span>
           }
         </div>
-        <button type="button" class="carousel-arrow carousel-arrow_next" (click)="scrollCarousel(recommendedCarousel, 1)">
-          <i class="pi pi-chevron-right"></i>
-        </button>
-      </div>
-    </section>
+      }
 
-    <!-- OPCIONES PARA DESCUBRIR -->
-    <section class="home-section compact-section">
-      <header class="section-header">
-        <div><span class="section-eyebrow">También puede interesarte</span><h2>Opciones para descubrir</h2></div>
-      </header>
-      <div class="carousel-shell compact-carousel">
-        <button type="button" class="carousel-arrow carousel-arrow_prev" (click)="scrollCarousel(valueCarousel, -1)">
-          <i class="pi pi-chevron-left"></i>
-        </button>
-        <div #valueCarousel class="product-carousel">
-          @for (product of valueProducts(); track product.id) {
-            <article class="home-product-card" (mouseenter)="stopAutoplay()" (mouseleave)="startAutoplay()">
-              <div class="product-image-area">
-                <a class="product-image-link" routerLink="/detalle-producto" [state]="{ productId: product.id }" [attr.aria-label]="'Ver detalle de ' + product.name">
-                  @if (product.imageUrl) {
-                    <img class="product-image" [src]="product.imageUrl" [alt]="product.name" loading="lazy" decoding="async" />
-                  } @else {
-                    <div class="image-placeholder"><i class="pi pi-image"></i></div>
-                  }
-                </a>
-                <button type="button" class="wishlist-button" [class.wishlist-button_active]="isInWishlist(product.id)" [attr.aria-label]="isInWishlist(product.id) ? 'Quitar de deseos' : 'Agregar a deseos'" (click)="toggleWishlist(product.id)">
-               <i class="pi"
-   [class.pi-heart]="!isInWishlist(product.id)"
-   [class.pi-heart-fill]="isInWishlist(product.id)">
-</i>
-                </button>
-                </div>
-
-<div class="product-info">
-              
-               <span class="product-category">
-  {{ product.category || 'Sin categoría' }}
-</span>
-                <a class="product-name-link" routerLink="/detalle-producto" [state]="{ productId: product.id }"><h3>{{ product.name }}</h3></a>
-                <p class="product-description">{{ product.description }}</p>
-                <div class="product-price-row">
-     
-<div class="product-prices">
-  <strong class="product-price">
-    {{ product.price | currency:'USD':'symbol':'1.2-2' }}
-  </strong>
-
-  @if (getPrecioBCV(product.price); as precioBs) {
-    <span class="product-price-bcv">
-      Bs. {{ precioBs | number:'1.2-2':'es-VE' }} BCV
-    </span>
-  } @else {
-    <span class="product-price-bcv">
-      Precio en Bs. no disponible
-    </span>
-  }
-</div>
-
-
-                  <span class="product-stock-label" [class.product-stock-label_out]="product.quantity <= 0">{{ product.quantity > 0 ? 'En stock' : 'Agotado' }}</span>
-                </div>
- <div class="product-cart-actions">
-
-  @if (getCantidadEnCarrito(product.id) > 0) {
-    <button
-      type="button"
-      class="product-minus-button"
-      title="Quitar una unidad"
-      aria-label="Quitar una unidad del carrito"
-      (click)="quitarDelCarrito(product.id)"
-    >
-      <i class="pi pi-minus"></i>
-    </button>
-  }
-
-  <button
-    type="button"
-    class="product-add-button"
-    [disabled]="getCantidadEnCarrito(product.id) >= product.quantity"
-    (click)="addToCart(product)"
-  >
-    <i class="pi pi-plus"></i>
-    Agregar al carrito
-
-    @if (getCantidadEnCarrito(product.id) > 0) {
-      <span class="product-cart-badge">
-        {{ getCantidadEnCarrito(product.id) }}
-      </span>
-    }
-  </button>
-
-</div>
-              </div>
-            </article>
-          }
-        </div>
-        <button type="button" class="carousel-arrow carousel-arrow_next" (click)="scrollCarousel(valueCarousel, 1)">
-          <i class="pi pi-chevron-right"></i>
-        </button>
-      </div>
-    </section>
-
-    <!-- EXPLORA POR CATEGORÍA -->
-    <section class="home-section visual-categories">
-      <header class="section-header">
-        <div>
-          <span class="section-eyebrow">Encuentra lo que buscas</span>
-          <h2>Explora por categoría</h2>
-          <p>Una forma más visual de descubrir la tienda.</p>
-        </div>
-      </header>
-      <div class="carousel-shell">
-        <button type="button" class="carousel-arrow carousel-arrow_prev" aria-label="Categorías anteriores" (click)="scrollCarousel(categoryCarousel, -1)">
-          <i class="pi pi-chevron-left"></i>
-        </button>
-   
-<div #categoryCarousel class="category-carousel">
-  @for (category of categories; track category.label) {
-    <div class="visual-category-wrapper">
-
-      <a
-        class="visual-category-card"
-        routerLink="/catalogo"
-        [queryParams]="{ categoria: category.label }"
-      >
-        <img
-          [src]="getCategoryImage(category)"
-          [alt]="category.label"
-          loading="lazy"
-          decoding="async"
-        />
-
-        <div class="visual-category-overlay">
-          <span class="visual-category-icon">
-            <i [class]="category.icon"></i>
-          </span>
-
-          <div>
-            <span>Explorar</span>
-            <h3>{{ category.label }}</h3>
-          </div>
-
-          <i class="pi pi-arrow-right"></i>
-        </div>
-      </a>
-
+      <!-- Botón para subir imágenes -->
       @if (canEditBanners()) {
         <button
           type="button"
-          class="promo-edit-button category-edit-button"
-          [attr.aria-label]="'Cambiar imagen de ' + category.label"
-          title="Cambiar imagen de categoría"
-          [disabled]="uploadingCategoryImage() !== null"
-          (click)="$event.stopPropagation(); categoryFile.click()"
+          class="promo-edit-button"
+          aria-label="Cambiar imagen del primer banner"
+          [disabled]="uploadingBanner()"
+          (click)="$event.stopPropagation(); promoFile1.click()"
         >
           <i class="pi pi-bars"></i>
         </button>
 
         <input
-          #categoryFile
+          #promoFile1
           type="file"
-          accept="image/jpeg,image/png,image/webp,image/gif"
+          accept="image/*"
+          multiple
           hidden
-          (change)="onCategoryImageChange($event, category)"
+          (change)="onPromoImageChange($event, 1)"
         />
       }
+    </article>
 
+    @if (estadoBanners()[1]; as estado) {
+      <p
+        class="promo-upload-status"
+        [class.exito]="estado.tipo === 'exito'"
+        [class.error]="estado.tipo === 'error'"
+        role="status"
+      >
+        {{ estado.mensaje }}
+      </p>
+    }
+
+    <!-- BANNER 2 -->
+    <article class="promo-card promo-card_secondary" (click)="irAlCatalogo($event)">
+      <!-- Imágenes con transición suave -->
+      <div class="promo-slides">
+        @for (imagen of imagenesBanner2(); track imagen.objectKey; let i = $index) {
+          <div
+            class="promo-slide"
+            [class.promo-slide_active]="i === indiceBanner2()"
+            [style.background-image]="'url(' + imagen.publicUrl + ')'"
+          ></div>
+        }
+      </div>
+
+      <!-- Punticos del banner 2 -->
+      @if (imagenesBanner2().length > 1) {
+        <div class="promo-dots" aria-label="Posición del segundo banner">
+          @for (imagen of imagenesBanner2(); track imagen.objectKey; let i = $index) {
+            <span class="promo-dot" [class.promo-dot_active]="i === indiceBanner2()"></span>
+          }
+        </div>
+      }
+
+      <!-- Botón para subir imágenes -->
+      @if (canEditBanners()) {
+        <button
+          type="button"
+          class="promo-edit-button"
+          aria-label="Cambiar imagen del segundo banner"
+          [disabled]="uploadingBanner()"
+          (click)="$event.stopPropagation(); promoFile2.click()"
+        >
+          <i class="pi pi-bars"></i>
+        </button>
+
+        <input
+          #promoFile2
+          type="file"
+          accept="image/*"
+          multiple
+          hidden
+          (change)="onPromoImageChange($event, 2)"
+        />
+      }
+    </article>
+
+    @if (estadoBanners()[2]; as estado) {
+      <p
+        class="promo-upload-status"
+        [class.exito]="estado.tipo === 'exito'"
+        [class.error]="estado.tipo === 'error'"
+        role="status"
+      >
+        {{ estado.mensaje }}
+      </p>
+    }
+  </section>
+
+  <!-- PARA TI -->
+  <section class="home-section compact-section">
+    <header class="section-header">
+      <div>
+        <span class="section-eyebrow">Seleccionados para ti</span>
+        <h2>Para ti</h2>
+      </div>
+    </header>
+
+    <div class="carousel-shell compact-carousel">
+      <button
+        type="button"
+        class="carousel-arrow carousel-arrow_prev"
+        aria-label="Productos anteriores"
+        (click)="scrollCarousel(forYouCarousel, -1)"
+      >
+        <i class="pi pi-chevron-left"></i>
+      </button>
+
+      <div #forYouCarousel class="product-carousel">
+        @for (product of forYouProducts(); track product.id) {
+          <article
+            class="home-product-card"
+            (mouseenter)="stopAutoplay()"
+            (mouseleave)="startAutoplay()"
+          >
+            <div class="product-image-area">
+              <a
+                class="product-image-link"
+                routerLink="/detalle-producto"
+                [state]="{ productId: product.id }"
+                [attr.aria-label]="'Ver detalle de ' + product.name"
+              >
+                @if (product.imageUrl) {
+                  <img
+                    class="product-image"
+                    [src]="product.imageUrl"
+                    [alt]="product.name"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                } @else {
+                  <div class="image-placeholder">
+                    <i class="pi pi-image"></i>
+                  </div>
+                }
+              </a>
+
+              <button
+                type="button"
+                class="wishlist-button"
+                [class.wishlist-button_active]="isInWishlist(product.id)"
+                [attr.aria-label]="
+                  isInWishlist(product.id) ? 'Quitar de deseos' : 'Agregar a deseos'
+                "
+                (click)="toggleWishlist(product.id)"
+              >
+                <i
+                  class="pi"
+                  [class.pi-heart]="!isInWishlist(product.id)"
+                  [class.pi-heart-fill]="isInWishlist(product.id)"
+                >
+                </i>
+              </button>
+            </div>
+
+            <div class="product-info">
+              <span class="product-category">{{ product.category || 'Sin categoría' }}</span>
+
+              <a
+                class="product-name-link"
+                routerLink="/detalle-producto"
+                [state]="{ productId: product.id }"
+              >
+                <h3>{{ product.name }}</h3>
+              </a>
+
+              <p class="product-description">{{ product.description }}</p>
+
+              <div class="product-price-row">
+                <div class="product-prices">
+                  <strong class="product-price">
+                    {{ product.price | currency: 'USD' : 'symbol' : '1.2-2' }}
+                  </strong>
+
+                  @if (getPrecioBCV(product.price); as precioBs) {
+                    <span class="product-price-bcv">
+                      Bs. {{ precioBs | number: '1.2-2' : 'es-VE' }} BCV
+                    </span>
+                  } @else {
+                    <span class="product-price-bcv"> Precio en Bs. no disponible </span>
+                  }
+                </div>
+
+                <span
+                  class="product-stock-label"
+                  [class.product-stock-label_out]="product.quantity <= 0"
+                >
+                  {{ product.quantity > 0 ? 'En stock' : 'Agotado' }}
+                </span>
+              </div>
+
+              <div class="product-cart-actions">
+                @if (getCantidadEnCarrito(product.id) > 0) {
+                  <button
+                    type="button"
+                    class="product-minus-button"
+                    title="Quitar una unidad"
+                    aria-label="Quitar una unidad del carrito"
+                    (click)="quitarDelCarrito(product.id)"
+                  >
+                    <i class="pi pi-minus"></i>
+                  </button>
+                }
+
+                <button
+                  type="button"
+                  class="product-add-button"
+                  [disabled]="getCantidadEnCarrito(product.id) >= product.quantity"
+                  (click)="addToCart(product)"
+                >
+                  <i class="pi pi-plus"></i>
+                  Agregar al carrito
+
+                  @if (getCantidadEnCarrito(product.id) > 0) {
+                    <span class="product-cart-badge">
+                      {{ getCantidadEnCarrito(product.id) }}
+                    </span>
+                  }
+                </button>
+              </div>
+            </div>
+          </article>
+        }
+      </div>
+
+      <button
+        type="button"
+        class="carousel-arrow carousel-arrow_next"
+        aria-label="Productos siguientes"
+        (click)="scrollCarousel(forYouCarousel, 1)"
+      >
+        <i class="pi pi-chevron-right"></i>
+      </button>
     </div>
-  }
-</div>
+  </section>
+  <!-- COMPRA POR CATEGORÍA -->
+  <section class="home-section category-section">
+    <header class="section-header">
+      <div>
+        <span class="section-eyebrow">Explora fácilmente</span>
+        <h2>Compra por categoría</h2>
+        <p>Elige una sección y encuentra lo que buscas.</p>
+      </div>
+    </header>
+    <div class="category-grid">
+      @for (category of categories; track category.label) {
+        <a
+          class="category-card"
+          routerLink="/catalogo"
+          [queryParams]="{ categoria: category.label }"
+        >
+          <span class="category-icon"><i [class]="category.icon"></i></span>
+          <span class="category-name">{{ category.label }}</span>
+          <i class="pi pi-chevron-right category-arrow"></i>
+        </a>
+      }
+    </div>
+  </section>
 
-        <button type="button" class="carousel-arrow carousel-arrow_next" aria-label="Categorías siguientes" (click)="scrollCarousel(categoryCarousel, 1)">
+  <!-- NOVEDADES: OCULTO TEMPORALMENTE -->
+  @if (false) {
+    <section class="home-section compact-section">
+      <header class="section-header">
+        <div>
+          <span class="section-eyebrow">Recién agregados</span>
+          <h2>Novedades</h2>
+        </div>
+      </header>
+      <div class="carousel-shell compact-carousel">
+        <button
+          type="button"
+          class="carousel-arrow carousel-arrow_prev"
+          (click)="scrollCarousel(newestCarousel, -1)"
+        >
+          <i class="pi pi-chevron-left"></i>
+        </button>
+        <div #newestCarousel class="product-carousel">
+          @for (product of newestProducts(); track product.id) {
+            <article
+              class="home-product-card"
+              (mouseenter)="stopAutoplay()"
+              (mouseleave)="startAutoplay()"
+            >
+              <div class="product-image-area">
+                <a
+                  class="product-image-link"
+                  routerLink="/detalle-producto"
+                  [state]="{ productId: product.id }"
+                  [attr.aria-label]="'Ver detalle de ' + product.name"
+                >
+                  @if (product.imageUrl) {
+                    <img
+                      class="product-image"
+                      [src]="product.imageUrl"
+                      [alt]="product.name"
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  } @else {
+                    <div class="image-placeholder"><i class="pi pi-image"></i></div>
+                  }
+                </a>
+                <button
+                  type="button"
+                  class="wishlist-button"
+                  [class.wishlist-button_active]="isInWishlist(product.id)"
+                  [attr.aria-label]="
+                    isInWishlist(product.id) ? 'Quitar de deseos' : 'Agregar a deseos'
+                  "
+                  (click)="toggleWishlist(product.id)"
+                >
+                  <i
+                    class="pi"
+                    [class.pi-heart]="!isInWishlist(product.id)"
+                    [class.pi-heart-fill]="isInWishlist(product.id)"
+                  >
+                  </i>
+                </button>
+              </div>
+              <div class="product-info">
+                <span class="product-category">
+                  {{ product.category || 'Sin categoría' }}
+                </span>
+                <a
+                  class="product-name-link"
+                  routerLink="/detalle-producto"
+                  [state]="{ productId: product.id }"
+                  ><h3>{{ product.name }}</h3></a
+                >
+                <p class="product-description">{{ product.description }}</p>
+                <div class="product-price-row">
+                  <div class="product-prices">
+                    <strong class="product-price">
+                      {{ product.price | currency: 'USD' : 'symbol' : '1.2-2' }}
+                    </strong>
+
+                    @if (getPrecioBCV(product.price); as precioBs) {
+                      <span class="product-price-bcv">
+                        Bs. {{ precioBs | number: '1.2-2' : 'es-VE' }} BCV
+                      </span>
+                    } @else {
+                      <span class="product-price-bcv"> Precio en Bs. no disponible </span>
+                    }
+                  </div>
+
+                  <span
+                    class="product-stock-label"
+                    [class.product-stock-label_out]="product.quantity <= 0"
+                    >{{ product.quantity > 0 ? 'En stock' : 'Agotado' }}</span
+                  >
+                </div>
+                <div class="product-cart-actions">
+                  @if (getCantidadEnCarrito(product.id) > 0) {
+                    <button
+                      type="button"
+                      class="product-minus-button"
+                      title="Quitar una unidad"
+                      aria-label="Quitar una unidad del carrito"
+                      (click)="quitarDelCarrito(product.id)"
+                    >
+                      <i class="pi pi-minus"></i>
+                    </button>
+                  }
+
+                  <button
+                    type="button"
+                    class="product-add-button"
+                    [disabled]="getCantidadEnCarrito(product.id) >= product.quantity"
+                    (click)="addToCart(product)"
+                  >
+                    <i class="pi pi-plus"></i>
+                    Agregar al carrito
+
+                    @if (getCantidadEnCarrito(product.id) > 0) {
+                      <span class="product-cart-badge">
+                        {{ getCantidadEnCarrito(product.id) }}
+                      </span>
+                    }
+                  </button>
+                </div>
+              </div>
+            </article>
+          }
+        </div>
+        <button
+          type="button"
+          class="carousel-arrow carousel-arrow_next"
+          (click)="scrollCarousel(newestCarousel, 1)"
+        >
           <i class="pi pi-chevron-right"></i>
         </button>
       </div>
     </section>
-  
-    
-<!-- BANNER 3: ANCHO COMPLETO -->
-<section class="promo-wide" aria-label="Promoción destacada">
-  <article class="promo-card promo-card_full">
+  }
 
-    <div class="promo-slides">
-      @for (imagen of imagenesBanner3(); track imagen.objectKey; let i = $index) {
-        <div
-          class="promo-slide"
-          [class.promo-slide_active]="i === indiceBanner3()"
-          [style.background-image]="'url(' + imagen.publicUrl + ')'"
-        ></div>
-      }
-    </div>
-
-    @if (imagenesBanner3().length > 1) {
-      <div class="promo-dots" aria-label="Posición del tercer banner">
-        @for (imagen of imagenesBanner3(); track imagen.objectKey; let i = $index) {
-          <span
-            class="promo-dot"
-            [class.promo-dot_active]="i === indiceBanner3()"
-          ></span>
-        }
+  <!-- RECOMENDADOS -->
+  <section class="home-section compact-section">
+    <header class="section-header">
+      <div>
+        <span class="section-eyebrow">Más para descubrir</span>
+        <h2>Recomendados para ti</h2>
       </div>
-    }
-
-    @if (canEditBanners()) {
+    </header>
+    <div class="carousel-shell compact-carousel">
       <button
         type="button"
-        class="promo-edit-button"
-        aria-label="Cambiar imágenes del tercer banner"
-        [disabled]="uploadingBanner()"
-        (click)="promoFile3.click()"
+        class="carousel-arrow carousel-arrow_prev"
+        (click)="scrollCarousel(recommendedCarousel, -1)"
       >
-        <i class="pi pi-bars"></i>
+        <i class="pi pi-chevron-left"></i>
+      </button>
+      <div #recommendedCarousel class="product-carousel">
+        @for (product of recommendedProducts(); track product.id) {
+          <article
+            class="home-product-card"
+            (mouseenter)="stopAutoplay()"
+            (mouseleave)="startAutoplay()"
+          >
+            <div class="product-image-area">
+              <a
+                class="product-image-link"
+                routerLink="/detalle-producto"
+                [state]="{ productId: product.id }"
+                [attr.aria-label]="'Ver detalle de ' + product.name"
+              >
+                @if (product.imageUrl) {
+                  <img
+                    class="product-image"
+                    [src]="product.imageUrl"
+                    [alt]="product.name"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                } @else {
+                  <div class="image-placeholder"><i class="pi pi-image"></i></div>
+                }
+              </a>
+              <button
+                type="button"
+                class="wishlist-button"
+                [class.wishlist-button_active]="isInWishlist(product.id)"
+                [attr.aria-label]="
+                  isInWishlist(product.id) ? 'Quitar de deseos' : 'Agregar a deseos'
+                "
+                (click)="toggleWishlist(product.id)"
+              >
+                <i
+                  class="pi"
+                  [class.pi-heart]="!isInWishlist(product.id)"
+                  [class.pi-heart-fill]="isInWishlist(product.id)"
+                >
+                </i>
+              </button>
+            </div>
+            <div class="product-info">
+              <span class="product-category">
+                {{ product.category || 'Sin categoría' }}
+              </span>
+              <a
+                class="product-name-link"
+                routerLink="/detalle-producto"
+                [state]="{ productId: product.id }"
+                ><h3>{{ product.name }}</h3></a
+              >
+              <p class="product-description">{{ product.description }}</p>
+              <div class="product-price-row">
+                <div class="product-prices">
+                  <strong class="product-price">
+                    {{ product.price | currency: 'USD' : 'symbol' : '1.2-2' }}
+                  </strong>
+
+                  @if (getPrecioBCV(product.price); as precioBs) {
+                    <span class="product-price-bcv">
+                      Bs. {{ precioBs | number: '1.2-2' : 'es-VE' }} BCV
+                    </span>
+                  } @else {
+                    <span class="product-price-bcv"> Precio en Bs. no disponible </span>
+                  }
+                </div>
+
+                <span
+                  class="product-stock-label"
+                  [class.product-stock-label_out]="product.quantity <= 0"
+                  >{{ product.quantity > 0 ? 'En stock' : 'Agotado' }}</span
+                >
+              </div>
+              <div class="product-cart-actions">
+                @if (getCantidadEnCarrito(product.id) > 0) {
+                  <button
+                    type="button"
+                    class="product-minus-button"
+                    title="Quitar una unidad"
+                    aria-label="Quitar una unidad del carrito"
+                    (click)="quitarDelCarrito(product.id)"
+                  >
+                    <i class="pi pi-minus"></i>
+                  </button>
+                }
+
+                <button
+                  type="button"
+                  class="product-add-button"
+                  [disabled]="getCantidadEnCarrito(product.id) >= product.quantity"
+                  (click)="addToCart(product)"
+                >
+                  <i class="pi pi-plus"></i>
+                  Agregar al carrito
+
+                  @if (getCantidadEnCarrito(product.id) > 0) {
+                    <span class="product-cart-badge">
+                      {{ getCantidadEnCarrito(product.id) }}
+                    </span>
+                  }
+                </button>
+              </div>
+            </div>
+          </article>
+        }
+      </div>
+      <button
+        type="button"
+        class="carousel-arrow carousel-arrow_next"
+        (click)="scrollCarousel(recommendedCarousel, 1)"
+      >
+        <i class="pi pi-chevron-right"></i>
+      </button>
+    </div>
+  </section>
+
+  <!-- OPCIONES PARA DESCUBRIR -->
+  <section class="home-section compact-section">
+    <header class="section-header">
+      <div>
+        <span class="section-eyebrow">También puede interesarte</span>
+        <h2>Opciones para descubrir</h2>
+      </div>
+    </header>
+    <div class="carousel-shell compact-carousel">
+      <button
+        type="button"
+        class="carousel-arrow carousel-arrow_prev"
+        (click)="scrollCarousel(valueCarousel, -1)"
+      >
+        <i class="pi pi-chevron-left"></i>
+      </button>
+      <div #valueCarousel class="product-carousel">
+        @for (product of valueProducts(); track product.id) {
+          <article
+            class="home-product-card"
+            (mouseenter)="stopAutoplay()"
+            (mouseleave)="startAutoplay()"
+          >
+            <div class="product-image-area">
+              <a
+                class="product-image-link"
+                routerLink="/detalle-producto"
+                [state]="{ productId: product.id }"
+                [attr.aria-label]="'Ver detalle de ' + product.name"
+              >
+                @if (product.imageUrl) {
+                  <img
+                    class="product-image"
+                    [src]="product.imageUrl"
+                    [alt]="product.name"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                } @else {
+                  <div class="image-placeholder"><i class="pi pi-image"></i></div>
+                }
+              </a>
+              <button
+                type="button"
+                class="wishlist-button"
+                [class.wishlist-button_active]="isInWishlist(product.id)"
+                [attr.aria-label]="
+                  isInWishlist(product.id) ? 'Quitar de deseos' : 'Agregar a deseos'
+                "
+                (click)="toggleWishlist(product.id)"
+              >
+                <i
+                  class="pi"
+                  [class.pi-heart]="!isInWishlist(product.id)"
+                  [class.pi-heart-fill]="isInWishlist(product.id)"
+                >
+                </i>
+              </button>
+            </div>
+
+            <div class="product-info">
+              <span class="product-category">
+                {{ product.category || 'Sin categoría' }}
+              </span>
+              <a
+                class="product-name-link"
+                routerLink="/detalle-producto"
+                [state]="{ productId: product.id }"
+                ><h3>{{ product.name }}</h3></a
+              >
+              <p class="product-description">{{ product.description }}</p>
+              <div class="product-price-row">
+                <div class="product-prices">
+                  <strong class="product-price">
+                    {{ product.price | currency: 'USD' : 'symbol' : '1.2-2' }}
+                  </strong>
+
+                  @if (getPrecioBCV(product.price); as precioBs) {
+                    <span class="product-price-bcv">
+                      Bs. {{ precioBs | number: '1.2-2' : 'es-VE' }} BCV
+                    </span>
+                  } @else {
+                    <span class="product-price-bcv"> Precio en Bs. no disponible </span>
+                  }
+                </div>
+
+                <span
+                  class="product-stock-label"
+                  [class.product-stock-label_out]="product.quantity <= 0"
+                  >{{ product.quantity > 0 ? 'En stock' : 'Agotado' }}</span
+                >
+              </div>
+              <div class="product-cart-actions">
+                @if (getCantidadEnCarrito(product.id) > 0) {
+                  <button
+                    type="button"
+                    class="product-minus-button"
+                    title="Quitar una unidad"
+                    aria-label="Quitar una unidad del carrito"
+                    (click)="quitarDelCarrito(product.id)"
+                  >
+                    <i class="pi pi-minus"></i>
+                  </button>
+                }
+
+                <button
+                  type="button"
+                  class="product-add-button"
+                  [disabled]="getCantidadEnCarrito(product.id) >= product.quantity"
+                  (click)="addToCart(product)"
+                >
+                  <i class="pi pi-plus"></i>
+                  Agregar al carrito
+
+                  @if (getCantidadEnCarrito(product.id) > 0) {
+                    <span class="product-cart-badge">
+                      {{ getCantidadEnCarrito(product.id) }}
+                    </span>
+                  }
+                </button>
+              </div>
+            </div>
+          </article>
+        }
+      </div>
+      <button
+        type="button"
+        class="carousel-arrow carousel-arrow_next"
+        (click)="scrollCarousel(valueCarousel, 1)"
+      >
+        <i class="pi pi-chevron-right"></i>
+      </button>
+    </div>
+  </section>
+
+  <!-- EXPLORA POR CATEGORÍA -->
+  <section class="home-section visual-categories">
+    <header class="section-header">
+      <div>
+        <span class="section-eyebrow">Encuentra lo que buscas</span>
+        <h2>Explora por categoría</h2>
+        <p>Una forma más visual de descubrir la tienda.</p>
+      </div>
+    </header>
+    <div class="carousel-shell">
+      <button
+        type="button"
+        class="carousel-arrow carousel-arrow_prev"
+        aria-label="Categorías anteriores"
+        (click)="scrollCarousel(categoryCarousel, -1)"
+      >
+        <i class="pi pi-chevron-left"></i>
       </button>
 
-      <input
-        #promoFile3
-        type="file"
-        accept="image/*"
-        multiple
-        hidden
-        (change)="onPromoImageChange($event, 3)"
-      />
-    }
+      <div #categoryCarousel class="category-carousel">
+        @for (category of categories; track category.label) {
+          <div class="visual-category-wrapper">
+            <a
+              class="visual-category-card"
+              routerLink="/catalogo"
+              [queryParams]="{ categoria: category.label }"
+            >
+              <img
+                [src]="getCategoryImage(category)"
+                [alt]="category.label"
+                loading="lazy"
+                decoding="async"
+              />
 
-  </article>
+              <div class="visual-category-overlay">
+                <span class="visual-category-icon">
+                  <i [class]="category.icon"></i>
+                </span>
 
+                <div>
+                  <span>Explorar</span>
+                  <h3>{{ category.label }}</h3>
+                </div>
 
-@if (estadoBanners()[3]; as estado) {
-  <p
-    class="promo-upload-status"
-    [class.exito]="estado.tipo === 'exito'"
-    [class.error]="estado.tipo === 'error'"
-    role="status"
-  >
-    {{ estado.mensaje }}
-  </p>
-}
+                <i class="pi pi-arrow-right"></i>
+              </div>
+            </a>
 
-</section>
-<!-- BENEFICIOS DE COMPRA -->
-<section
-  class="benefits-section"
-  aria-label="Beneficios de compra"
->
-  @for (benefit of benefits; track benefit.id) {
+            @if (canEditBanners()) {
+              <button
+                type="button"
+                class="promo-edit-button category-edit-button"
+                [attr.aria-label]="'Cambiar imagen de ' + category.label"
+                title="Cambiar imagen de categoría"
+                [disabled]="uploadingCategoryImage() !== null"
+                (click)="$event.stopPropagation(); categoryFile.click()"
+              >
+                <i class="pi pi-bars"></i>
+              </button>
 
-    <article class="benefit-card">
+              <input
+                #categoryFile
+                type="file"
+                accept="image/jpeg,image/png,image/webp,image/gif"
+                hidden
+                (change)="onCategoryImageChange($event, category)"
+              />
+            }
+          </div>
+        }
+      </div>
 
-      @if (benefitImages()[benefit.id]; as imagen) {
+      <button
+        type="button"
+        class="carousel-arrow carousel-arrow_next"
+        aria-label="Categorías siguientes"
+        (click)="scrollCarousel(categoryCarousel, 1)"
+      >
+        <i class="pi pi-chevron-right"></i>
+      </button>
+    </div>
+  </section>
 
-        <img
-          class="benefit-custom-image"
-          [src]="imagen"
-          [alt]="benefit.title + ': ' + benefit.description"
-        />
+  <!-- BANNER 3: ANCHO COMPLETO -->
+  <section class="promo-wide" aria-label="Promoción destacada">
+    <article class="promo-card promo-card_full">
+      <div class="promo-slides">
+        @for (imagen of imagenesBanner3(); track imagen.objectKey; let i = $index) {
+          <div
+            class="promo-slide"
+            [class.promo-slide_active]="i === indiceBanner3()"
+            [style.background-image]="'url(' + imagen.publicUrl + ')'"
+          ></div>
+        }
+      </div>
 
-      } @else {
-
-        <span class="benefit-icon">
-          <i
-            [class]="benefit.icon"
-            aria-hidden="true"
-          ></i>
-        </span>
-
-        <div class="benefit-content">
-          <h3>{{ benefit.title }}</h3>
-          <p>{{ benefit.description }}</p>
+      @if (imagenesBanner3().length > 1) {
+        <div class="promo-dots" aria-label="Posición del tercer banner">
+          @for (imagen of imagenesBanner3(); track imagen.objectKey; let i = $index) {
+            <span class="promo-dot" [class.promo-dot_active]="i === indiceBanner3()"></span>
+          }
         </div>
-
       }
 
       @if (canEditBanners()) {
-
         <button
           type="button"
-          class="benefit-edit-button"
-          title="Subir imagen"
-          [attr.aria-label]="'Cambiar imagen de ' + benefit.title"
-          [disabled]="uploadingBenefit() !== null"
-          (click)="benefitFile.click()"
+          class="promo-edit-button"
+          aria-label="Cambiar imágenes del tercer banner"
+          [disabled]="uploadingBanner()"
+          (click)="promoFile3.click()"
         >
-          <i
-            [class]="uploadingBenefit() === benefit.id
-              ? 'pi pi-spin pi-spinner'
-              : 'pi pi-bars'"
-          ></i>
+          <i class="pi pi-bars"></i>
         </button>
 
         <input
-          #benefitFile
+          #promoFile3
           type="file"
           accept="image/*"
+          multiple
           hidden
-          (change)="onBenefitImageChange($event, benefit.id)"
+          (change)="onPromoImageChange($event, 3)"
         />
-
       }
-
     </article>
 
-  }
-</section>
+    @if (estadoBanners()[3]; as estado) {
+      <p
+        class="promo-upload-status"
+        [class.exito]="estado.tipo === 'exito'"
+        [class.error]="estado.tipo === 'error'"
+        role="status"
+      >
+        {{ estado.mensaje }}
+      </p>
+    }
+  </section>
+  <!-- BENEFICIOS DE COMPRA -->
+  <section class="benefits-section" aria-label="Beneficios de compra">
+    @for (benefit of benefits; track benefit.id) {
+      <article class="benefit-card">
+        @if (benefitImages()[benefit.id]; as imagen) {
+          <img
+            class="benefit-custom-image"
+            [src]="imagen"
+            [alt]="benefit.title + ': ' + benefit.description"
+          />
+        } @else {
+          <span class="benefit-icon">
+            <i [class]="benefit.icon" aria-hidden="true"></i>
+          </span>
+
+          <div class="benefit-content">
+            <h3>{{ benefit.title }}</h3>
+            <p>{{ benefit.description }}</p>
+          </div>
+        }
+
+        @if (canEditBanners()) {
+          <button
+            type="button"
+            class="benefit-edit-button"
+            title="Subir imagen"
+            [attr.aria-label]="'Cambiar imagen de ' + benefit.title"
+            [disabled]="uploadingBenefit() !== null"
+            (click)="benefitFile.click()"
+          >
+            <i
+              [class]="uploadingBenefit() === benefit.id ? 'pi pi-spin pi-spinner' : 'pi pi-bars'"
+            ></i>
+          </button>
+
+          <input
+            #benefitFile
+            type="file"
+            accept="image/*"
+            hidden
+            (change)="onBenefitImageChange($event, benefit.id)"
+          />
+        }
+      </article>
+    }
+  </section>
 
   <!-- FOOTER -->
-<app-site-footer></app-site-footer>
-  <app-wishlist [items]="wishlistProducts()" [isOpen]="wishlistOpen()" (closeRequested)="closeWishlist()" (removeRequested)="removeFromWishlist($event)"></app-wishlist>
+  <app-site-footer></app-site-footer>
+  <app-wishlist
+    [items]="wishlistProducts()"
+    [isOpen]="wishlistOpen()"
+    (closeRequested)="closeWishlist()"
+    (removeRequested)="removeFromWishlist($event)"
+  ></app-wishlist>
   <app-carrito></app-carrito>
-  <app-mi-perfil
-  [isOpen]="perfilAbierto()"
-  (closeRequested)="cerrarPerfil()"
-></app-mi-perfil>
+  <app-mi-perfil [isOpen]="perfilAbierto()" (closeRequested)="cerrarPerfil()"></app-mi-perfil>
 </div>
