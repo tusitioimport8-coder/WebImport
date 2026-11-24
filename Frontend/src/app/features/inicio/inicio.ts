@@ -81,6 +81,121 @@ export class Inicio implements OnInit, OnDestroy {
   private readonly productService = inject(ProductService);
   private readonly cartService = inject(CartService);
 
+  readonly benefits = [
+  {
+    id: 'home-beneficio-envios',
+    icon: 'pi pi-truck',
+    title: 'ENVÍOS A NIVEL NACIONAL',
+    description: 'Despachos asegurados a través de MRW, Tealca, Zoom y Domesa con código de seguimiento en tiempo real.'
+  },
+  {
+    id: 'home-beneficio-pagos',
+    icon: 'pi pi-wallet',
+    title: 'MÚLTIPLES MÉTODOS DE PAGO',
+    description: 'Aceptamos Zelle, Pago Móvil (Tasa Oficial BCV), Binance USDT y transferencias en moneda nacional.'
+  },
+  {
+    id: 'home-beneficio-garantia',
+    icon: 'pi pi-verified',
+    title: 'GARANTÍA Y CONFIANZA',
+    description: 'Todos los productos cuentan con verificación de funcionamiento previo al empaque y respaldo directo.'
+  }
+];
+
+readonly benefitImages = signal<Record<string, string>>({});
+readonly uploadingBenefit = signal<string | null>(null);
+
+loadBenefitImages(): void {
+  for (const benefit of this.benefits) {
+    this.bannerService.getBanner(benefit.id).subscribe({
+      next: response => {
+        const imagen = response.data?.activo
+          ? response.data.imagenes?.[0]
+          : null;
+
+        if (imagen?.publicUrl) {
+          this.benefitImages.update(images => ({
+            ...images,
+            [benefit.id]: imagen.publicUrl
+          }));
+        }
+      },
+      error: error => {
+        if (error.status !== 404) {
+          console.error('Error cargando beneficio:', error);
+        }
+      }
+    });
+  }
+}
+
+onBenefitImageChange(event: Event, id: string): void {
+  const input = event.target as HTMLInputElement;
+  const file = input.files?.[0];
+
+  input.value = '';
+
+  if (
+    !file ||
+    !this.canEditBanners() ||
+    this.uploadingBenefit() !== null
+  ) {
+    return;
+  }
+
+  const tiposPermitidos = [
+    'image/jpeg',
+    'image/png',
+    'image/webp',
+    'image/gif'
+  ];
+
+  if (!tiposPermitidos.includes(file.type)) {
+    alert('Selecciona una imagen JPG, PNG, WEBP o GIF.');
+    return;
+  }
+
+  this.uploadingBenefit.set(id);
+
+  this.bannerService.requestUploadUrl(file).pipe(
+    switchMap(response => {
+      if (!response.success || !response.data) {
+        throw new Error('No se pudo preparar la subida.');
+      }
+
+      const { uploadUrl, publicUrl, objectKey } = response.data;
+
+      return this.bannerService.uploadImage(uploadUrl, file).pipe(
+        switchMap(() =>
+          this.bannerService.saveBanner(id, [
+            { objectKey, publicUrl }
+          ])
+        )
+      );
+    })
+  ).subscribe({
+    next: response => {
+      const nuevaUrl = response.data?.imagenes?.[0]?.publicUrl;
+
+      if (response.success && nuevaUrl) {
+        this.benefitImages.update(images => ({
+          ...images,
+          [id]: nuevaUrl
+        }));
+      } else {
+        alert('No se pudo guardar la imagen.');
+      }
+
+      this.uploadingBenefit.set(null);
+    },
+    error: error => {
+      console.error('Error subiendo beneficio:', error);
+      alert('No se pudo actualizar la cartilla.');
+      this.uploadingBenefit.set(null);
+    }
+  });
+}
+
   readonly categoryImages = signal<Record<string, string>>({});
 readonly uploadingCategoryImage = signal<string | null>(null);
 
@@ -475,6 +590,7 @@ ngOnInit(): void {
   this.loadProducts();
   this.loadBanners();
   this.loadCategoryImages();
+  this.loadBenefitImages();
   this.cargarTasaBCV();
 }
   ngOnDestroy(): void {
@@ -759,6 +875,19 @@ getCantidadEnCarrito(productId: string): number {
   return this.cartService.getQuantity(productId);
 }
 
+quitarDelCarrito(productId: string): void {
+  const item = this.cartService.items().find(
+    item => item.id === productId
+  );
+
+  if (!item) return;
+
+  if (item.quantity <= 1) {
+    this.cartService.remove(item.lineId);
+  } else {
+    this.cartService.decrease(item.lineId);
+  }
+}
   // CARRITO
 
 addToCart(product: HomeProduct): void {

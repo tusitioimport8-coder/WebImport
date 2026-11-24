@@ -264,23 +264,37 @@
               </span>
             </div>
 
-       
-<button
-  type="button"
-  class="product-add-button"
-  [disabled]="product.quantity <= 0"
-  (click)="addToCart(product)"
->
-  <i class="pi pi-plus"></i>
-  Agregar al carrito
+  <div class="product-cart-actions">
 
   @if (getCantidadEnCarrito(product.id) > 0) {
-    <span class="product-cart-badge">
-      {{ getCantidadEnCarrito(product.id) }}
-    </span>
+    <button
+      type="button"
+      class="product-minus-button"
+      title="Quitar una unidad"
+      aria-label="Quitar una unidad del carrito"
+      (click)="quitarDelCarrito(product.id)"
+    >
+      <i class="pi pi-minus"></i>
+    </button>
   }
-</button>
 
+  <button
+    type="button"
+    class="product-add-button"
+    [disabled]="getCantidadEnCarrito(product.id) >= product.quantity"
+    (click)="addToCart(product)"
+  >
+    <i class="pi pi-plus"></i>
+    Agregar al carrito
+
+    @if (getCantidadEnCarrito(product.id) > 0) {
+      <span class="product-cart-badge">
+        {{ getCantidadEnCarrito(product.id) }}
+      </span>
+    }
+  </button>
+
+</div>
           </div>
         </article>
       }
@@ -369,22 +383,37 @@
 
                     <span class="product-stock-label" [class.product-stock-label_out]="product.quantity <= 0">{{ product.quantity > 0 ? 'En stock' : 'Agotado' }}</span>
                   </div>
-                
-<button
-  type="button"
-  class="product-add-button"
-  [disabled]="product.quantity <= 0"
-  (click)="addToCart(product)"
->
-  <i class="pi pi-plus"></i>
-  Agregar al carrito
+  <div class="product-cart-actions">
 
   @if (getCantidadEnCarrito(product.id) > 0) {
-    <span class="product-cart-badge">
-      {{ getCantidadEnCarrito(product.id) }}
-    </span>
+    <button
+      type="button"
+      class="product-minus-button"
+      title="Quitar una unidad"
+      aria-label="Quitar una unidad del carrito"
+      (click)="quitarDelCarrito(product.id)"
+    >
+      <i class="pi pi-minus"></i>
+    </button>
   }
-</button>
+
+  <button
+    type="button"
+    class="product-add-button"
+    [disabled]="getCantidadEnCarrito(product.id) >= product.quantity"
+    (click)="addToCart(product)"
+  >
+    <i class="pi pi-plus"></i>
+    Agregar al carrito
+
+    @if (getCantidadEnCarrito(product.id) > 0) {
+      <span class="product-cart-badge">
+        {{ getCantidadEnCarrito(product.id) }}
+      </span>
+    }
+  </button>
+
+</div>
 
                 </div>
               </article>
@@ -448,23 +477,37 @@
 
                   <span class="product-stock-label" [class.product-stock-label_out]="product.quantity <= 0">{{ product.quantity > 0 ? 'En stock' : 'Agotado' }}</span>
                 </div>
-             
-<button
-  type="button"
-  class="product-add-button"
-  [disabled]="product.quantity <= 0"
-  (click)="addToCart(product)"
->
-  <i class="pi pi-plus"></i>
-  Agregar al carrito
+ <div class="product-cart-actions">
 
   @if (getCantidadEnCarrito(product.id) > 0) {
-    <span class="product-cart-badge">
-      {{ getCantidadEnCarrito(product.id) }}
-    </span>
+    <button
+      type="button"
+      class="product-minus-button"
+      title="Quitar una unidad"
+      aria-label="Quitar una unidad del carrito"
+      (click)="quitarDelCarrito(product.id)"
+    >
+      <i class="pi pi-minus"></i>
+    </button>
   }
-</button>
 
+  <button
+    type="button"
+    class="product-add-button"
+    [disabled]="getCantidadEnCarrito(product.id) >= product.quantity"
+    (click)="addToCart(product)"
+  >
+    <i class="pi pi-plus"></i>
+    Agregar al carrito
+
+    @if (getCantidadEnCarrito(product.id) > 0) {
+      <span class="product-cart-badge">
+        {{ getCantidadEnCarrito(product.id) }}
+      </span>
+    }
+  </button>
+
+</div>
               </div>
             </article>
           }
@@ -692,40 +735,70 @@
 }
 
 </section>
-
-  <!-- BENEFICIOS DE COMPRA -->
-  <section class="benefits-section" aria-label="Beneficios de compra">
-    <article class="benefit-card">
-      <span class="benefit-icon">
-        <i class="pi pi-truck" aria-hidden="true"></i>
-      </span>
-      <div class="benefit-content">
-        <h3>ENVÍOS A NIVEL NACIONAL</h3>
-        <p>Despachos asegurados a través de MRW, Tealca, Zoom y Domesa con código de seguimiento en tiempo real.</p>
-      </div>
-    </article>
+<!-- BENEFICIOS DE COMPRA -->
+<section
+  class="benefits-section"
+  aria-label="Beneficios de compra"
+>
+  @for (benefit of benefits; track benefit.id) {
 
     <article class="benefit-card">
-      <span class="benefit-icon">
-        <i class="pi pi-wallet" aria-hidden="true"></i>
-      </span>
-      <div class="benefit-content">
-        <h3>MÚLTIPLES MÉTODOS DE PAGO</h3>
-        <p>Aceptamos Zelle, Pago Móvil (Tasa Oficial BCV), Binance USDT y transferencias en moneda nacional.</p>
-      </div>
+
+      @if (benefitImages()[benefit.id]; as imagen) {
+
+        <img
+          class="benefit-custom-image"
+          [src]="imagen"
+          [alt]="benefit.title + ': ' + benefit.description"
+        />
+
+      } @else {
+
+        <span class="benefit-icon">
+          <i
+            [class]="benefit.icon"
+            aria-hidden="true"
+          ></i>
+        </span>
+
+        <div class="benefit-content">
+          <h3>{{ benefit.title }}</h3>
+          <p>{{ benefit.description }}</p>
+        </div>
+
+      }
+
+      @if (canEditBanners()) {
+
+        <button
+          type="button"
+          class="benefit-edit-button"
+          title="Subir imagen"
+          [attr.aria-label]="'Cambiar imagen de ' + benefit.title"
+          [disabled]="uploadingBenefit() !== null"
+          (click)="benefitFile.click()"
+        >
+          <i
+            [class]="uploadingBenefit() === benefit.id
+              ? 'pi pi-spin pi-spinner'
+              : 'pi pi-bars'"
+          ></i>
+        </button>
+
+        <input
+          #benefitFile
+          type="file"
+          accept="image/*"
+          hidden
+          (change)="onBenefitImageChange($event, benefit.id)"
+        />
+
+      }
+
     </article>
 
-    <article class="benefit-card">
-      <span class="benefit-icon">
-        <i class="pi pi-verified" aria-hidden="true"></i>
-      </span>
-      <div class="benefit-content">
-        <h3>GARANTÍA Y CONFIANZA</h3>
-        <p>Todos los productos cuentan con verificación de funcionamiento previo al empaque y respaldo directo.</p>
-      </div>
-    </article>
-  </section>
-
+  }
+</section>
 
   <!-- FOOTER -->
 <app-site-footer></app-site-footer>

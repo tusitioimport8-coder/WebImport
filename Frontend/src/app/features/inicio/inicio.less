@@ -1138,8 +1138,8 @@
   border: 2px solid #ffffff;
   border-radius: 999px;
 
-  background: #111111;
-  color: #ffffff;
+  background: #ffffff;
+color: #111111;
 
   font-size: 12px;
   font-weight: 900;
@@ -1159,5 +1159,193 @@
   to {
     opacity: 1;
     transform: scale(1);
+  }
+}
+/* CONTROLES DEL CARRITO EN LAS CARTILLAS */
+
+.product-cart-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  margin-top: auto;
+
+  .product-add-button {
+    flex: 1 1 0;
+    min-width: 0;
+    width: auto;
+    min-height: 36px !important;
+    margin: 0;
+
+    i {
+      font-size: 14px;
+      font-weight: 900;
+    }
+  }
+}
+
+.product-minus-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+flex: 0 0 36px !important;
+
+width: 36px !important;
+min-width: 36px !important;
+max-width: 36px !important;
+
+height: 36px !important;
+min-height: 36px !important;
+max-height: 36px !important;
+
+aspect-ratio: 1 / 1;
+box-sizing: border-box;
+padding: 0 !important;
+border-radius: 50% !important;
+
+  border: 0;
+  border-radius: 50%;
+  background: var(--home-lime);
+  color: #111;
+  cursor: pointer;
+  transition: all .2s ease;
+
+  i {
+    font-size: 14px;
+    font-weight: 900;
+  }
+
+  &:hover {
+    background: var(--home-lime-hover);
+  }
+
+  &:active {
+    transform: scale(.97);
+  }
+}
+
+/* CORAZÓN SELECCIONADO */
+.home-product-card .wishlist-button.wishlist-button_active {
+  background: #7800b8 !important;
+  color: #ffffff !important;
+
+  i {
+    display: none !important;
+  }
+
+  &::before {
+    content: '';
+    display: block;
+    width: 18px;
+    height: 18px;
+    background: #ffffff;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54z'/%3E%3C/svg%3E") center / contain no-repeat;
+  }
+}
+/* CONTADOR BLANCO CON NÚMERO NEGRO */
+.home-product-card .product-cart-badge {
+  background: #ffffff !important;
+  color: #111111 !important;
+  border: 2px solid #ffffff !important;
+}
+
+/* SEPARACIÓN DE LAS CARTILLAS DEL FOOTER */
+.benefits-section {
+  margin-bottom: 40px !important;
+}
+
+/* Separación en teléfonos */
+@media (max-width: 650px) {
+  .benefits-section {
+    margin-bottom: 25px !important;
+  }
+}
+
+/* ==========================================
+   CARTILLAS DE BENEFICIOS EDITABLES
+   ========================================== */
+
+.benefit-card {
+  position: relative;
+  overflow: hidden;
+  min-height: 82px;
+}
+
+/* Imagen personalizada de la cartilla */
+.benefit-custom-image {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+  border-radius: inherit;
+}
+
+/* Botón verde igual al de los banners */
+.benefit-edit-button {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  z-index: 21;
+
+  display: grid;
+  place-items: center;
+
+  width: 36px;
+  height: 36px;
+  padding: 0;
+
+  border: 2px solid #111111;
+  border-radius: 10px;
+
+  background: #baff00;
+  color: #111111;
+
+  box-shadow: 3px 3px 0 #111111;
+  cursor: pointer;
+
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+
+  i {
+    font-size: 14px;
+    font-weight: 700;
+  }
+
+  &:hover:not(:disabled) {
+    transform: translate(-2px, -2px);
+    box-shadow: 5px 5px 0 #111111;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: wait;
+  }
+}
+
+/* Evita que el botón tape el texto */
+.benefit-card:has(.benefit-edit-button) .benefit-content {
+  padding-right: 36px;
+}
+
+/* Mantiene la altura de las cartillas con imagen */
+.benefit-card:has(.benefit-custom-image) {
+  min-height: 82px;
+}
+
+@media (max-width: 650px) {
+  .benefit-card {
+    min-height: 90px;
+  }
+
+  .benefit-edit-button {
+    width: 32px;
+    height: 32px;
+  }
+
+  .benefit-card:has(.benefit-custom-image) {
+    min-height: 90px;
   }
 }
