@@ -9,22 +9,22 @@ import { AuthService } from './services/auth';
   templateUrl: './app.html',
 })
 export class App implements OnInit {
-  protected readonly title = signal('Frontend');
+  protected readonly title = signal('Tu Sitio Import');
 
   private readonly authService = inject(AuthService);
 
   ngOnInit(): void {
     this.authService.checkSession().subscribe({
-      next: response => {
+      next: (response) => {
         if (response.success && response.user) {
           console.log('Sesión recuperada:', response.user.tipo);
         } else {
           console.log('No hay sesión activa');
         }
       },
-      error: error => {
+      error: (error) => {
         console.error('Error al verificar sesión:', error);
-      }
+      },
     });
   }
 }
