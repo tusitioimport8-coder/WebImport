@@ -217,7 +217,10 @@
               [attr.aria-label]="isInWishlist(product.id) ? 'Quitar de deseos' : 'Agregar a deseos'"
               (click)="toggleWishlist(product.id)"
             >
-              <i class="pi pi-heart"></i>
+             <i class="pi"
+   [class.pi-heart]="!isInWishlist(product.id)"
+   [class.pi-heart-fill]="isInWishlist(product.id)">
+</i>
             </button>
 
            
@@ -352,7 +355,10 @@
                     }
                   </a>
                   <button type="button" class="wishlist-button" [class.wishlist-button_active]="isInWishlist(product.id)" [attr.aria-label]="isInWishlist(product.id) ? 'Quitar de deseos' : 'Agregar a deseos'" (click)="toggleWishlist(product.id)">
-                    <i class="pi pi-heart"></i>
+                    <i class="pi"
+   [class.pi-heart]="!isInWishlist(product.id)"
+   [class.pi-heart-fill]="isInWishlist(product.id)">
+</i>
                   </button>
                  
                 </div>
@@ -447,7 +453,10 @@
                   }
                 </a>
                 <button type="button" class="wishlist-button" [class.wishlist-button_active]="isInWishlist(product.id)" [attr.aria-label]="isInWishlist(product.id) ? 'Quitar de deseos' : 'Agregar a deseos'" (click)="toggleWishlist(product.id)">
-                  <i class="pi pi-heart"></i>
+                <i class="pi"
+   [class.pi-heart]="!isInWishlist(product.id)"
+   [class.pi-heart-fill]="isInWishlist(product.id)">
+</i>
                 </button>
                 
               </div>
@@ -539,7 +548,10 @@
                   }
                 </a>
                 <button type="button" class="wishlist-button" [class.wishlist-button_active]="isInWishlist(product.id)" [attr.aria-label]="isInWishlist(product.id) ? 'Quitar de deseos' : 'Agregar a deseos'" (click)="toggleWishlist(product.id)">
-                  <i class="pi pi-heart"></i>
+               <i class="pi"
+   [class.pi-heart]="!isInWishlist(product.id)"
+   [class.pi-heart-fill]="isInWishlist(product.id)">
+</i>
                 </button>
                 </div>
 
@@ -571,23 +583,37 @@
 
                   <span class="product-stock-label" [class.product-stock-label_out]="product.quantity <= 0">{{ product.quantity > 0 ? 'En stock' : 'Agotado' }}</span>
                 </div>
-                
-<button
-  type="button"
-  class="product-add-button"
-  [disabled]="product.quantity <= 0"
-  (click)="addToCart(product)"
->
-  <i class="pi pi-plus"></i>
-  Agregar al carrito
+ <div class="product-cart-actions">
 
   @if (getCantidadEnCarrito(product.id) > 0) {
-    <span class="product-cart-badge">
-      {{ getCantidadEnCarrito(product.id) }}
-    </span>
+    <button
+      type="button"
+      class="product-minus-button"
+      title="Quitar una unidad"
+      aria-label="Quitar una unidad del carrito"
+      (click)="quitarDelCarrito(product.id)"
+    >
+      <i class="pi pi-minus"></i>
+    </button>
   }
-</button>
 
+  <button
+    type="button"
+    class="product-add-button"
+    [disabled]="getCantidadEnCarrito(product.id) >= product.quantity"
+    (click)="addToCart(product)"
+  >
+    <i class="pi pi-plus"></i>
+    Agregar al carrito
+
+    @if (getCantidadEnCarrito(product.id) > 0) {
+      <span class="product-cart-badge">
+        {{ getCantidadEnCarrito(product.id) }}
+      </span>
+    }
+  </button>
+
+</div>
               </div>
             </article>
           }

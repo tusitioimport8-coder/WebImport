@@ -533,62 +533,71 @@
     transform: scale(1);
   }
 }
+/* FAVORITOS - IDÉNTICO A INICIO */
 
-/* ==========================================
-   WISHLIST - MISMO DISEÑO DE INICIO
-   ========================================== */
-
-.product-card .wishlist-button {
+:host .product-card .wishlist-button {
   position: absolute;
   top: 10px;
   right: 10px;
   z-index: 2;
 
-  display: grid;
-  place-items: center;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
 
   width: 36px;
   height: 36px;
   padding: 0;
 
-  border: 0;
+  border: none !important;
   border-radius: 50%;
+  background: #baff00 !important;
+  color: #f500aa !important;
 
-  background: #baff00;
-  color: #f500aa;
-
-  font-size: 16px;
   cursor: pointer;
-
   box-shadow: 0 3px 9px rgba(0, 0, 0, .13);
+  transition: transform .2s ease;
 
-  transition: transform 0.2s ease;
+  &::before,
+  &::after,
+  &.wishlist-button_active::before,
+  &.wishlist-button_active::after {
+    content: none !important;
+    display: none !important;
+  }
+
+  i.pi {
+    display: inline-block !important;
+    position: static !important;
+    font-family: 'primeicons' !important;
+    font-size: 18px !important;
+    font-weight: normal !important;
+    line-height: 1 !important;
+    color: #f500aa !important;
+    transform: none !important;
+
+    &::after {
+      content: none !important;
+      display: none !important;
+    }
+  }
+
+  &.wishlist-button_active {
+    background: #baff00 !important;
+    color: #f500aa !important;
+  }
 
   &:hover {
     transform: scale(1.06);
   }
 }
 
-/* CORAZÓN SELECCIONADO */
-
-.product-card .wishlist-button.wishlist-button_active {
-  background: #7800b8 !important;
-  color: #ffffff !important;
-
-  i {
-    display: none !important;
-  }
-
-  &::before {
-    content: '\2665';
-    display: block;
-
-    font-family: Arial, sans-serif;
-    font-size: 24px;
-    font-weight: 700;
-    line-height: 1;
-
-    color: #ffffff;
+@media (max-width: 600px) {
+  :host .product-card .wishlist-button {
+    width: 29px;
+    height: 29px;
+    top: 6px;
+    right: 6px;
   }
 }
 

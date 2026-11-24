@@ -40,23 +40,42 @@
 
     <nav class="footer-column footer-categories" aria-label="Categorías del pie de página">
       <h3>CATEGORÍAS</h3>
+<div class="footer-categories-grid">
 
-      <div class="footer-categories-grid">
-        @for (categoria of categoriasFooter; track categoria) {
-          <a routerLink="/catalogo" [queryParams]="{ categoria: categoria }">
-            {{ categoria }}
-          </a>
-        }
+  <div class="footer-category-column">
+    @for (categoria of categoriasFooter.slice(0, 6); track categoria) {
+      <a routerLink="/catalogo" [queryParams]="{ categoria: categoria }">
+        {{ categoria }}
+      </a>
+    }
+  </div>
 
-        <a
-          routerLink="/catalogo"
-          class="footer-categories-more"
-          aria-label="Ver todas las categorías"
-          title="Ver todas las categorías"
-        >
-          +
-        </a>
-      </div>
+  <div class="footer-category-column">
+    @for (categoria of categoriasFooter.slice(6, 12); track categoria) {
+      <a routerLink="/catalogo" [queryParams]="{ categoria: categoria }">
+        {{ categoria }}
+      </a>
+    }
+  </div>
+
+  <div class="footer-category-column">
+    @for (categoria of categoriasFooter.slice(12); track categoria) {
+      <a routerLink="/catalogo" [queryParams]="{ categoria: categoria }">
+        {{ categoria }}
+      </a>
+    }
+
+    <a
+      routerLink="/catalogo"
+      class="footer-categories-more"
+      aria-label="Ver todas las categorías"
+      title="Ver todas las categorías"
+    >
+      +
+    </a>
+  </div>
+
+</div>
     </nav>
 
     <div class="footer-column">
