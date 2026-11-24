@@ -1,10 +1,15 @@
 
 <section class="admin-page">
   <header class="admin-header">
-    <div>
-      <span class="admin-eyebrow">PANEL ADMINISTRATIVO</span>
-      <h1>Gestión de usuarios</h1>
-      <p>Consulta y administra los usuarios registrados.</p>
+    <div class="admin-heading">
+      <a routerLink="/inicio" class="back-button" aria-label="Volver al inicio" title="Volver al inicio">
+        <i class="pi pi-arrow-left"></i>
+      </a>
+      <div>
+        <span class="admin-eyebrow">PANEL ADMINISTRATIVO</span>
+        <h1>Gestión de usuarios</h1>
+        <p>Consulta y administra los usuarios registrados.</p>
+      </div>
     </div>
 
     <button
@@ -18,12 +23,29 @@
   </header>
 
   <div class="admin-toolbar">
-    <input
-      type="search"
-      placeholder="Buscar usuario por nombre, correo o rol..."
-      [ngModel]="searchTerm()"
-      (ngModelChange)="onSearchChange($event)"
-    />
+    <div class="admin-filters">
+      <input
+        type="search"
+        placeholder="Buscar usuario por nombre, correo o rol..."
+        [ngModel]="searchTerm()"
+        (ngModelChange)="onSearchChange($event)"
+      />
+
+      <label class="role-filter">
+        <span>Filtrar por rol</span>
+        <select
+          [ngModel]="roleFilter()"
+          (ngModelChange)="onRoleFilterChange($event)"
+          aria-label="Filtrar usuarios por rol"
+        >
+          <option value="TODOS">Todos los roles</option>
+          <option value="MARKETING">Marketing</option>
+          <option value="CLIENTE">Cliente</option>
+          <option value="F_VENTAS">F_ventas</option>
+          <option value="ADMIN">Admin</option>
+        </select>
+      </label>
+    </div>
 
     <span>{{ filteredUsers().length }} usuarios</span>
   </div>

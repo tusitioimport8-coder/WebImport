@@ -8,6 +8,7 @@ import {
   signal
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 
 import { AuthService } from '../../services/auth';
 
@@ -20,7 +21,7 @@ import {
 @Component({
   selector: 'app-admin',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, RouterLink],
   templateUrl: './admin.html',
   styleUrl: './admin.less',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -39,19 +40,24 @@ isCurrentUser(user: ApiUser): boolean {
   readonly errorMessage = signal<string | null>(null);
   readonly successMessage = signal<string | null>(null);
   readonly searchTerm = signal('');
+  readonly roleFilter = signal<'TODOS' | 'MARKETING' | 'CLIENTE' | 'F_VENTAS' | 'ADMIN'>('TODOS');
 
   readonly editingUser = signal<ApiUser | null>(null);
 
   readonly filteredUsers = computed(() => {
     const search = this.searchTerm().trim().toLowerCase();
+    const role = this.roleFilter();
 
-    if (!search) return this.users();
+    return this.users().filter(user => {
+      const matchesSearch =
+        !search ||
+        user.nombre_completo.toLowerCase().includes(search) ||
+        user.correo.toLowerCase().includes(search) ||
+        user.rol.toLowerCase().includes(search);
+      const matchesRole = role === 'TODOS' || user.rol.trim().toUpperCase() === role;
 
-    return this.users().filter(user =>
-      user.nombre_completo.toLowerCase().includes(search) ||
-      user.correo.toLowerCase().includes(search) ||
-      user.rol.toLowerCase().includes(search)
-    );
+      return matchesSearch && matchesRole;
+    });
   });
 
   ngOnInit(): void {
@@ -79,6 +85,10 @@ isCurrentUser(user: ApiUser): boolean {
 
   onSearchChange(value: string): void {
     this.searchTerm.set(value);
+  }
+
+  onRoleFilterChange(value: 'TODOS' | 'MARKETING' | 'CLIENTE' | 'F_VENTAS' | 'ADMIN'): void {
+    this.roleFilter.set(value);
   }
 
   editUser(user: ApiUser): void {

@@ -50,13 +50,41 @@
       </div>
     } @else if (presupuestos().length > 0) {
 
-      <div class="listado-resumen">
-        Total de presupuestos:
-        <strong>{{ presupuestos().length }}</strong>
+      <div class="presupuestos-toolbar">
+        <div class="listado-resumen">
+          Presupuestos:
+          <strong>{{ presupuestosFiltrados().length }}</strong>
+          de {{ presupuestos().length }}
+        </div>
+
+        <div class="presupuestos-filtros">
+          <label class="filtro-cliente">
+            <span>Buscar por cliente</span>
+            <input
+              type="search"
+              placeholder="Nombre del cliente"
+              [ngModel]="filtroCliente()"
+              (ngModelChange)="filtroCliente.set($event)"
+            />
+          </label>
+
+          <label class="filtro-estado">
+            <span>Filtrar por estado</span>
+            <select
+              [ngModel]="filtroEstado()"
+              (ngModelChange)="filtroEstado.set($event)"
+            >
+              <option value="todos">Todos los estados</option>
+              <option value="vendido">Vendido</option>
+              <option value="proceso">Proceso</option>
+              <option value="cancelado">Cancelado</option>
+            </select>
+          </label>
+        </div>
       </div>
 
       <div class="presupuestos-lista">
-        @for (presupuesto of presupuestos(); track presupuesto.id) {
+        @for (presupuesto of presupuestosFiltrados(); track presupuesto.id) {
           <article class="presupuesto-card">
 
             <div class="presupuesto-principal">
@@ -438,6 +466,12 @@
             }
 
           </article>
+        } @empty {
+          <div class="estado-vacio">
+            <i class="pi pi-filter-slash"></i>
+            <h2>No hay presupuestos con este estado</h2>
+            <p>Prueba con otro filtro para ver más resultados.</p>
+          </div>
         }
       </div>
     }

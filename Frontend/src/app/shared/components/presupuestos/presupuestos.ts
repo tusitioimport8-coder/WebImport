@@ -39,6 +39,20 @@ export class Presupuestos {
   });
 
   readonly presupuestos = signal<Presupuesto[]>([]);
+  readonly filtroEstado = signal<EstadoPresupuesto | 'todos'>('todos');
+  readonly filtroCliente = signal('');
+  readonly presupuestosFiltrados = computed(() => {
+    const estado = this.filtroEstado();
+    const cliente = this.filtroCliente().trim().toLocaleLowerCase();
+    const presupuestos = this.presupuestos();
+
+    return presupuestos.filter((presupuesto) => {
+      const coincideEstado = estado === 'todos' || presupuesto.estado === estado;
+      const coincideCliente = presupuesto.nombre_cliente.toLocaleLowerCase().includes(cliente);
+
+      return coincideEstado && coincideCliente;
+    });
+  });
   readonly cargando = signal(false);
   readonly error = signal('');
   readonly mensaje = signal('');
