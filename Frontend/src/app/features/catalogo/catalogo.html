@@ -145,7 +145,10 @@
                   [attr.aria-pressed]="isInWishlist(product.id)"
                   (click)="toggleWishlist(product)"
                 >
-                  <i class="pi pi-heart"></i>
+                  <i class="pi"
+   [class.pi-heart]="!isInWishlist(product.id)"
+   [class.pi-heart-fill]="isInWishlist(product.id)">
+</i>
                 </button>
 
               
