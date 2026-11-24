@@ -146,8 +146,8 @@
 
 .footer-categories-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  column-gap: 14px;
+  grid-template-columns: repeat(3, max-content);
+  column-gap: 20px;
   row-gap: 7px;
   width: 100%;
   align-items: start;
@@ -1007,35 +1007,28 @@
 /* CATEGORÍAS ORDENADAS VERTICALMENTE */
 .footer-categories-grid {
   display: grid;
+  width: 100%;
 
-  grid-template-columns:
-    repeat(3, minmax(0, 100px));
-
+  grid-template-columns: repeat(3, max-content);
   grid-template-rows: repeat(6, auto);
   grid-auto-flow: column;
 
-  justify-content: start;
+ column-gap: 40px;
+  row-gap: 8px;
+
   align-items: start;
-
-  width: 100%;
-
-  column-gap: 10px;
-  row-gap: 6px;
+  justify-content: start;
 
   a {
+    display: block;
+    margin: 0;
+    min-width: 0;
+    max-width: 130px;
     font-size: 12px;
     line-height: 1.4;
     font-weight: 400;
   }
 }
-.footer-categories-grid .footer-categories-more {
-  width: 19px;
-  height: 19px;
-  min-width: 19px;
-  min-height: 19px;
-  font-size: 14px;
-}
-
 /* ATENCIÓN AL CLIENTE */
 
 .footer-main > .footer-column:nth-child(3) {
@@ -1158,14 +1151,6 @@
   }
 }
 
-@media (min-width: 1400px) {
-  .footer-categories-grid {
-    grid-template-columns:
-      repeat(3, minmax(0, 130px));
-
-    column-gap: 16px;
-  }
-}
 
 @media (max-width: 560px) {
   .footer-categories-grid {
@@ -1182,5 +1167,70 @@
 @media (max-width: 350px) {
   .footer-categories-grid {
     grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.footer-payments .payment-tags span {
+  font-size: 11px;
+  line-height: 10.8px;
+  padding: 3px 7px;
+}
+
+@media (min-width: 901px) {
+  .footer-categories-grid {
+    display: grid;
+
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-rows: 28px 28px 17px 28px 17px 21px;
+    grid-auto-flow: column;
+
+    width: 100%;
+    max-width: 350px;
+column-gap: 16px;
+    row-gap: 4px;
+
+    height: auto;
+    align-items: start;
+    justify-content: start;
+
+    a:not(.footer-categories-more) {
+      width: fit-content;
+      max-width: 100%;
+      font-size: 12px;
+      line-height: 14px;
+      white-space: normal;
+      overflow-wrap: normal;
+      word-break: normal;
+    }
+
+    a:nth-child(1),
+    a:nth-child(2),
+    a:nth-child(4),
+    a:nth-child(13) {
+      max-width: 100px;
+    }
+  }
+}
+
+@media (min-width: 901px) {
+  .footer-about .footer-logo-container {
+    position: relative;
+    transform: none;
+    left: -40px;
+  }
+}
+
+@media (min-width: 901px) {
+  .footer-categories {
+    position: relative;
+    left: 25px;
+  }
+}
+
+@media (min-width: 901px) {
+  .footer-about p {
+    font-size: 13px;
+    line-height: 1.6;
+    margin-bottom: 8px;
   }
 }

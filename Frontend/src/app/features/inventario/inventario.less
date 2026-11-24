@@ -677,23 +677,6 @@ th {
   box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18) !important;
 }
 
-/* Centrar encabezados y contenido de la tabla */
-.inventory .table-card {
-  th,
-  td {
-    text-align: center;
-    vertical-align: middle;
-  }
-
-  .product-cell {
-    justify-content: center;
-    text-align: center;
-  }
-
-  .table-actions {
-    justify-content: center;
-  }
-}
 
 /* Fondos blancos del inventario */
 :host {
@@ -1028,5 +1011,188 @@ th {
     border-color: #e600a7;
     background: #fff0fa;
     color: #e600a7;
+  }
+}
+
+/* ==========================================
+   INVENTARIO - ALINEACIÓN UNIFORME DE TABLA
+   ========================================== */
+
+.inventory .table-card .table-scroll {
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  th,
+  td {
+    text-align: center;
+    vertical-align: middle;
+    box-sizing: border-box;
+  }
+
+  /* Primera columna: productos */
+  th:first-child,
+  td:first-child {
+    text-align: left !important;
+    padding-left: 20px;
+  }
+
+  /* Contenedor de imagen y texto */
+  .product-cell {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start !important;
+    width: 100%;
+    min-width: 0;
+    gap: 12px;
+    text-align: left !important;
+    box-sizing: border-box;
+
+    /* Imagen del producto */
+    .product-image {
+      display: block;
+      width: 58px;
+      height: 58px;
+      min-width: 58px;
+      max-width: 58px;
+      flex: 0 0 58px;
+      object-fit: contain;
+      border-radius: 8px;
+      box-sizing: border-box;
+    }
+
+    /* Nombre y descripción */
+    > div {
+      flex: 1 1 0;
+      min-width: 0;
+      overflow: hidden;
+      text-align: left !important;
+    }
+
+    strong,
+    span {
+      display: block;
+      width: 100%;
+      max-width: 100%;
+      text-align: left !important;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      line-height: 1.4;
+    }
+
+    strong {
+      font-weight: 700;
+    }
+  }
+
+  /* Mantener espacio si no hay imagen */
+  .product-cell:not(:has(.product-image))::before {
+    content: '';
+    display: block;
+    width: 58px;
+    height: 58px;
+    flex: 0 0 58px;
+  }
+
+  /* Precios y cantidades */
+  .number-column {
+    text-align: center;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+
+    small {
+      display: block;
+      margin-top: 3px;
+    }
+  }
+
+  /* Botones de editar y eliminar */
+  .table-actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+}
+
+/* Mantener alineación en modo compacto */
+
+.inventory .table-card--compact .table-scroll {
+
+  .product-cell {
+    gap: 10px;
+
+    .product-image {
+      width: 48px;
+      height: 48px;
+      min-width: 48px;
+      max-width: 48px;
+      flex: 0 0 48px;
+    }
+  }
+
+  .product-cell:not(:has(.product-image))::before {
+    width: 48px;
+    height: 48px;
+    flex: 0 0 48px;
+  }
+}
+
+/* ==========================================
+   INVENTARIO - LIMITAR COLUMNA DE PRODUCTOS
+   ========================================== */
+
+.inventory .table-card .table-scroll {
+
+  table {
+    table-layout: fixed;
+    width: 100%;
+    min-width: 1150px;
+  }
+
+  /* Ancho de cada columna */
+  th:nth-child(1) { width: 28%; }
+  th:nth-child(2) { width: 14%; }
+  th:nth-child(3) { width: 7%; }
+  th:nth-child(4) { width: 9%; }
+  th:nth-child(5) { width: 8%; }
+  th:nth-child(6) { width: 10%; }
+  th:nth-child(7) { width: 6%; }
+  th:nth-child(8) { width: 5%; }
+  th:nth-child(9) { width: 7%; }
+  th:nth-child(10) { width: 6%; }
+
+  /* Evitar que los productos ensanchen la tabla */
+  td:first-child {
+    overflow: hidden;
+  }
+
+  .product-cell {
+    width: 100%;
+    min-width: 0 !important;
+    max-width: 100%;
+
+    > div {
+      flex: 1 1 0;
+      min-width: 0;
+      overflow: hidden;
+    }
+
+    strong,
+    span {
+      display: block;
+      width: 100%;
+      max-width: 100%;
+      white-space: nowrap !important;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+
+  th {
+    white-space: normal;
   }
 }
