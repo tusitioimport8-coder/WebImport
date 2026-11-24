@@ -586,3 +586,601 @@
     cursor: not-allowed;
   }
 }
+
+/* ==========================================
+   FOOTER - DISEÑO AJUSTADO A LA REFERENCIA
+   ========================================== */
+
+.site-footer {
+  background: #fff0f8;
+  color: #211820;
+  font-family: 'Montserrat', Arial, sans-serif;
+  font-size: 12px;
+
+  box-shadow:
+    0 -6px 15px rgba(0, 0, 0, 0.18),
+    0 -12px 25px rgba(0, 0, 0, 0.10);
+}
+
+
+/* DISTRIBUCIÓN PRINCIPAL */
+
+.footer-main {
+  width: 90%;
+  max-width: 1600px;
+
+  grid-template-columns:
+    minmax(0, 1.15fr)
+    minmax(0, 2fr)
+    minmax(0, 1.15fr)
+    minmax(0, 1fr);
+
+  column-gap: 28px;
+  align-items: start;
+
+  margin: 0 auto;
+  padding: 18px 0 12px;
+}
+
+
+/* LOGO Y DESCRIPCIÓN */
+
+.footer-about {
+  align-items: flex-start;
+
+  .footer-logo-container {
+    align-self: flex-start;
+    margin-left: 20px;
+    margin-bottom: 5px;
+  }
+
+  .footer-logo {
+    width: 130px;
+    height: 55px;
+    object-fit: contain;
+    object-position: center;
+    margin: 0;
+  }
+
+  p {
+    max-width: 250px;
+    margin: 0 0 8px;
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 1.55;
+  }
+}
+
+
+/* GARANTÍA */
+
+.footer-guarantee {
+  background: #baff00;
+  color: #111111;
+
+  padding: 4px 9px;
+  border-radius: 999px;
+
+  font-size: 10px;
+  font-weight: 400;
+}
+
+
+/* TÍTULOS Y ENLACES */
+
+.footer-column {
+  gap: 9px;
+  padding-top: 0;
+
+  h3 {
+    margin: 0 0 5px;
+    font-size: 13px;
+    font-weight: 900;
+    line-height: 1.2;
+    letter-spacing: 0.3px;
+  }
+
+  a {
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 1.45;
+  }
+}
+
+
+/* CATEGORÍAS */
+
+.footer-categories-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+
+  column-gap: 18px;
+  row-gap: 7px;
+
+  a {
+    font-size: 13px;
+    line-height: 1.45;
+  }
+}
+
+
+/* BOTÓN + DE CATEGORÍAS */
+
+.footer-categories-grid .footer-categories-more {
+  width: 21px;
+  height: 21px;
+  min-width: 21px;
+  min-height: 21px;
+
+  background: #baff00;
+  color: #111111;
+
+  border-radius: 50%;
+  font-size: 16px;
+  font-weight: 900;
+}
+
+
+/* ATENCIÓN AL CLIENTE */
+
+.footer-main > .footer-column:nth-child(3) {
+  gap: 9px;
+
+  > a {
+    font-size: 13px;
+    line-height: 1.4;
+  }
+
+  h3 {
+    white-space: normal;
+  }
+}
+
+
+/* BOTÓN DE SOPORTE */
+
+.footer-support {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+
+  gap: 9px;
+  width: fit-content;
+  min-height: 46px;
+
+  margin-top: 5px;
+  padding: 9px 12px;
+
+  background: #ff00b8;
+  color: #ffffff;
+
+  border-radius: 10px;
+  box-shadow: none;
+
+  i {
+    font-size: 19px;
+    color: #ffffff;
+  }
+
+  span {
+    gap: 4px;
+  }
+
+  strong {
+    font-size: 10px;
+    font-weight: 900;
+    text-transform: uppercase;
+  }
+
+  small {
+    font-size: 10px;
+    font-weight: 400;
+  }
+}
+
+
+/* MÉTODOS DE PAGO */
+
+.footer-payments {
+  h3 {
+    white-space: normal;
+  }
+}
+
+.payment-tags {
+  display: grid;
+  grid-template-columns: repeat(3, max-content);
+  justify-content: start;
+  gap: 4px;
+
+  span {
+    width: fit-content;
+    padding: 4px 7px;
+
+    background: #baff00;
+    color: #111111;
+
+    border-radius: 5px;
+    font-size: 10px;
+    font-weight: 400;
+    line-height: 1.2;
+    white-space: nowrap;
+  }
+
+  /* Transferencia bancaria en su propia fila */
+
+  span:nth-child(4) {
+    grid-column: 1 / -1;
+  }
+}
+
+
+/* SEGURIDAD VERIFICADA */
+
+.footer-security {
+  gap: 4px;
+  margin-top: 2px;
+
+  small {
+    font-size: 10px;
+    font-weight: 400;
+  }
+
+  strong {
+    font-size: 10px;
+    font-weight: 900;
+    white-space: normal;
+  }
+
+  i {
+    font-size: 12px;
+  }
+}
+
+
+/* BARRA INFERIOR */
+
+.footer-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  min-height: 55px;
+  padding: 12px 2%;
+
+  border-top: 1px solid #211820;
+
+  font-size: 10px;
+  font-weight: 400;
+}
+
+
+/* ==========================================
+   ADAPTACIÓN RESPONSIVE
+   ========================================== */
+
+@media (max-width: 1200px) {
+  .footer-main {
+    width: 94%;
+    column-gap: 18px;
+  }
+
+  .footer-about p,
+  .footer-column a,
+  .footer-categories-grid a,
+  .footer-main > .footer-column:nth-child(3) > a {
+    font-size: 12px;
+  }
+
+  .footer-column h3 {
+    font-size: 12px;
+  }
+
+  .footer-categories-grid {
+    column-gap: 10px;
+  }
+
+  .payment-tags span {
+    font-size: 9px;
+    padding: 4px 5px;
+  }
+}
+
+
+@media (max-width: 900px) {
+  .footer-main {
+    width: 92%;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 25px;
+    padding: 20px 0;
+  }
+}
+
+
+@media (max-width: 560px) {
+  .footer-main {
+    width: 90%;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 24px;
+  }
+
+  .footer-about .footer-logo-container {
+    margin-left: 0;
+  }
+
+  .footer-about p {
+    max-width: 100%;
+  }
+
+  .footer-categories-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px 15px;
+  }
+
+  .footer-column h3 {
+    font-size: 13px;
+  }
+
+  .payment-tags span {
+    font-size: 10px;
+    padding: 5px 8px;
+  }
+
+  .footer-bottom {
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+    gap: 8px;
+    padding: 15px;
+  }
+}
+/* ==========================================
+   AJUSTE FINAL AL DISEÑO ORIGINAL DEL FOOTER
+   ========================================== */
+
+.site-footer {
+  background: #fff0f8;
+  font-family: 'Montserrat', sans-serif;
+}
+
+/* DISTRIBUCIÓN DE LAS COLUMNAS */
+.footer-main {
+  display: grid;
+
+  width: 90%;
+  max-width: none;
+
+  grid-template-columns:
+    minmax(0, 20fr)
+    minmax(0, 34fr)
+    minmax(0, 20fr)
+    minmax(0, 16fr);
+
+  justify-content: start;
+  align-items: start;
+
+  column-gap: 24px;
+
+  margin: 0 auto;
+  padding: 12px 0 5px;
+  box-sizing: border-box;
+}
+
+/* LOGO Y DESCRIPCIÓN */
+
+.footer-about {
+  .footer-logo-container {
+    align-self: center;
+    margin: 0 0 5px;
+  }
+
+  .footer-logo {
+    width: 115px;
+    height: 49px;
+  }
+
+  p {
+    max-width: none;
+    font-size: 12px;
+    line-height: 1.5;
+    margin-bottom: 6px;
+  }
+}
+
+/* TÍTULOS */
+
+.footer-column {
+  gap: 7px;
+
+  h3 {
+    font-size: 12px;
+    font-weight: 900;
+    letter-spacing: 0.2px;
+    margin-bottom: 4px;
+  }
+
+  a {
+    font-size: 12px;
+    line-height: 1.4;
+  }
+}
+
+/* CATEGORÍAS ORDENADAS VERTICALMENTE */
+.footer-categories-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(3, minmax(0, 100px));
+
+  grid-template-rows: repeat(6, auto);
+  grid-auto-flow: column;
+
+  justify-content: start;
+  align-items: start;
+
+  width: 100%;
+
+  column-gap: 10px;
+  row-gap: 6px;
+
+  a {
+    font-size: 12px;
+    line-height: 1.4;
+    font-weight: 400;
+  }
+}
+.footer-categories-grid .footer-categories-more {
+  width: 19px;
+  height: 19px;
+  min-width: 19px;
+  min-height: 19px;
+  font-size: 14px;
+}
+
+/* ATENCIÓN AL CLIENTE */
+
+.footer-main > .footer-column:nth-child(3) {
+  gap: 7px;
+
+  > a {
+    font-size: 12px;
+    line-height: 1.4;
+  }
+}
+
+/* SOPORTE MÁS COMPACTO */
+
+.footer-support {
+  width: fit-content;
+  min-height: 40px;
+  padding: 7px 10px;
+  margin-top: 5px;
+  gap: 8px;
+  border-radius: 9px;
+
+  i {
+    font-size: 16px;
+  }
+
+  strong {
+    font-size: 9px;
+    font-weight: 900;
+  }
+
+  small {
+    font-size: 9px;
+  }
+}
+
+/* MÉTODOS DE PAGO */
+
+.payment-tags {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 4px;
+
+  span {
+    font-size: 9px;
+    padding: 3px 6px;
+    border-radius: 5px;
+  }
+
+  span:nth-child(4) {
+    margin-right: calc(100% - 120px);
+  }
+}
+
+.footer-security {
+  gap: 3px;
+
+  small {
+    font-size: 9px;
+  }
+
+  strong {
+    font-size: 9px;
+    font-weight: 900;
+  }
+}
+
+/* BARRA INFERIOR */
+
+.footer-bottom {
+  min-height: 50px;
+  padding: 10px 2%;
+  font-size: 9px;
+  justify-content: space-between;
+  border-top: 1px solid #211820;
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 900px) {
+  .footer-main {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 24px;
+    padding: 20px 0;
+  }
+}
+
+@media (max-width: 560px) {
+  .footer-main {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 20px;
+  }
+
+  .footer-categories-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: none;
+    grid-auto-flow: row;
+  }
+
+  .footer-about .footer-logo-container {
+    align-self: flex-start;
+  }
+
+  .footer-bottom {
+    flex-direction: column;
+    text-align: center;
+    gap: 8px;
+  }
+}
+.payment-tags {
+  display: grid;
+  grid-template-columns: repeat(3, max-content);
+  gap: 4px;
+  justify-content: start;
+
+  span:nth-child(4) {
+    grid-column: 1 / -1;
+    margin-right: 0;
+  }
+}
+
+@media (min-width: 1400px) {
+  .footer-categories-grid {
+    grid-template-columns:
+      repeat(3, minmax(0, 130px));
+
+    column-gap: 16px;
+  }
+}
+
+@media (max-width: 560px) {
+  .footer-categories-grid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+
+    grid-template-rows: none;
+    grid-auto-flow: row;
+
+    column-gap: 12px;
+  }
+}
+
+@media (max-width: 350px) {
+  .footer-categories-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

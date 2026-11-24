@@ -533,3 +533,200 @@
     transform: scale(1);
   }
 }
+
+/* ==========================================
+   WISHLIST - MISMO DISEÑO DE INICIO
+   ========================================== */
+
+.product-card .wishlist-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 2;
+
+  display: grid;
+  place-items: center;
+
+  width: 36px;
+  height: 36px;
+  padding: 0;
+
+  border: 0;
+  border-radius: 50%;
+
+  background: #baff00;
+  color: #f500aa;
+
+  font-size: 16px;
+  cursor: pointer;
+
+  box-shadow: 0 3px 9px rgba(0, 0, 0, .13);
+
+  transition: transform 0.2s ease;
+
+  &:hover {
+    transform: scale(1.06);
+  }
+}
+
+/* CORAZÓN SELECCIONADO */
+
+.product-card .wishlist-button.wishlist-button_active {
+  background: #7800b8 !important;
+  color: #ffffff !important;
+
+  i {
+    display: none !important;
+  }
+
+  &::before {
+    content: '\2665';
+    display: block;
+
+    font-family: Arial, sans-serif;
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 1;
+
+    color: #ffffff;
+  }
+}
+
+
+/* ==========================================
+   CONTROLES DEL CARRITO
+   ========================================== */
+
+.product-cart-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  margin-top: auto;
+
+  .add-to-cart-btn {
+    flex: 1 1 0;
+    min-width: 0;
+    width: auto;
+
+    min-height: 36px !important;
+    margin: 0;
+    padding: 6px 5px;
+
+    border: 0;
+    border-radius: 12px;
+
+    background: #baff00;
+    color: #111111;
+
+    font-size: 11px;
+    font-weight: 900;
+
+    gap: 4px;
+
+    i {
+      font-size: 14px;
+      font-weight: 900;
+      flex-shrink: 0;
+    }
+
+    &:hover:not(:disabled) {
+      background: #a8e900;
+      filter: none;
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  }
+}
+
+
+/* BOTÓN MENOS CIRCULAR */
+
+.product-minus-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  flex: 0 0 36px !important;
+
+  width: 36px !important;
+  min-width: 36px !important;
+  max-width: 36px !important;
+
+  height: 36px !important;
+  min-height: 36px !important;
+  max-height: 36px !important;
+
+  aspect-ratio: 1 / 1;
+  box-sizing: border-box;
+
+  padding: 0 !important;
+  border: 0;
+  border-radius: 50% !important;
+
+  background: #baff00;
+  color: #111111;
+
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  i {
+    font-size: 14px;
+    font-weight: 900;
+  }
+
+  &:hover {
+    background: #a8e900;
+  }
+
+  &:active {
+    transform: scale(0.97);
+  }
+}
+
+
+/* CONTADOR BLANCO CON NÚMERO NEGRO */
+
+.product-card .product-cart-badge {
+  background: #ffffff !important;
+  color: #111111 !important;
+  border: 2px solid #ffffff !important;
+}
+
+
+/* ==========================================
+   ADAPTACIÓN PARA TELÉFONOS
+   ========================================== */
+
+@media (max-width: 600px) {
+
+  .product-card .wishlist-button {
+    width: 29px;
+    height: 29px;
+    top: 6px;
+    right: 6px;
+    font-size: 14px;
+  }
+
+  .product-card .wishlist-button.wishlist-button_active {
+    &::before {
+      font-size: 21px;
+    }
+  }
+
+  .product-cart-actions {
+    gap: 4px;
+
+    .add-to-cart-btn {
+      min-height: 36px !important;
+      padding: 5px 3px !important;
+      font-size: 10px !important;
+      gap: 3px;
+      white-space: normal;
+      text-align: center;
+    }
+  }
+}

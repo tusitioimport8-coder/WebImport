@@ -183,25 +183,38 @@
 
 
 
-             
-<button
-  type="button"
-  class="add-to-cart-btn"
-  [disabled]="getQuantityInCart(product.id) >= product.quantity"
-  (click)="addToCart(product)"
->
-  <i class="pi pi-plus"></i>
-
-  {{ getQuantityInCart(product.id) > 0
-    ? 'Agregar otro'
-    : 'Agregar al carrito' }}
+ <div class="product-cart-actions">
 
   @if (getQuantityInCart(product.id) > 0) {
-    <span class="product-cart-badge">
-      {{ getQuantityInCart(product.id) }}
-    </span>
+    <button
+      type="button"
+      class="product-minus-button"
+      title="Quitar una unidad"
+      aria-label="Quitar una unidad del carrito"
+      (click)="quitarDelCarrito(product.id)"
+    >
+      <i class="pi pi-minus"></i>
+    </button>
   }
-</button>
+
+  <button
+    type="button"
+    class="add-to-cart-btn"
+    [disabled]="getQuantityInCart(product.id) >= product.quantity"
+    (click)="addToCart(product)"
+  >
+    <i class="pi pi-plus"></i>
+
+    Agregar al carrito
+
+    @if (getQuantityInCart(product.id) > 0) {
+      <span class="product-cart-badge">
+        {{ getQuantityInCart(product.id) }}
+      </span>
+    }
+  </button>
+
+</div>
 
               </div>
             </article>

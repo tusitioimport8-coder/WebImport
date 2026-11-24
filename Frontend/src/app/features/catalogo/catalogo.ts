@@ -493,6 +493,20 @@ getQuantityInCart(productId: string): number {
   return this.cartService.getQuantity(productId);
 }
 
+quitarDelCarrito(productId: string): void {
+  const item = this.cartService.items().find(
+    item => item.id === productId
+  );
+
+  if (!item) return;
+
+  if (item.quantity <= 1) {
+    this.cartService.remove(item.lineId);
+  } else {
+    this.cartService.decrease(item.lineId);
+  }
+}
+
   openCart(): void {
     this.cartService.open();
   }
