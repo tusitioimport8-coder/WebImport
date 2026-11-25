@@ -8,15 +8,15 @@ export type TipoPrecioPresupuesto =
 export interface PresupuestoDetalleInput {
   producto_id: string;
   cantidad: number;
-  precio_unitario: number;
-  tipo_precio: string;
+  precio_unitario?: number;
+  tipo_precio: TipoPrecioPresupuesto;
 }
 
 export interface PresupuestoInput {
   nombre_cliente: string;
   telefono_cliente?: string;
   descuento?: number;
-  total: number;
+  total?: number;
   detalles: PresupuestoDetalleInput[];
 }
 
@@ -24,7 +24,7 @@ export interface EditarPresupuestoDetalleInput {
   producto_id: string;
   cantidad: number;
   precio_unitario?: number;
-  tipo_precio?: TipoPrecioPresupuesto;
+  tipo_precio: TipoPrecioPresupuesto;
 }
 
 export interface IPresupuesto {

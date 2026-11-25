@@ -2,7 +2,10 @@ import { Request, Response } from "express";
 import ProductRepository from "../repositories/ProductRepository.js";
 import PresupuestoRepository from "../repositories/PresupuestoRepository.js";
 import { generarLinkPresupuestoWhatsAppHelper } from "../utils/Messenge.js";
-import { editarPresupuestoSchema } from "../utils/validator/presupuesto.validator.js";
+import {
+  crearPresupuestoSchema,
+  editarPresupuestoSchema,
+} from "../utils/validator/presupuesto.validator.js";
 class PresupuestoController {
   constructor(private readonly presupuestoRepository = PresupuestoRepository) {}
 
@@ -41,8 +44,19 @@ class PresupuestoController {
 
   async crearPresupuesto(req: Request, res: Response) {
     try {
-      const { detalles } = req.body;
-      for (const detalle of detalles) {
+      const parsed = crearPresupuestoSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({
+          success: false,
+          message: "Datos inválidos para crear el presupuesto",
+          errors: parsed.error.flatten(),
+        });
+      }
+
+      const detallesConPrecio: Array<
+        (typeof parsed.data.detalles)[number] & { precio_unitario: number }
+      > = [];
+      for (const detalle of parsed.data.detalles) {
         const producto = await ProductRepository.getProductoPorId(
           detalle.producto_id,
         );
@@ -52,9 +66,36 @@ class PresupuestoController {
             message: `Producto con ID ${detalle.producto_id} no encontrado`,
           });
         }
+
+        const precio = producto.precios?.find(
+          (item) => item.tipo_precio === detalle.tipo_precio,
+        );
+        if (!precio) {
+          return res.status(400).json({
+            success: false,
+            message: `El producto con ID ${detalle.producto_id} no tiene precio tipo ${detalle.tipo_precio}`,
+          });
+        }
+
+        detallesConPrecio.push({
+          ...detalle,
+          precio_unitario: Number(precio.precio),
+        });
       }
+
+      const subtotal = detallesConPrecio.reduce(
+        (total, detalle) => total + detalle.precio_unitario * detalle.cantidad,
+        0,
+      );
+      const descuento = parsed.data.descuento ?? 0;
+      const total = Number((subtotal * (1 - descuento / 100)).toFixed(2));
+
       const nuevoPresupuesto =
-        await this.presupuestoRepository.crearPresupuesto(req.body);
+        await this.presupuestoRepository.crearPresupuesto({
+          ...parsed.data,
+          total,
+          detalles: detallesConPrecio,
+        });
       return res.status(201).json({
         success: true,
         message: "Presupuesto creado exitosamente",
@@ -158,6 +199,7 @@ class PresupuestoController {
         nombre: string;
         cantidad: number;
         subtotal: number;
+        tipo_precio: (typeof detalles)[number]["tipo_precio"];
       }> = [];
 
       for (const detalle of detalles) {
@@ -179,6 +221,7 @@ class PresupuestoController {
           nombre: producto.nombre ?? "Producto",
           cantidad,
           subtotal: cantidad * precioUnitario,
+          tipo_precio: detalle.tipo_precio,
         });
       }
 
@@ -263,6 +306,13 @@ class PresupuestoController {
         error.message.startsWith("Producto con ID")
       ) {
         res.status(404).json({ message: error.message });
+        return;
+      }
+      if (
+        error instanceof Error &&
+        error.message.startsWith("Precio tipo")
+      ) {
+        res.status(400).json({ message: error.message });
         return;
       }
       res

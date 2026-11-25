@@ -3,16 +3,16 @@ import { z } from "zod";
 export const presupuestoDetalleSchema = z.object({
   producto_id: z.string().uuid("El ID del producto debe ser un UUID válido"),
   cantidad: z.number().int().positive("La cantidad debe ser mayor a 0"),
-  precio_unitario: z.number().positive("El precio unitario debe ser mayor a 0"),
-  tipo_precio: z.string().min(1, "El tipo de precio es requerido"),
+  precio_unitario: z.number().positive().optional(),
+  tipo_precio: z.enum(["detal_usd", "detal_bs", "Mayor", "GranMayor"]),
 });
 
 export const crearPresupuestoSchema = z.object({
   id: z.string().uuid("El ID debe ser un UUID válido").optional(),
   nombre_cliente: z.string().min(2, "El nombre del cliente es requerido"),
   telefono_cliente: z.string().optional(),
-  descuento: z.number().min(0, "El descuento no puede ser negativo").optional(),
-  total: z.number().positive("El total debe ser mayor a 0"),
+  descuento: z.number().min(0).max(100).optional(),
+  total: z.number().optional(),
   detalles: z
     .array(presupuestoDetalleSchema)
     .min(1, "El presupuesto debe incluir al menos un producto"),
@@ -38,9 +38,7 @@ export const editarPresupuestoSchema = z.object({
         producto_id: z.string().min(1),
         cantidad: z.number().positive(),
         precio_unitario: z.number().nonnegative().optional(),
-        tipo_precio: z
-          .enum(["detal_usd", "detal_bs", "Mayor", "GranMayor"])
-          .optional(),
+        tipo_precio: z.enum(["detal_usd", "detal_bs", "Mayor", "GranMayor"]),
       }),
     )
     .min(1)

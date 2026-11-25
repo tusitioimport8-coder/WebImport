@@ -95,7 +95,7 @@ export class PresupuestoRepository {
       producto_id: string;
       cantidad: number;
       precio_unitario: number;
-      tipo_precio?: string;
+      tipo_precio: TipoPrecioPresupuesto;
     }>
   > {
     const result = await this.db.excecuteNameQuery(
@@ -135,9 +135,8 @@ export class PresupuestoRepository {
 
         const calculado = this.resolverPrecio(
           producto.precios ?? [],
-          item.cantidad,
-          item.precio_unitario,
           item.tipo_precio,
+          item.producto_id,
         );
         detallesPreparados.push({
           presupuesto_id: payload.id,
@@ -157,12 +156,12 @@ export class PresupuestoRepository {
         await this.db.excecuteNameQuery("crearPresupuestoDetalle", detalle);
       }
 
-      if (payload.total === undefined) {
-        const descuento =
-          payload.descuento ?? Number(actual.descuento ?? 0);
-        totalCalculado =
-          subtotal * (1 - Math.max(0, Math.min(100, descuento)) / 100);
-      }
+      const descuento = payload.descuento ?? Number(actual.descuento ?? 0);
+      totalCalculado = Number(
+        (subtotal * (1 - Math.max(0, Math.min(100, descuento)) / 100)).toFixed(
+          2,
+        ),
+      );
     }
 
     await this.db.excecuteNameQuery("actualizarPresupuesto", {
@@ -179,39 +178,21 @@ export class PresupuestoRepository {
 
   private resolverPrecio(
     precios: Array<{ tipo_precio: TipoPrecioPresupuesto; precio: number }>,
-    cantidad: number,
-    precioSolicitado?: number,
-    tipoSolicitado?: TipoPrecioPresupuesto,
+    tipoSolicitado: TipoPrecioPresupuesto,
+    productoId: string,
   ): { precio_unitario: number; tipo_precio: TipoPrecioPresupuesto } {
-    const tipo =
-      tipoSolicitado ??
-      (cantidad >= 12
-        ? "GranMayor"
-        : cantidad >= 6
-          ? "Mayor"
-          : "detal_usd");
     const precioCatalogo = precios.find(
-      (precio) => precio.tipo_precio === tipo,
-    )?.precio;
-
-    if (precioCatalogo !== undefined) {
-      return {
-        precio_unitario: Number(precioCatalogo),
-        tipo_precio: tipo,
-      };
+      (precio) => precio.tipo_precio === tipoSolicitado,
+    );
+    if (!precioCatalogo) {
+      throw new Error(
+        `Precio tipo ${tipoSolicitado} no disponible para producto con ID ${productoId}`,
+      );
     }
 
-    const precioFallback = precios.find(
-      (precio) =>
-        precio.tipo_precio === "detal_usd" ||
-        precio.tipo_precio === "detal_bs",
-    );
     return {
-      precio_unitario:
-        precioSolicitado ??
-        (precioFallback ? Number(precioFallback.precio) : 0),
-      tipo_precio:
-        tipoSolicitado ?? precioFallback?.tipo_precio ?? "detal_usd",
+      precio_unitario: Number(precioCatalogo.precio),
+      tipo_precio: tipoSolicitado,
     };
   }
 }

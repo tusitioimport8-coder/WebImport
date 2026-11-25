@@ -1,3 +1,5 @@
+import type { TipoPrecioPresupuesto } from "../interfaces/presupuesto.interface.js";
+
 export interface DatosWhatsAppInput {
   telefonoEmpresa: string;
   datosOrden: {
@@ -69,9 +71,26 @@ export interface DatosPresupuestoWhatsAppInput {
     idPresupuesto: string;
     clienteNombre: string;
     telefonoCliente?: string;
-    items: Array<{ nombre: string; cantidad: number; subtotal: number }>;
+    items: Array<{
+      nombre: string;
+      cantidad: number;
+      subtotal: number;
+      tipo_precio: TipoPrecioPresupuesto;
+    }>;
     total: number;
   };
+}
+
+function formatearMontoPresupuesto(
+  monto: number,
+  tipoPrecio: TipoPrecioPresupuesto,
+): string {
+  const valor = monto.toFixed(2);
+  if (tipoPrecio === "detal_bs") return `$ ${valor}`;
+  if (tipoPrecio === "detal_usd") return `$ ${valor}`;
+  if (tipoPrecio === "Mayor") return `Mayor: $${valor}`;
+  if (tipoPrecio === "GranMayor") return `Gran Mayor: $${valor}`;
+  return valor;
 }
 
 export function generarLinkPresupuestoWhatsAppHelper(
@@ -89,10 +108,18 @@ export function generarLinkPresupuestoWhatsAppHelper(
 
   for (const item of presupuesto.items) {
     mensaje += `• ${item.cantidad} x ${item.nombre}\n`;
-    mensaje += `  USD: $${item.subtotal.toFixed(2)}\n`;
+    mensaje += `\t\t ${formatearTarifa(item.tipo_precio)}: ${formatearMontoPresupuesto(item.subtotal, item.tipo_precio)}\n`;
   }
 
-  mensaje += `\n*Total:* $${Number(presupuesto.total).toFixed(2)}\n\n`;
+  const tiposPrecio = new Set(
+    presupuesto.items.map((item) => item.tipo_precio),
+  );
+  const tipoUnico =
+    tiposPrecio.size === 1 ? presupuesto.items[0]?.tipo_precio : undefined;
+  const total = tipoUnico
+    ? formatearMontoPresupuesto(Number(presupuesto.total), tipoUnico)
+    : Number(presupuesto.total).toFixed(2);
+  mensaje += `\n*Total:* ${total}\n\n`;
 
   mensaje += `Contamos con métodos super cómodos para que pagues como te sea más fácil:\n`;
   mensaje += `• Zelle.\n`;
