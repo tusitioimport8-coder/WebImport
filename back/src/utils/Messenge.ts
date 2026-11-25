@@ -12,36 +12,51 @@ export interface DatosWhatsAppInput {
   };
 }
 
+const ETIQUETAS_TARIFA: Record<string, string> = {
+  detal_bs: "Detal BCV",
+  detal_usd: "Detal Divisa",
+  mayor: "Precio Mayor",
+  granmayor: "Precio Gran Mayor",
+  gran_mayor: "Precio Gran Mayor",
+};
+
+function formatearTarifa(nivel?: string): string {
+  if (!nivel) return "Detal BCV";
+  const clave = nivel.trim().toLowerCase();
+  return ETIQUETAS_TARIFA[clave] ?? nivel;
+}
+
 export function generarLinkWhatsAppHelper(data: DatosWhatsAppInput): string {
   const telefono = data.telefonoEmpresa || "584129668437";
   const orden = data.datosOrden;
 
-  let mensaje = `👋 Hola, me gustaría confirmar el siguiente pedido:\n\n`;
+  let mensaje = `Hola, me gustaría confirmar el siguiente pedido:\n\n`;
 
   if (orden.idPedido) {
-    mensaje += `🆔 *Nro. de Pedido:* ${orden.idPedido.substring(0, 8).toUpperCase()}\n`;
+    mensaje += `*Nro. de Pedido:* ${orden.idPedido.substring(0, 8).toUpperCase()}\n`;
   }
 
-  mensaje += `👤 *Cliente:* ${orden.clienteNombre}\n`;
-  if (orden.telefonoCliente)
-    mensaje += `📞 *Teléfono:* ${orden.telefonoCliente}\n`;
+  mensaje += `*Cliente:* ${orden.clienteNombre}\n`;
+  if (orden.telefonoCliente) {
+    mensaje += `*Teléfono:* ${orden.telefonoCliente}\n`;
+  }
 
-  mensaje += `🏷️ *Tarifa Aplicada:* ${orden.nivelAplicado}\n`;
+  mensaje += `*Tarifa Aplicada:* ${formatearTarifa(orden.nivelAplicado)}\n`;
 
   if (orden.tipoEntrega) {
-    mensaje += `📦 *Tipo de Entrega:* ${orden.tipoEntrega.toUpperCase()}\n`;
+    mensaje += `*Tipo de Entrega:* ${orden.tipoEntrega.toUpperCase()}\n`;
   }
   if (orden.metodoPago) {
-    mensaje += `💳 *Método de Pago:* ${orden.metodoPago.toUpperCase()}\n\n`;
+    mensaje += `*Método de Pago:* ${orden.metodoPago.toUpperCase()}\n\n`;
   }
 
-  mensaje += `🛒 *Detalle del Pedido:*\n`;
+  mensaje += `*Detalle del Pedido:*\n`;
 
   orden.items.forEach((item) => {
     mensaje += `• ${item.cantidad}x ${item.nombre} - $${item.subtotal.toFixed(2)}\n`;
   });
 
-  mensaje += `\n💰 *Total a pagar:* $${orden.totalPagar.toFixed(2)}\n\n`;
+  mensaje += `\n*Total a pagar:* $${orden.totalPagar.toFixed(2)}\n\n`;
   mensaje += `¿Me confirman los datos para el pago y envío?`;
 
   const mensajeFormateado = encodeURIComponent(mensaje);
