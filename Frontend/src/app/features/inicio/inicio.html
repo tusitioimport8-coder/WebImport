@@ -213,7 +213,7 @@
               <div class="product-price-row">
                 <div class="product-prices">
                   <strong class="product-price">
-                    {{ product.price | currency: 'USD' : 'symbol' : '1.2-2' }}
+                 {{ product.priceBCV | currency: 'USD' : 'symbol' : '1.2-2' }}
                   </strong>
 
                   @if (getPrecioBCV(product.price); as precioBs) {
@@ -375,7 +375,7 @@
                 <div class="product-price-row">
                   <div class="product-prices">
                     <strong class="product-price">
-                      {{ product.price | currency: 'USD' : 'symbol' : '1.2-2' }}
+                    {{ product.priceBCV | currency: 'USD' : 'symbol' : '1.2-2' }}
                     </strong>
 
                     @if (getPrecioBCV(product.price); as precioBs) {
@@ -510,7 +510,7 @@
               <div class="product-price-row">
                 <div class="product-prices">
                   <strong class="product-price">
-                    {{ product.price | currency: 'USD' : 'symbol' : '1.2-2' }}
+{{ product.priceBCV | currency: 'USD' : 'symbol' : '1.2-2' }}
                   </strong>
 
                   @if (getPrecioBCV(product.price); as precioBs) {
@@ -645,10 +645,10 @@
               <div class="product-price-row">
                 <div class="product-prices">
                   <strong class="product-price">
-                    {{ product.price | currency: 'USD' : 'symbol' : '1.2-2' }}
+                  {{ product.priceBCV | currency: 'USD' : 'symbol' : '1.2-2' }}
                   </strong>
 
-                  @if (getPrecioBCV(product.price); as precioBs) {
+                  @if (getPrecioBCV(product.priceBCV); as precioBs) {
                     <span class="product-price-bcv">
                       Bs. {{ precioBs | number: '1.2-2' : 'es-VE' }} BCV
                     </span>

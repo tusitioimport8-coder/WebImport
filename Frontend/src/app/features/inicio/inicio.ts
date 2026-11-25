@@ -42,7 +42,8 @@ export interface HomeProduct {
   name: string;
   description: string;
   price: number;
-  quantity: number;
+priceBCV: number;
+quantity: number;
   imageUrl?: string;
   category?: string;
   prices: Partial<Record<
@@ -1082,8 +1083,9 @@ private mapApiProduct(product: ApiProduct): HomeProduct {
     id: product.id,
     name: product.nombre,
     description: product.descripcion ?? '',
-    price: prices.detal_usd ?? 0,
-    quantity: Number(product.stock ?? 0),
+   price: prices.detal_usd ?? 0,
+priceBCV: prices.detal_bs ?? 0,
+quantity: Number(product.stock ?? 0),
     imageUrl: product.imagen_url,
    category: product.categorias
   ?.map(categoria => categoria.nombre_categoria)

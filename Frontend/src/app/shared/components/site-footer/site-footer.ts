@@ -40,7 +40,7 @@ export class SiteFooter implements OnInit {
     'Oficina',
     'Cables y cargadores',
     'Gym',
-    'Perfume',
+    'Perfumes',
     'Herramientas',
     'Salud',
   ];
@@ -63,7 +63,12 @@ export class SiteFooter implements OnInit {
       }
     });
   }
-
+  
+get categoriasFooterOrdenadas(): string[] {
+  return [...this.categoriasFooter].sort(
+    (a, b) => b.length - a.length
+  );
+}
   onLogoChange(event: Event): void {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];

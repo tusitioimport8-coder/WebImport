@@ -1,3 +1,4 @@
+
 <!-- FONDO OSCURO -->
 <div
   class="cart-backdrop"
@@ -20,7 +21,12 @@
       <h2>Carrito</h2>
     </div>
 
-    <button type="button" class="close-button" aria-label="Cerrar carrito" (click)="close()">
+    <button
+      type="button"
+      class="close-button"
+      aria-label="Cerrar carrito"
+      (click)="close()"
+    >
       <i class="pi pi-times"></i>
     </button>
   </header>
@@ -37,79 +43,94 @@
         <p>Agrega algunos productos para comenzar tu pedido.</p>
       </div>
     } @else {
-      <!-- SELECTOR GLOBAL -->
-      <div class="cart-price-selector">
-        <span class="cart-price-title">Tipo de precio</span>
 
-        <div class="cart-price-options">
-          <button
-            type="button"
-            class="cart-price-option"
-            [class.cart-price-option_active]="cartService.priceMode() === 'detal_bs'"
-            (click)="cartService.setPriceMode('detal_bs')"
-          >
-            <span>Detal</span>
-            <small>(BCV)</small>
-          </button>
+<!-- SELECTOR GLOBAL -->
+<div class="cart-price-selector">
+  <span class="cart-price-title">Tipo de precio</span>
 
-          <button
-            type="button"
-            class="cart-price-option"
-            [class.cart-price-option_active]="cartService.priceMode() === 'detal_usd'"
-            (click)="cartService.setPriceMode('detal_usd')"
-          >
-            <span>Detal</span>
-            <small>(Descuento en Divisas)</small>
-          </button>
+  <div class="cart-price-options">
+    <button
+      type="button"
+      class="cart-price-option"
+      [class.cart-price-option_active]="
+        cartService.priceMode() === 'detal_bs'
+      "
+      (click)="cartService.setPriceMode('detal_bs')"
+    >
+      <span>Detal</span>
+      <small>(BCV)</small>
+    </button>
+
+    <button
+      type="button"
+      class="cart-price-option"
+      [class.cart-price-option_active]="
+        cartService.priceMode() === 'detal_usd'
+      "
+      (click)="cartService.setPriceMode('detal_usd')"
+    >
+      <span>Detal</span>
+      <small>(Divisas)</small>
+    </button>
+  </div>
+
+  @if (cartService.priceMode() === 'detal_bs') {
+    <p class="cart-price-description">
+      Precio Detal BCV fijo, sin importar la cantidad.
+    </p>
+  } @else {
+    <div class="cart-tier-box">
+      <span class="cart-tier-current">
+        @switch (cartService.currentTier()) {
+          @case ('Mayor') {
+            Precio al Mayor
+          }
+          @case ('GranMayor') {
+            Precio al Gran Mayor
+          }
+          @default {
+            Precio Detal Divisas
+          }
+        }
+      </span>
+
+      @if (cartService.nextTier(); as next) {
+       <strong>
+  Desbloquea el precio al {{ next.name }} y ahorra en tu compra
+</strong>
+
+        <div class="cart-tier-track">
+          <div
+            class="cart-tier-fill"
+            [style.width.%]="next.progress"
+          ></div>
         </div>
 
-        @if (cartService.priceMode() === 'detal_bs') {
-          <p class="cart-price-description">Precio Detal BCV fijo, sin importar la cantidad.</p>
-        } @else {
-          <div class="cart-tier-box">
-            <span class="cart-tier-current">
-              @switch (cartService.currentTier()) {
-                @case ('Mayor') {
-                  Precio al Mayor
-                }
-                @case ('GranMayor') {
-                  Precio al Gran Mayor
-                }
-                @default {
-                  Precio Detal Divisas
-                }
-              }
-            </span>
+        <p>
+          @if (next.missingUnits > 0) {
+            {{ next.missingUnits }} unidad(es) más
+          } @else {
+            Cantidad alcanzada
+          }
+        </p>
 
-            @if (cartService.nextTier(); as next) {
-              <strong> Desbloquea el precio al {{ next.name }} y ahorra en tu compra </strong>
-
-              <div class="cart-tier-track">
-                <div class="cart-tier-fill" [style.width.%]="next.progress"></div>
-              </div>
-
-              <p>
-                @if (next.missingUnits > 0) {
-                  {{ next.missingUnits }} unidad(es) más
-                } @else {
-                  Cantidad alcanzada
-                }
-              </p>
-
-              <p>
-                @if (next.missingAmount > 0) {
-                  {{ next.missingAmount | currency: 'USD' : 'symbol' : '1.2-2' }}
-                  más en monto base
-                } @else {
-                  Monto alcanzado
-                }
-              </p>
-            } @else {
-              <strong class="cart-tier-success"> ¡Alcanzaste el precio Gran Mayor! </strong>
-            }
-          </div>
-        }
-      </div>
+        <p>
+          @if (next.missingAmount > 0) {
+            {{ next.missingAmount
+              | currency:'USD':'symbol':'1.2-2' }}
+            más en monto base
+          } @else {
+            Monto alcanzado
+          }
+        </p>
+      } @else {
+        <strong class="cart-tier-success">
+          ¡Alcanzaste el precio Gran Mayor!
+        </strong>
+      }
+    </div>
+  }
+</div>
 
       <div class="cart-items">
         @for (item of cartService.items(); track item.lineId) {
@@ -117,7 +138,12 @@
             <!-- IMAGEN -->
             <div class="item-image">
               @if (item.imageUrl) {
-                <img [src]="item.imageUrl" [alt]="item.name" loading="lazy" decoding="async" />
+                <img
+                  [src]="item.imageUrl"
+                  [alt]="item.name"
+                  loading="lazy"
+                  decoding="async"
+                />
               } @else {
                 <i class="pi pi-image"></i>
               }
@@ -138,33 +164,35 @@
                 </button>
               </div>
 
-              <!-- TIPO DE PRECIO -->
-              <span class="item-price-type">
-                @switch (item.priceType) {
-                  @case ('detal_bs') {
-                    Precio Detal BCV
-                  }
-                  @case ('detal_usd') {
-                    Precio Detal Divisas
-                  }
-                  @case ('Mayor') {
-                    Precio al Mayor
-                  }
-                  @case ('GranMayor') {
-                    Precio al Gran Mayor
-                  }
-                  @default {
-                    Precio Detal
-                  }
-                }
-              </span>
+           
+<!-- TIPO DE PRECIO -->
+<span class="item-price-type">
+  @switch (item.priceType) {
+    @case ('detal_bs') {
+      Precio Detal BCV
+    }
+    @case ('detal_usd') {
+      Precio Detal Divisas
+    }
+    @case ('Mayor') {
+      Precio al Mayor
+    }
+    @case ('GranMayor') {
+      Precio al Gran Mayor
+    }
+    @default {
+      Precio Detal
+    }
+  }
+</span>
+
 
               <!-- PRECIO -->
               <strong class="item-price">
                 @if (item.priceType === 'detal_bs') {
-                  $ {{ item.price | number: '1.2-2' : 'es-VE' }}
+                  Bs. {{ item.price | number:'1.2-2':'es-VE' }}
                 } @else {
-                  {{ item.price | currency: 'USD' : 'symbol' : '1.2-2' }}
+                  {{ item.price | currency:'USD':'symbol':'1.2-2' }}
                 }
               </strong>
 
@@ -193,10 +221,10 @@
 
                 <!-- SUBTOTAL -->
                 <span class="item-subtotal">
-                  @if (tasaBCV(); as tasa) {
-                    Bs. {{ getSubtotalBolivares(item.price, item.quantity, tasa) | number: '1.2-2' : 'es-VE' }}
+                  @if (item.priceType === 'detal_bs') {
+                    Bs. {{ item.price * item.quantity | number:'1.2-2':'es-VE' }}
                   } @else {
-                    Tasa BCV no disponible
+                    {{ item.price * item.quantity | currency:'USD':'symbol':'1.2-2' }}
                   }
                 </span>
               </div>
@@ -211,85 +239,103 @@
   @if (!cartService.isEmpty()) {
     <footer class="cart-footer">
       <div class="cart-summary">
-        <div>
-          <span>Productos</span>
-          <strong>{{ cartService.totalItems() }}</strong>
-        </div>
+  <div>
+    <span>Productos</span>
+    <strong>{{ cartService.totalItems() }}</strong>
+  </div>
 
-        @if (cartService.totalSavings() > 0.005) {
-          <div class="cart-original-price">
-            <span>Subtotal a Detal Divisas</span>
-            <strong>
-              {{ cartService.baseTotalUSD() | currency: 'USD' : 'symbol' : '1.2-2' }}
-            </strong>
-          </div>
+  @if (cartService.totalSavings() > 0.005) {
 
-          <div class="cart-savings">
-            <div class="cart-savings-info">
-              <span class="cart-savings-title">
-                <i class="pi pi-tag"></i>
-                ¡Estás ahorrando!
-              </span>
+    <div class="cart-original-price">
+      <span>Subtotal a Detal Divisas</span>
+      <strong>
+        {{ cartService.baseTotalUSD()
+          | currency:'USD':'symbol':'1.2-2' }}
+      </strong>
+    </div>
 
-              <small>
-                {{ cartService.savingsPercentage().toFixed(1) }}% de ahorro por tu compra
-              </small>
-            </div>
+    <div class="cart-savings">
+      <div class="cart-savings-info">
+        <span class="cart-savings-title">
+          <i class="pi pi-tag"></i>
+          ¡Estás ahorrando!
+        </span>
 
-            <strong class="cart-savings-amount">
-              {{ cartService.totalSavings() | currency: 'USD' : 'symbol' : '1.2-2' }}
-            </strong>
-          </div>
-        }
-
-        <div class="total-row">
-          <span>Total</span>
-          <strong>
-            {{ totalPriceUSD() | currency: 'USD' : 'symbol' : '1.2-2' }}
-            <br />
-            <small>
-              @if (totalPriceBs() !== null) {
-                Bs. {{ totalPriceBs() | number: '1.2-2' : 'es-VE' }}
-              } @else {
-                Tasa BCV no disponible
-              }
-            </small>
-          </strong>
-        </div>
+        <small>
+          {{ cartService.savingsPercentage().toFixed(1) }}%
+          de ahorro por tu compra
+        </small>
       </div>
 
-      @if (puedeCrearPresupuesto()) {
-        <button
-          tuiButton
-          type="button"
-          class="whatsapp-button"
-          [disabled]="procesandoPresupuesto()"
-          (click)="abrirFormularioPresupuesto()"
-        >
-          <i class="pi pi-file"></i>
-          Crear presupuesto
-        </button>
+      <strong class="cart-savings-amount">
+        {{ cartService.totalSavings()
+          | currency:'USD':'symbol':'1.2-2' }}
+      </strong>
+    </div>
 
-        @if (errorPresupuesto() && !mostrarFormularioPresupuesto()) {
-          <p class="pedido-error" role="alert">
-            {{ errorPresupuesto() }}
-          </p>
+  }
+
+<div class="total-row">
+  <span>Total</span>
+  <strong>
+    {{ totalPriceUSD() | currency:'USD':'symbol':'1.2-2' }}
+
+    @if (cartService.priceMode() === 'detal_bs') {
+      <br />
+      <small>
+        @if (totalPriceBs() !== null) {
+          Bs. {{ totalPriceBs() | number:'1.2-2':'es-VE' }}
+        } @else {
+          Tasa BCV no disponible
         }
-      }
+      </small>
+    }
+  </strong>
+</div>
+      </div>
 
-      @if (!esFuerzaVentas()) {
-        <button tuiButton type="button" class="whatsapp-button" (click)="abrirFormulario()">
-          <i class="pi pi-whatsapp"></i>
-          Pedir por WhatsApp
-        </button>
-      }
+     
+@if (puedeCrearPresupuesto()) {
+  <button
+    tuiButton
+    type="button"
+    class="whatsapp-button"
+    [disabled]="procesandoPresupuesto()"
+    (click)="abrirFormularioPresupuesto()"
+  >
+    <i class="pi pi-file"></i>
+    Crear presupuesto
+  </button>
+
+  @if (errorPresupuesto() && !mostrarFormularioPresupuesto()) {
+    <p class="pedido-error" role="alert">
+      {{ errorPresupuesto() }}
+    </p>
+  }
+}
+
+@if (!esFuerzaVentas()) {
+  <button
+    tuiButton
+    type="button"
+    class="whatsapp-button"
+    (click)="abrirFormulario()"
+  >
+    <i class="pi pi-whatsapp"></i>
+    Pedir por WhatsApp
+  </button>
+}
+
     </footer>
   }
 </aside>
 
 <!-- FORMULARIO DE PRESUPUESTO -->
 @if (mostrarFormularioPresupuesto()) {
-  <div class="pedido-modal-backdrop" (click)="cerrarFormularioPresupuesto()"></div>
+  <div
+    class="pedido-modal-backdrop"
+    (click)="cerrarFormularioPresupuesto()"
+  ></div>
 
   <section
     class="pedido-modal"
@@ -300,7 +346,9 @@
     <header class="pedido-modal-header">
       <div>
         <span class="cart-eyebrow">Fuerza de Ventas</span>
-        <h2 id="formulario-presupuesto-titulo">Crear presupuesto</h2>
+        <h2 id="formulario-presupuesto-titulo">
+          Crear presupuesto
+        </h2>
       </div>
 
       <button
@@ -314,8 +362,13 @@
       </button>
     </header>
 
-    <form class="pedido-modal-content" (ngSubmit)="enviarPresupuesto()">
-      <label for="presupuesto-nombre"> Nombre del cliente * </label>
+    <form
+      class="pedido-modal-content"
+      (ngSubmit)="enviarPresupuesto()"
+    >
+      <label for="presupuesto-nombre">
+        Nombre del cliente *
+      </label>
 
       <input
         id="presupuesto-nombre"
@@ -327,7 +380,9 @@
         required
       />
 
-      <label for="presupuesto-telefono"> Teléfono del cliente </label>
+      <label for="presupuesto-telefono">
+        Teléfono del cliente
+      </label>
 
       <input
         id="presupuesto-telefono"
@@ -337,64 +392,52 @@
         [(ngModel)]="datosPresupuesto.telefono_cliente"
       />
 
-      <label for="presupuesto-descuento"> Descuento (USD) </label>
+     
 
-      <input
-        id="presupuesto-descuento"
-        type="number"
-        name="descuento"
-        min="0"
-        step="0.01"
-        [(ngModel)]="datosPresupuesto.descuento"
-      />
+   <!-- RESUMEN DEL PRESUPUESTO -->
+<div class="cart-summary">
+  <div>
+    <span>Productos</span>
+    <strong>{{ cartService.totalItems() }}</strong>
+  </div>
 
-      <!-- RESUMEN DEL PRESUPUESTO -->
-      <div class="cart-summary">
-        <div>
-          <span>Productos</span>
-          <strong>{{ cartService.totalItems() }}</strong>
-        </div>
+  <div>
+    <span>Subtotal</span>
+    <strong>
+      {{ cartService.totalPrice() | currency:'USD':'symbol':'1.2-2' }}
+    </strong>
+  </div>
 
-        <div>
-          <span>Subtotal</span>
-          <strong>
-            {{ cartService.totalPrice() | currency: 'USD' : 'symbol' : '1.2-2' }}
-          </strong>
-        </div>
-
-        <div>
-          <span>Descuento</span>
-          <strong>
-            {{ datosPresupuesto.descuento | currency: 'USD' : 'symbol' : '1.2-2' }}
-          </strong>
-        </div>
-
-        <div class="total-row">
-          <span>Total del presupuesto</span>
-          <strong>
-            {{
-              cartService.totalPrice() - (+datosPresupuesto.descuento || 0)
-                | currency: 'USD' : 'symbol' : '1.2-2'
-            }}
-          </strong>
-        </div>
-      </div>
-
+  <div class="total-row">
+    <span>Total del presupuesto</span>
+    <strong>
+      {{ cartService.totalPrice() | currency:'USD':'symbol':'1.2-2' }}
+    </strong>
+  </div>
+</div>
       @if (errorPresupuesto()) {
         <p class="pedido-error" role="alert">
           {{ errorPresupuesto() }}
         </p>
       }
 
-      <button tuiButton type="submit" class="whatsapp-button" [disabled]="procesandoPresupuesto()">
+      <button
+        tuiButton
+        type="submit"
+        class="whatsapp-button"
+        [disabled]="procesandoPresupuesto()"
+      >
         <i class="pi pi-file-check"></i>
 
-        {{ procesandoPresupuesto() ? 'Registrando presupuesto...' : 'Confirmar presupuesto' }}
+        {{
+          procesandoPresupuesto()
+            ? 'Registrando presupuesto...'
+            : 'Confirmar presupuesto'
+        }}
       </button>
     </form>
   </section>
 }
-
 <!-- CONFIRMACIÓN DE PRESUPUESTO -->
 @if (presupuestoCreado()) {
   <div class="pedido-modal-backdrop"></div>
@@ -408,7 +451,9 @@
     <header class="pedido-modal-header">
       <div>
         <span class="cart-eyebrow">Fuerza de Ventas</span>
-        <h2 id="presupuesto-modal-titulo">Presupuesto registrado</h2>
+        <h2 id="presupuesto-modal-titulo">
+          Presupuesto registrado
+        </h2>
       </div>
     </header>
 
@@ -420,10 +465,38 @@
         {{ presupuestoCreado() }}
       </p>
 
+      @if (errorEnvioPresupuesto()) {
+        <p class="pedido-error" role="alert">
+          {{ errorEnvioPresupuesto() }}
+        </p>
+      }
+
       <button
         tuiButton
         type="button"
         class="whatsapp-button"
+        [disabled]="enviandoPresupuestoWhatsApp()"
+        (click)="enviarPresupuestoPorWhatsApp()"
+      >
+        <i
+          class="pi"
+          [class.pi-whatsapp]="!enviandoPresupuestoWhatsApp()"
+          [class.pi-spinner]="enviandoPresupuestoWhatsApp()"
+          [class.pi-spin]="enviandoPresupuestoWhatsApp()"
+        ></i>
+
+        {{
+          enviandoPresupuestoWhatsApp()
+            ? 'Generando enlace...'
+            : 'Enviar por WhatsApp'
+        }}
+      </button>
+
+      <button
+        tuiButton
+        type="button"
+        class="whatsapp-button"
+        [disabled]="enviandoPresupuestoWhatsApp()"
         (click)="cerrarConfirmacionPresupuesto()"
       >
         <i class="pi pi-check"></i>
@@ -435,7 +508,10 @@
 
 <!-- MODAL DE CONFIRMACIÓN DEL PEDIDO NORMAL -->
 @if (mostrarFormulario()) {
-  <div class="pedido-modal-backdrop" (click)="cerrarFormulario()"></div>
+  <div
+    class="pedido-modal-backdrop"
+    (click)="cerrarFormulario()"
+  ></div>
 
   <section
     class="pedido-modal"
@@ -460,7 +536,10 @@
       </button>
     </header>
 
-    <form class="pedido-modal-content" (ngSubmit)="openWhatsApp()">
+    <form
+      class="pedido-modal-content"
+      (ngSubmit)="openWhatsApp()"
+    >
       <input
         type="text"
         name="nombre_completo"
@@ -488,6 +567,8 @@
         required
       />
 
+    
+
       <input
         type="text"
         name="direccion_base"
@@ -498,14 +579,24 @@
 
       <label for="tipo-entrega">Tipo de entrega</label>
 
-      <select id="tipo-entrega" name="tipo_entrega" [(ngModel)]="datosPedido.tipo_entrega">
+      <select
+        id="tipo-entrega"
+        name="tipo_entrega"
+        [(ngModel)]="datosPedido.tipo_entrega"
+      >
         <option value="retiro">Retiro en sede</option>
         <option value="domicilio">Envío a domicilio</option>
       </select>
 
+    
+
       <label for="metodo-pago">Método de pago</label>
 
-      <select id="metodo-pago" name="metodo_pago" [(ngModel)]="datosPedido.metodo_pago">
+      <select
+        id="metodo-pago"
+        name="metodo_pago"
+        [(ngModel)]="datosPedido.metodo_pago"
+      >
         <option value="transferencia">Transferencia</option>
         <option value="efectivo">Efectivo</option>
         <option value="pago_movil">Pago móvil</option>
@@ -517,10 +608,19 @@
         </p>
       }
 
-      <button tuiButton type="submit" class="whatsapp-button" [disabled]="procesandoPedido()">
+      <button
+        tuiButton
+        type="submit"
+        class="whatsapp-button"
+        [disabled]="procesandoPedido()"
+      >
         <i class="pi pi-whatsapp"></i>
 
-        {{ procesandoPedido() ? 'Registrando pedido...' : 'Confirmar pedido por WhatsApp' }}
+        {{
+          procesandoPedido()
+            ? 'Registrando pedido...'
+            : 'Confirmar pedido por WhatsApp'
+        }}
       </button>
     </form>
   </section>

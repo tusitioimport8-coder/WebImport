@@ -52,3 +52,39 @@ body {
 body {
   background: #ff00d4;
 }
+
+
+/* SCROLL OSCURO GLOBAL */
+
+
+html,
+body,
+* {
+  scrollbar-width: thin !important;
+  scrollbar-color: #333333 transparent !important;
+}
+
+*::-webkit-scrollbar {
+  width: 7px !important;
+  height: 7px !important;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent !important;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: #333333 !important;
+  border-radius: 10px !important;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: #111111 !important;
+}
+
+
+
+/* ELIMINAR SCROLL TRANSPARENTE DE TAIGA UI */
+tui-scroll-controls.t-root-scrollbar {
+  display: none !important;
+}

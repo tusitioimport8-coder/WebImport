@@ -1,4 +1,3 @@
-
 import { CurrencyPipe, DecimalPipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
@@ -30,7 +29,7 @@ import {
 @Component({
   selector: 'app-carrito',
   standalone: true,
-  imports: [CurrencyPipe, DecimalPipe, FormsModule, TuiButton],
+ imports: [CurrencyPipe, DecimalPipe, FormsModule, TuiButton],
   templateUrl: './carrito.html',
   styleUrl: './carrito.less',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -92,20 +91,20 @@ readonly puedeCrearPresupuesto = computed(
   readonly procesandoPresupuesto = signal(false);
   readonly errorPresupuesto = signal('');
   readonly presupuestoCreado = signal('');
+
+  readonly telefonoPresupuestoCreado = signal('');
+readonly enviandoPresupuestoWhatsApp = signal(false);
+readonly errorEnvioPresupuesto = signal('');
   readonly mostrarFormularioPresupuesto = signal(false);
 
-  datosPresupuesto = {
-    nombre_cliente: '',
-    telefono_cliente: '',
-    descuento: 0,
-  };
+ datosPresupuesto = {
+  nombre_cliente: '',
+  telefono_cliente: '',
+};
 
-  readonly totalPresupuesto = computed(() => {
-    const subtotal = this.cartService.totalPrice();
-    const descuento = Number(this.datosPresupuesto.descuento) || 0;
-
-    return Math.max(0, subtotal - descuento);
-  });
+ readonly totalPresupuesto = computed(() =>
+  this.cartService.totalPrice()
+);
 
   abrirFormularioPresupuesto(): void {
     if (
@@ -233,12 +232,12 @@ readonly puedeCrearPresupuesto = computed(
     }
 
     const pedido: CrearPedidoRequest = {
-     contacto: {
-  nombre_completo: datos.nombre_completo.trim(),
-  telefono: datos.telefono.trim(),
-  correo: datos.correo.trim(),
-  direccion_base: datos.direccion_base.trim(),
-},
+      contacto: {
+        nombre_completo: datos.nombre_completo.trim(),
+        telefono: datos.telefono.trim(),
+        correo: datos.correo.trim(),
+        direccion_base: datos.direccion_base.trim(),
+      },
    entrega: {
   tipo: datos.tipo_entrega,
   detalles: '',
@@ -322,13 +321,8 @@ readonly puedeCrearPresupuesto = computed(
 
     const telefonoCliente =
       this.datosPresupuesto.telefono_cliente.trim();
-
-    const descuento = Number(
-      this.datosPresupuesto.descuento
-    );
-
-    const subtotal = this.cartService.totalPrice();
-    const total = subtotal - descuento;
+const descuento = 0;
+const total = this.cartService.totalPrice();
 
     if (nombreCliente.length < 2) {
       this.errorPresupuesto.set(
@@ -337,15 +331,7 @@ readonly puedeCrearPresupuesto = computed(
       return;
     }
 
-    if (
-      !Number.isFinite(descuento) ||
-      descuento < 0
-    ) {
-      this.errorPresupuesto.set(
-        'El descuento debe ser un número válido mayor o igual a cero.'
-      );
-      return;
-    }
+   
 
     if (!Number.isFinite(total) || total <= 0) {
       this.errorPresupuesto.set(
@@ -406,14 +392,16 @@ readonly puedeCrearPresupuesto = computed(
             return;
           }
 
-          this.presupuestoCreado.set(response.data.id);
-          this.mostrarFormularioPresupuesto.set(false);
+       this.telefonoPresupuestoCreado.set(telefonoCliente);
+this.errorEnvioPresupuesto.set('');
 
-          this.datosPresupuesto = {
-            nombre_cliente: '',
-            telefono_cliente: '',
-            descuento: 0,
-          };
+this.presupuestoCreado.set(response.data.id);
+this.mostrarFormularioPresupuesto.set(false);
+
+       this.datosPresupuesto = {
+  nombre_cliente: '',
+  telefono_cliente: '',
+};
 
           this.cartService.clear();
         },
@@ -435,10 +423,82 @@ readonly puedeCrearPresupuesto = computed(
       });
   }
 
-  cerrarConfirmacionPresupuesto(): void {
-    this.presupuestoCreado.set('');
-    this.close();
+  // ENVIAR PRESUPUESTO RECIÉN CREADO POR WHATSAPP
+enviarPresupuestoPorWhatsApp(): void {
+  const presupuestoId = this.presupuestoCreado();
+
+  if (
+    !this.puedeCrearPresupuesto() ||
+    !presupuestoId ||
+    this.enviandoPresupuestoWhatsApp()
+  ) {
+    return;
   }
+
+  this.errorEnvioPresupuesto.set('');
+
+  const ventana = window.open('about:blank', '_blank');
+
+  if (!ventana) {
+    this.errorEnvioPresupuesto.set(
+      'No se pudo abrir WhatsApp. Verifica los permisos de ventanas emergentes.'
+    );
+    return;
+  }
+
+  ventana.opener = null;
+
+  this.enviandoPresupuestoWhatsApp.set(true);
+
+  this.presupuestoService
+    .enviarPresupuesto({
+      presupuestoId,
+      telefonoSolicitado:
+        this.telefonoPresupuestoCreado() || undefined,
+    })
+    .subscribe({
+      next: (response) => {
+        this.enviandoPresupuestoWhatsApp.set(false);
+
+        if (!response.success || !response.data?.whatsappUrl) {
+          ventana.close();
+
+          this.errorEnvioPresupuesto.set(
+            response.message ||
+            'No se pudo generar el enlace de WhatsApp.'
+          );
+
+          return;
+        }
+
+        ventana.location.href = response.data.whatsappUrl;
+      },
+
+      error: (error: HttpErrorResponse) => {
+        this.enviandoPresupuestoWhatsApp.set(false);
+        ventana.close();
+
+        console.error(
+          'ERROR AL ENVIAR PRESUPUESTO POR WHATSAPP:',
+          error
+        );
+
+        this.errorEnvioPresupuesto.set(
+          error.error?.message ??
+          'No se pudo generar el enlace de WhatsApp.'
+        );
+      },
+    });
+}
+cerrarConfirmacionPresupuesto(): void {
+  if (this.enviandoPresupuestoWhatsApp()) return;
+
+  this.presupuestoCreado.set('');
+  this.telefonoPresupuestoCreado.set('');
+  this.errorEnvioPresupuesto.set('');
+
+  this.close();
+}
 
   @HostListener('document:keydown.escape')
   onEscape(): void {
