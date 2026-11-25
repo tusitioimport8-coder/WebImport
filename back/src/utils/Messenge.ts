@@ -84,14 +84,14 @@ export function generarLinkPresupuestoWhatsAppHelper(
   const presupuesto = data.datosPresupuesto;
 
   let mensaje = `Hola ${presupuesto.clienteNombre}, somos *Tu Sitio Import* y este es tu presupuesto:\n\n`;
-  mensaje += `📋 *Presupuesto Nro.:* ${presupuesto.idPresupuesto.substring(0, 8).toUpperCase()}\n\n`;
-  mensaje += `🛒 *Productos:*\n`;
+  mensaje += `*Presupuesto Nro.:* ${presupuesto.idPresupuesto.substring(0, 8).toUpperCase()}\n\n`;
+  mensaje += `*Productos:*\n`;
 
   for (const item of presupuesto.items) {
     mensaje += `• ${item.cantidad}x ${item.nombre} - $${item.subtotal.toFixed(2)}\n`;
   }
 
-  mensaje += `\n💰 *Total:* $${Number(presupuesto.total).toFixed(2)}\n\n`;
+  mensaje += `\n*Total:* $${Number(presupuesto.total).toFixed(2)}\n\n`;
   mensaje += `Si tienes alguna duda, haznos saber.`;
 
   const whatsappUrl = `https://wa.me/${telefonoLimpio}?text=${encodeURIComponent(mensaje)}`;
