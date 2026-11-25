@@ -1,11 +1,9 @@
-
 <section class="presupuestos-page">
   <div class="presupuestos-container">
-
     <header class="presupuestos-header">
       <a routerLink="/inicio" class="btn-volver" title="Volver al inicio">
-  <i class="pi pi-arrow-left"></i>
-</a>
+        <i class="pi pi-arrow-left"></i>
+      </a>
       <div>
         <span class="presupuestos-eyebrow">Fuerza de Ventas</span>
         <h1>Presupuestos</h1>
@@ -49,7 +47,6 @@
         <p>Los presupuestos creados aparecerán aquí.</p>
       </div>
     } @else if (presupuestos().length > 0) {
-
       <div class="presupuestos-toolbar">
         <div class="listado-resumen">
           Presupuestos:
@@ -70,10 +67,7 @@
 
           <label class="filtro-estado">
             <span>Filtrar por estado</span>
-            <select
-              [ngModel]="filtroEstado()"
-              (ngModelChange)="filtroEstado.set($event)"
-            >
+            <select [ngModel]="filtroEstado()" (ngModelChange)="filtroEstado.set($event)">
               <option value="todos">Todos los estados</option>
               <option value="vendido">Vendido</option>
               <option value="proceso">Proceso</option>
@@ -86,12 +80,9 @@
       <div class="presupuestos-lista">
         @for (presupuesto of presupuestosFiltrados(); track presupuesto.id) {
           <article class="presupuesto-card">
-
             <div class="presupuesto-principal">
               <div class="presupuesto-info">
-                <span class="presupuesto-id">
-                  Presupuesto #{{ presupuesto.id.slice(0, 8) }}
-                </span>
+                <span class="presupuesto-id"> Presupuesto #{{ presupuesto.id.slice(0, 8) }} </span>
 
                 <h2>{{ presupuesto.nombre_cliente }}</h2>
 
@@ -120,13 +111,11 @@
               <div class="presupuesto-totales">
                 <span>Total</span>
                 <strong>
-                  {{ presupuesto.total | currency:'USD':'symbol':'1.2-2' }}
+                  {{ presupuesto.total | currency: 'USD' : 'symbol' : '1.2-2' }}
                 </strong>
 
                 @if (presupuesto.descuento > 0) {
-                  <small>
-                    Descuento: {{ presupuesto.descuento }}%
-                  </small>
+                  <small> Descuento: {{ presupuesto.descuento }}% </small>
                 }
               </div>
             </div>
@@ -145,9 +134,7 @@
                   [class.pi-eye-slash]="presupuestoExpandido() === presupuesto.id"
                 ></i>
                 {{
-                  presupuestoExpandido() === presupuesto.id
-                    ? 'Ocultar detalles'
-                    : 'Ver detalles'
+                  presupuestoExpandido() === presupuesto.id ? 'Ocultar detalles' : 'Ver detalles'
                 }}
               </button>
 
@@ -158,11 +145,7 @@
                 (click)="iniciarEdicion(presupuesto)"
               >
                 <i class="pi pi-pencil"></i>
-                {{
-                  editandoId() === presupuesto.id
-                    ? 'Cancelar edición'
-                    : 'Editar'
-                }}
+                {{ editandoId() === presupuesto.id ? 'Cancelar edición' : 'Editar' }}
               </button>
 
               <button
@@ -178,9 +161,7 @@
                   [class.pi-spinner]="enviandoId() === presupuesto.id"
                 ></i>
                 {{
-                  enviandoId() === presupuesto.id
-                    ? 'Generando enlace...'
-                    : 'Enviar por WhatsApp'
+                  enviandoId() === presupuesto.id ? 'Generando enlace...' : 'Enviar por WhatsApp'
                 }}
               </button>
 
@@ -196,11 +177,7 @@
                   [class.pi-spin]="eliminandoId() === presupuesto.id"
                   [class.pi-spinner]="eliminandoId() === presupuesto.id"
                 ></i>
-                {{
-                  eliminandoId() === presupuesto.id
-                    ? 'Eliminando...'
-                    : 'Eliminar'
-                }}
+                {{ eliminandoId() === presupuesto.id ? 'Eliminando...' : 'Eliminar' }}
               </button>
             </div>
 
@@ -212,7 +189,6 @@
                 <h3>Editar presupuesto</h3>
 
                 <div class="edicion-grid">
-
                   <label class="edicion-campo">
                     <span>Nombre del cliente</span>
                     <input
@@ -260,7 +236,6 @@
                       <option value="cancelado">Cancelado</option>
                     </select>
                   </label>
-
                 </div>
 
                 <div class="edicion-productos">
@@ -280,7 +255,6 @@
 
                   @for (detalle of edicionDetalles(); track $index; let i = $index) {
                     <div class="edicion-producto">
-
                       <div class="edicion-campo selector-producto">
                         <span>Producto</span>
 
@@ -297,7 +271,6 @@
 
                         @if (selectorProductoAbierto() === i) {
                           <div class="selector-producto-dropdown">
-
                             <div class="selector-producto-busqueda">
                               <i class="pi pi-search"></i>
 
@@ -331,7 +304,6 @@
                                 </div>
                               }
                             </div>
-
                           </div>
                         }
                       </div>
@@ -370,14 +342,13 @@
                       >
                         <i class="pi pi-trash"></i>
                       </button>
-
                     </div>
                   }
                 </div>
 
                 <p class="edicion-nota">
-                  El total se recalculará en el servidor según los
-                  productos, precios disponibles y descuento.
+                  El total se recalculará en el servidor según los productos, precios disponibles y
+                  descuento.
                 </p>
 
                 <div class="edicion-acciones">
@@ -390,11 +361,7 @@
                     Cancelar
                   </button>
 
-                  <button
-                    type="submit"
-                    class="btn-guardar-edicion"
-                    [disabled]="guardando()"
-                  >
+                  <button type="submit" class="btn-guardar-edicion" [disabled]="guardando()">
                     <i
                       class="pi"
                       [class.pi-save]="!guardando()"
@@ -435,16 +402,13 @@
                             <td>{{ detalle.cantidad }}</td>
 
                             <td>
-                              {{
-                                detalle.precio_unitario
-                                  | currency:'USD':'symbol':'1.2-2'
-                              }}
+                              {{ detalle.precio_unitario | currency: 'USD' : 'symbol' : '1.2-2' }}
                             </td>
 
                             <td>
                               {{
                                 detalle.precio_unitario * detalle.cantidad
-                                  | currency:'USD':'symbol':'1.2-2'
+                                  | currency: 'USD' : 'symbol' : '1.2-2'
                               }}
                             </td>
                           </tr>
@@ -459,12 +423,11 @@
                 <div class="detalle-total">
                   <span>Total del presupuesto</span>
                   <strong>
-                    {{ presupuesto.total | currency:'USD':'symbol':'1.2-2' }}
+                    {{ presupuesto.total | currency: 'USD' : 'symbol' : '1.2-2' }}
                   </strong>
                 </div>
               </div>
             }
-
           </article>
         } @empty {
           <div class="estado-vacio">
@@ -475,6 +438,5 @@
         }
       </div>
     }
-
   </div>
 </section>

@@ -1082,7 +1082,7 @@ private mapApiProduct(product: ApiProduct): HomeProduct {
     id: product.id,
     name: product.nombre,
     description: product.descripcion ?? '',
-    price: prices.detal_bs ?? 0,
+    price: prices.detal_usd ?? 0,
     quantity: Number(product.stock ?? 0),
     imageUrl: product.imagen_url,
    category: product.categorias

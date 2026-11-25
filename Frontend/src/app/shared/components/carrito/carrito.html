@@ -189,7 +189,11 @@
 
               <!-- PRECIO -->
               <strong class="item-price">
-                {{ item.price | currency:'USD':'symbol':'1.2-2' }}
+                @if (item.priceType === 'detal_bs') {
+                  Bs. {{ item.price | number:'1.2-2':'es-VE' }}
+                } @else {
+                  {{ item.price | currency:'USD':'symbol':'1.2-2' }}
+                }
               </strong>
 
               <div class="item-bottom">
@@ -217,10 +221,11 @@
 
                 <!-- SUBTOTAL -->
                 <span class="item-subtotal">
-                  {{
-                    item.price * item.quantity
-                      | currency:'USD':'symbol':'1.2-2'
-                  }}
+                  @if (item.priceType === 'detal_bs') {
+                    Bs. {{ item.price * item.quantity | number:'1.2-2':'es-VE' }}
+                  } @else {
+                    {{ item.price * item.quantity | currency:'USD':'symbol':'1.2-2' }}
+                  }
                 </span>
               </div>
             </div>
@@ -242,10 +247,15 @@
         <div class="total-row">
           <span>Total</span>
           <strong>
-            {{
-              cartService.totalPrice()
-                | currency:'USD':'symbol':'1.2-2'
-            }}
+            {{ totalPriceUSD() | currency:'USD':'symbol':'1.2-2' }}
+            <br />
+            <small>
+              @if (totalPriceBs() !== null) {
+                Bs. {{ totalPriceBs() | number:'1.2-2':'es-VE' }}
+              } @else {
+                Tasa BCV no disponible
+              }
+            </small>
           </strong>
         </div>
       </div>

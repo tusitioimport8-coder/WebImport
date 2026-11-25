@@ -1,11 +1,12 @@
 
-import { CurrencyPipe } from '@angular/common';
+import { CurrencyPipe, DecimalPipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import {
   ChangeDetectionStrategy,
   Component,
   HostListener,
+  OnInit,
   computed,
   inject,
   input,
@@ -14,6 +15,7 @@ import {
 import { TuiButton } from '@taiga-ui/core';
 
 import { AuthService } from '../../../services/auth';
+import { BcvService } from '../../../services/bcv.service';
 import { CartPriceType, CartService } from '../../../services/cart';
 import {
   PedidoService,
@@ -28,16 +30,41 @@ import {
 @Component({
   selector: 'app-carrito',
   standalone: true,
-  imports: [CurrencyPipe, FormsModule, TuiButton],
+  imports: [CurrencyPipe, DecimalPipe, FormsModule, TuiButton],
   templateUrl: './carrito.html',
   styleUrl: './carrito.less',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class Carrito {
+export class Carrito implements OnInit {
   readonly cartService = inject(CartService);
   readonly pedidoService = inject(PedidoService);
   readonly authService = inject(AuthService);
+  private readonly bcvService = inject(BcvService);
   private readonly presupuestoService = inject(PresupuestoService);
+
+  readonly tasaBCV = signal<number | null>(null);
+  readonly totalPriceUSD = computed(() =>
+    this.cartService.priceMode() === 'detal_bs'
+      ? this.cartService.baseTotalUSD()
+      : this.cartService.totalPrice()
+  );
+  readonly totalPriceBs = computed(() => {
+    const tasa = this.tasaBCV();
+
+    return tasa === null
+      ? null
+      : this.bcvService.convertirABolivares(this.totalPriceUSD(), tasa);
+  });
+
+  ngOnInit(): void {
+    this.bcvService.getRate().subscribe({
+      next: tasa => this.tasaBCV.set(tasa),
+      error: error => {
+        console.error('[BCV] Error al obtener la tasa para el carrito:', error);
+        this.tasaBCV.set(null);
+      },
+    });
+  }
 
   // FUERZA DE VENTAS
   readonly esFuerzaVentas = computed(
