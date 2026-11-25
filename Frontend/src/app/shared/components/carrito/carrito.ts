@@ -56,6 +56,10 @@ export class Carrito implements OnInit {
       : this.bcvService.convertirABolivares(this.totalPriceUSD(), tasa);
   });
 
+  getSubtotalBolivares(precio: number, cantidad: number, tasa: number): number {
+    return this.bcvService.convertirABolivares(precio * cantidad, tasa);
+  }
+
   ngOnInit(): void {
     this.bcvService.getRate().subscribe({
       next: tasa => this.tasaBCV.set(tasa),
