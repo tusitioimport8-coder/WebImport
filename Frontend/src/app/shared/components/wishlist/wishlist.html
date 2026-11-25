@@ -105,3 +105,46 @@
 }
 
 </aside>
+
+@if (wishlistService.sessionRequired()) {
+  <div
+    class="wishlist-session-backdrop"
+    (click)="dismissSessionPrompt()"
+  >
+    <section
+      class="wishlist-session-modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="wishlist-session-title"
+      aria-describedby="wishlist-session-message"
+      (click)="$event.stopPropagation()"
+    >
+      <div class="wishlist-session-icon">
+        <i class="pi pi-lock"></i>
+      </div>
+
+      <h2 id="wishlist-session-title">Inicia sesión</h2>
+      <p id="wishlist-session-message">
+        No puedes guardar productos en favoritos hasta que inicies sesión.
+      </p>
+
+      <div class="wishlist-session-actions">
+        <button
+          type="button"
+          class="wishlist-session-cancel"
+          (click)="dismissSessionPrompt()"
+        >
+          Ahora no
+        </button>
+        <button
+          type="button"
+          class="wishlist-session-login"
+          (click)="goToSession()"
+        >
+          <i class="pi pi-sign-in"></i>
+          Iniciar sesión
+        </button>
+      </div>
+    </section>
+  </div>
+}
