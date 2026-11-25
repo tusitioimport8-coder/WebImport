@@ -83,16 +83,25 @@ export function generarLinkPresupuestoWhatsAppHelper(
   );
   const presupuesto = data.datosPresupuesto;
 
-  let mensaje = `Hola ${presupuesto.clienteNombre}, somos *Tu Sitio Import* y este es tu presupuesto:\n\n`;
+  let mensaje = `Hola ${presupuesto.clienteNombre}, somos *Tu Sitio Import* y este es el presupuesto que nos solicitaste:\n\n`;
   mensaje += `*Presupuesto Nro.:* ${presupuesto.idPresupuesto.substring(0, 8).toUpperCase()}\n\n`;
   mensaje += `*Productos:*\n`;
 
   for (const item of presupuesto.items) {
-    mensaje += `• ${item.cantidad}x ${item.nombre} - $${item.subtotal.toFixed(2)}\n`;
+    mensaje += `• ${item.cantidad} x ${item.nombre} $\n`;
+    mensaje += `  USD: $${item.subtotal.toFixed(2)}\n`;
   }
 
   mensaje += `\n*Total:* $${Number(presupuesto.total).toFixed(2)}\n\n`;
-  mensaje += `Si tienes alguna duda, haznos saber.`;
+
+  mensaje += `Contamos con métodos super cómodos para que pagues como te sea más fácil:\n`;
+  mensaje += `• Zelle.\n`;
+  mensaje += `• Efectivo.\n`;
+  mensaje += `• Binance (USDT)\n`;
+  mensaje += `• Pago Movil / Transferencias.\n`;
+  mensaje += `• Caseha\n\n`;
+
+  mensaje += `¿Que forma de pago quieres elegir en este momento? `;
 
   const whatsappUrl = `https://wa.me/${telefonoLimpio}?text=${encodeURIComponent(mensaje)}`;
   return { whatsappUrl, mensaje };
