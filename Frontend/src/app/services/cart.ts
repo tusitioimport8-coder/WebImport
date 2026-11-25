@@ -131,6 +131,29 @@ export class CartService {
     )
   );
 
+  // AHORRO TOTAL DE LA COMPRA
+readonly totalSavings = computed(() => {
+  if (this.priceMode() === 'detal_bs') {
+    return 0;
+  }
+
+  return Math.max(
+    0,
+    this.baseTotalUSD() - this.totalPrice()
+  );
+});
+
+// PORCENTAJE DE AHORRO
+readonly savingsPercentage = computed(() => {
+  const original = this.baseTotalUSD();
+
+  if (original <= 0) {
+    return 0;
+  }
+
+  return (this.totalSavings() / original) * 100;
+});
+
   readonly isEmpty = computed(
     () => this.itemsState().length === 0
   );

@@ -352,6 +352,55 @@ background: transparent;
     }
   }
 }
+
+/* AHORRO DE LA COMPRA */
+.cart-summary > .cart-original-price {
+  strong {
+    text-decoration: line-through;
+    opacity: .85;
+  }
+}
+
+.cart-summary > .cart-savings {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #baff00;
+  color: #000;
+
+  .cart-savings-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+  }
+
+  .cart-savings-title {
+    font-size: .8rem;
+    font-weight: 900;
+
+    i {
+      margin-right: 4px;
+      font-size: .8rem;
+    }
+  }
+
+  small {
+    font-size: .65rem;
+    font-weight: 600;
+    color: #000;
+  }
+
+  .cart-savings-amount {
+    color: #000;
+    font-size: 1.15rem;
+    font-weight: 900;
+    white-space: nowrap;
+  }
+}
 .total-row {
   padding: 0;
   border: 0;

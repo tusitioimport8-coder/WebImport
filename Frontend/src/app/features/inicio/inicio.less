@@ -746,18 +746,35 @@
     border-radius: 18px;
   }
 }
-
 @media (max-width: 820px) {
   .promo-wide {
     width: calc(100% - 2rem);
 
     .promo-card_full {
-      height: 230px;
-      min-height: 230px;
+      width: 100%;
+      height: auto;
+      min-height: 0;
+      aspect-ratio: 1180 / 320;
+      padding: 0;
+    }
+
+    .promo-slide {
+      background-size: contain;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+
+    .promo-dots {
+      bottom: 8px;
+      gap: 6px;
+    }
+
+    .promo-dot {
+      width: 7px;
+      height: 7px;
     }
   }
 }
-
 
 /* Ajustar imágenes de los tres banners */
 .promo-grid,
@@ -1320,9 +1337,16 @@ border-radius: 50% !important;
     height: 32px;
   }
 
-  .benefit-card:has(.benefit-custom-image) {
-    min-height: 90px;
-  }
+ .benefit-card:has(.benefit-custom-image) {
+  height: auto;
+  min-height: 0;
+  aspect-ratio: 4.5 / 1;
+  padding: 0;
+}
+
+.benefit-custom-image {
+  object-fit: contain;
+}
 }
 
 /* ==========================================
@@ -1359,22 +1383,44 @@ border-radius: 50% !important;
   background-position: center;
   background-repeat: no-repeat;
 }
-
-/* TABLETS Y TELÉFONOS */
+/* BANNERS SUPERIORES RESPONSIVE */
 @media (max-width: 820px) {
-  .promo-grid > .promo-card {
-    height: 230px !important;
-    min-height: 230px !important;
-    max-height: 230px !important;
-  }
-}
 
-/* TELÉFONOS PEQUEÑOS */
-@media (max-width: 560px) {
+  .promo-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+  }
+
   .promo-grid > .promo-card {
-    height: 180px !important;
-    min-height: 180px !important;
-    max-height: 180px !important;
+    width: 100%;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    padding: 0 !important;
+  }
+
+  .promo-grid > .promo-card_primary {
+    aspect-ratio: 2.55 / 1;
+  }
+
+  .promo-grid > .promo-card_secondary {
+    aspect-ratio: 1.8 / 1;
+  }
+
+  .promo-grid .promo-slide {
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+  }
+
+  .promo-grid .promo-dots {
+    bottom: 8px;
+    gap: 6px;
+  }
+
+  .promo-grid .promo-dot {
+    width: 7px;
+    height: 7px;
   }
 }
 /* FAVORITOS: VERDE Y ROSADO EN AMBOS ESTADOS */
