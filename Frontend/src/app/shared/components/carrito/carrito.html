@@ -95,9 +95,9 @@
       </span>
 
       @if (cartService.nextTier(); as next) {
-        <strong>
-          Te falta para {{ next.name }}
-        </strong>
+       <strong>
+  Desbloquea el precio al {{ next.name }} y ahorra en tu compra
+</strong>
 
         <div class="cart-tier-track">
           <div
@@ -239,12 +239,43 @@
   @if (!cartService.isEmpty()) {
     <footer class="cart-footer">
       <div class="cart-summary">
-        <div>
-          <span>Productos</span>
-          <strong>{{ cartService.totalItems() }}</strong>
-        </div>
+  <div>
+    <span>Productos</span>
+    <strong>{{ cartService.totalItems() }}</strong>
+  </div>
 
-        <div class="total-row">
+  @if (cartService.totalSavings() > 0.005) {
+
+    <div class="cart-original-price">
+      <span>Subtotal a Detal Divisas</span>
+      <strong>
+        {{ cartService.baseTotalUSD()
+          | currency:'USD':'symbol':'1.2-2' }}
+      </strong>
+    </div>
+
+    <div class="cart-savings">
+      <div class="cart-savings-info">
+        <span class="cart-savings-title">
+          <i class="pi pi-tag"></i>
+          ¡Estás ahorrando!
+        </span>
+
+        <small>
+          {{ cartService.savingsPercentage().toFixed(1) }}%
+          de ahorro por tu compra
+        </small>
+      </div>
+
+      <strong class="cart-savings-amount">
+        {{ cartService.totalSavings()
+          | currency:'USD':'symbol':'1.2-2' }}
+      </strong>
+    </div>
+
+  }
+
+  <div class="total-row">
           <span>Total</span>
           <strong>
             {{ totalPriceUSD() | currency:'USD':'symbol':'1.2-2' }}
