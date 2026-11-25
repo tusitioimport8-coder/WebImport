@@ -88,7 +88,7 @@ export function generarLinkPresupuestoWhatsAppHelper(
   mensaje += `*Productos:*\n`;
 
   for (const item of presupuesto.items) {
-    mensaje += `• ${item.cantidad} x ${item.nombre} $\n`;
+    mensaje += `• ${item.cantidad} x ${item.nombre}\n`;
     mensaje += `  USD: $${item.subtotal.toFixed(2)}\n`;
   }
 
