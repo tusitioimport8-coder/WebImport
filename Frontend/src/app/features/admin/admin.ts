@@ -47,6 +47,12 @@ isCurrentUser(user: ApiUser): boolean {
   readonly filteredUsers = computed(() => {
     const search = this.searchTerm().trim().toLowerCase();
     const role = this.roleFilter();
+    const roleOrder: Record<string, number> = {
+      ADMIN: 0,
+      F_VENTAS: 1,
+      MARKETING: 2,
+      CLIENTE: 3
+    };
 
     return this.users().filter(user => {
       const matchesSearch =
@@ -57,6 +63,11 @@ isCurrentUser(user: ApiUser): boolean {
       const matchesRole = role === 'TODOS' || user.rol.trim().toUpperCase() === role;
 
       return matchesSearch && matchesRole;
+    }).sort((a, b) => {
+      const aOrder = roleOrder[a.rol.trim().toUpperCase()] ?? 4;
+      const bOrder = roleOrder[b.rol.trim().toUpperCase()] ?? 4;
+
+      return aOrder - bOrder;
     });
   });
 
@@ -89,6 +100,27 @@ isCurrentUser(user: ApiUser): boolean {
 
   onRoleFilterChange(value: 'TODOS' | 'MARKETING' | 'CLIENTE' | 'F_VENTAS' | 'ADMIN'): void {
     this.roleFilter.set(value);
+  }
+
+  exportUsersCsv(): void {
+    const headers = ['Nombre completo', 'Correo', 'Teléfono', 'Rol'];
+    const rows = this.filteredUsers().map(user => [
+      user.nombre_completo,
+      user.correo,
+      user.telefono ?? '',
+      user.rol
+    ]);
+    const csv = [headers, ...rows]
+      .map(row => row.map(value => `"${value.replace(/"/g, '""')}"`).join(';'))
+      .join('\r\n');
+    const blob = new Blob(['\uFEFF', csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+
+    link.href = url;
+    link.download = 'usuarios.csv';
+    link.click();
+    URL.revokeObjectURL(url);
   }
 
   editUser(user: ApiUser): void {

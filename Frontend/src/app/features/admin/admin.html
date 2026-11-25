@@ -12,14 +12,26 @@
       </div>
     </div>
 
-    <button
-      type="button"
-      class="refresh-button"
-      (click)="loadUsers()"
-      [disabled]="loading()"
-    >
-      Actualizar listado
-    </button>
+    <div class="header-actions">
+      <button
+        type="button"
+        class="export-button"
+        (click)="exportUsersCsv()"
+        [disabled]="loading() || filteredUsers().length === 0"
+      >
+        <i class="pi pi-download" aria-hidden="true"></i>
+        Exportar CSV
+      </button>
+
+      <button
+        type="button"
+        class="refresh-button"
+        (click)="loadUsers()"
+        [disabled]="loading()"
+      >
+        Actualizar listado
+      </button>
+    </div>
   </header>
 
   <div class="admin-toolbar">
