@@ -375,14 +375,14 @@ private readonly bcvService = inject(BcvService);
 
 readonly tasaBCV = signal<number | null>(null);
 
-getPrecioBCV(precioUSD: number): number | null {
+getPrecioBCV(precioDetalBs: number): number | null {
   const tasa = this.tasaBCV();
 
   if (tasa === null) {
     return null;
   }
 
-  return this.bcvService.convertirABolivares(precioUSD, tasa);
+  return this.bcvService.convertirABolivares(precioDetalBs, tasa);
 }
 
 private cargarTasaBCV(): void {
