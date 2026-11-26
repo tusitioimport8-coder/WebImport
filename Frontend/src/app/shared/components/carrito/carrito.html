@@ -197,7 +197,7 @@
                     @if (tasaBCV(); as tasa) {
                       Bs.
                       {{
-                        getSubtotalBolivares(item.price, item.quantity, tasa)
+                        getSubtotalBolivares(item.price, 1, tasa)
                           | number: '1.2-2' : 'es-VE'
                       }}
                     } @else {
