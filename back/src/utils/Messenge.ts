@@ -108,7 +108,7 @@ export function generarLinkPresupuestoWhatsAppHelper(
 
   for (const item of presupuesto.items) {
     mensaje += `• ${item.cantidad} x ${item.nombre}\n`;
-    mensaje += `\t\t ${formatearTarifa(item.tipo_precio)}: ${formatearMontoPresupuesto(item.subtotal, item.tipo_precio)}\n`;
+    mensaje += `\t ${formatearTarifa(item.tipo_precio)}: ${formatearMontoPresupuesto(item.subtotal, item.tipo_precio)}\n`;
   }
 
   const tiposPrecio = new Set(
@@ -126,7 +126,7 @@ export function generarLinkPresupuestoWhatsAppHelper(
   mensaje += `• Efectivo.\n`;
   mensaje += `• Binance (USDT)\n`;
   mensaje += `• Pago Movil / Transferencias.\n`;
-  mensaje += `• Caseha\n\n`;
+  mensaje += `• Cashea\n\n`;
 
   mensaje += `¿Que forma de pago quieres elegir en este momento? `;
 
