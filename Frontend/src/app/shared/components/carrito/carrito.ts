@@ -43,9 +43,7 @@ export class Carrito implements OnInit {
 
   readonly tasaBCV = signal<number | null>(null);
   readonly totalPriceUSD = computed(() =>
-    this.cartService.priceMode() === 'detal_bs'
-      ? this.cartService.baseTotalUSD()
-      : this.cartService.totalPrice()
+    this.cartService.totalPrice()
   );
   readonly totalPriceBs = computed(() => {
     const tasa = this.tasaBCV();
