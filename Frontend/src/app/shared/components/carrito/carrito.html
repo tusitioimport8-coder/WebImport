@@ -191,7 +191,7 @@
               <!-- PRECIO -->
               <strong class="item-price">
                 @if (item.priceType === 'detal_bs') {
-                  Bs. {{ item.price | number:'1.2-2':'es-VE' }}
+                  $ {{ item.price | number:'1.2-2':'es-VE' }}
                 } @else {
                   {{ item.price | currency:'USD':'symbol':'1.2-2' }}
                 }
@@ -223,7 +223,12 @@
                 <!-- SUBTOTAL -->
                 <span class="item-subtotal">
                   @if (item.priceType === 'detal_bs') {
-                    Bs. {{ item.price * item.quantity | number:'1.2-2':'es-VE' }}
+                    @if (tasaBCV(); as tasa) {
+                      Bs. {{ getSubtotalBolivares(item.price, item.quantity, tasa)
+                        | number:'1.2-2':'es-VE' }}
+                    } @else {
+                      Tasa BCV no disponible
+                    }
                   } @else {
                     {{ item.price * item.quantity | currency:'USD':'symbol':'1.2-2' }}
                   }
