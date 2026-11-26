@@ -187,15 +187,10 @@
   }
 </span>
 
-
-              <!-- PRECIO -->
-              <strong class="item-price">
-                @if (item.priceType === 'detal_bs') {
-                  Bs. {{ item.price | number:'1.2-2':'es-VE' }}
-                } @else {
-                  {{ item.price | currency:'USD':'symbol':'1.2-2' }}
-                }
-              </strong>
+<!-- PRECIO -->
+<strong class="item-price">
+  {{ item.price | currency:'USD':'$':'1.2-2' }}
+</strong>
 
               <div class="item-bottom">
                 <!-- CANTIDAD -->
@@ -220,14 +215,10 @@
                   </button>
                 </div>
 
-                <!-- SUBTOTAL -->
-                <span class="item-subtotal">
-                  @if (item.priceType === 'detal_bs') {
-                    Bs. {{ item.price * item.quantity | number:'1.2-2':'es-VE' }}
-                  } @else {
-                    {{ item.price * item.quantity | currency:'USD':'symbol':'1.2-2' }}
-                  }
-                </span>
+              <!-- SUBTOTAL -->
+<span class="item-subtotal">
+  {{ item.price * item.quantity | currency:'USD':'$':'1.2-2' }}
+</span>
               </div>
             </div>
           </article>
