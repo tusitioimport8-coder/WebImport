@@ -217,7 +217,15 @@
 
               <!-- SUBTOTAL -->
 <span class="item-subtotal">
-  {{ item.price * item.quantity | currency:'USD':'$':'1.2-2' }}
+  @if (item.priceType === 'detal_bs') {
+    @if (tasaBCV() !== null) {
+      Bs. {{ item.price * (tasaBCV() ?? 0) | number:'1.2-2':'es-VE' }}
+    } @else {
+      Tasa BCV no disponible
+    }
+  } @else {
+    {{ item.price * item.quantity | currency:'USD':'$':'1.2-2' }}
+  }
 </span>
               </div>
             </div>
