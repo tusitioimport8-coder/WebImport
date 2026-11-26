@@ -83,9 +83,6 @@
             {{ product.stock > 0 ? 'En stock' : 'Agotado' }}
           </span>
 
-          <span class="stock-text">
-            {{ product.stock }} disponibles
-          </span>
         </div>
 
         <!-- PRECIO DESTACADO -->
@@ -224,11 +221,11 @@
             </summary>
 
             <div class="accordion-content">
-              <p>
-                {{ product.stock > 0
-                  ? 'Unidades disponibles: ' + product.stock
-                  : 'Producto agotado' }}
-              </p>
+            <p>
+  {{ product.stock > 0
+    ? 'Producto disponible'
+    : 'Producto agotado' }}
+</p>
             </div>
           </details>
 

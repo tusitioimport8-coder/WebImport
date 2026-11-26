@@ -1286,23 +1286,25 @@
     }
   }
 }
-
 @media (max-width: 900px) {
   .footer-categories-grid {
     height: auto;
     max-width: 100%;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     column-gap: 12px;
+    align-items: stretch;
   }
 
   .footer-category-column {
     height: auto;
+    align-self: stretch;
+    justify-content: space-between;
     gap: 8px;
-    justify-content: flex-start;
 
     a:not(.footer-categories-more) {
       max-width: 100%;
       white-space: normal;
+      flex-shrink: 0;
     }
   }
 }

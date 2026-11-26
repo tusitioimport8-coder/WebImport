@@ -409,37 +409,44 @@ formatearBCV(precioUSD: number): string {
       }
     });
   }
+// SELECCIONAR PRODUCTO
+selectProduct(productId: string): void {
+  const product = this.products().find(
+    item => item.id === productId
+  );
 
-  // SELECCIONAR PRODUCTO
-  selectProduct(productId: string): void {
-    const product = this.products().find(
-      item => item.id === productId
-    );
+  if (!product) return;
 
-    if (!product) return;
+  this.product.set(product);
+  this.quantity.set(1);
 
-    this.product.set(product);
-    this.quantity.set(1);
+  const categoriasProducto = new Set(
+    (product.categorias ?? []).map(
+      categoria => categoria.id_categoria
+    )
+  );
 
-    const possibleRelated = this.products().filter(
-      item =>
-        item.id !== product.id &&
-        Number(item.stock) > 0 &&
-        item.estado
-    );
+  const possibleRelated = this.products().filter(
+    item =>
+      item.id !== product.id &&
+      Number(item.stock) > 0 &&
+      item.estado &&
+      (item.categorias ?? []).some(
+        categoria => categoriasProducto.has(categoria.id_categoria)
+      )
+  );
 
-    this.relatedSelection.set(
-      this.getRandomProducts(possibleRelated, 5)
-    );
+  this.relatedSelection.set(
+    this.getRandomProducts(possibleRelated, 5)
+  );
 
   this.selectedPriceType.set('DetalBCV');
 
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth'
-    });
-  }
-
+  window.scrollTo({
+    top: 0,
+    behavior: 'smooth'
+  });
+}
   // PRECIOS
   selectPrice(type: TipoPrecioVisual): void {
  if (type !== 'DetalBCV' && type !== 'detal_usd') return;
