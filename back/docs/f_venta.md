@@ -44,8 +44,8 @@ al menos un producto.
 | `id`               | `string` | No          | Si se envía, debe ser un UUID válido. Si se omite, se genera automáticamente. |
 | `nombre_cliente`   | `string` | Sí          | Debe tener al menos 2 caracteres.                                             |
 | `telefono_cliente` | `string` | No          | Teléfono del cliente.                                                         |
-| `descuento`        | `number` | No          | Debe ser mayor o igual a `0`. Si se omite, se guarda como `0`.                |
-| `total`            | `number` | Sí          | Debe ser mayor que `0`.                                                       |
+| `descuento`        | `number` | No          | Porcentaje entre `0` y `100`. Si se omite, se usa `0`.                        |
+| `total`            | `number` | No          | Se recalcula en el servidor; el valor enviado, si existe, se ignora.          |
 | `detalles`         | `array`  | Sí          | Debe contener al menos un producto.                                           |
 
 Cada elemento de `detalles` debe contener:
@@ -54,8 +54,8 @@ Cada elemento de `detalles` debe contener:
 | ----------------- | --------- | ----------- | --------------------------------- |
 | `producto_id`     | `string`  | Sí          | Debe ser un UUID válido.          |
 | `cantidad`        | `integer` | Sí          | Debe ser un entero mayor que `0`. |
-| `precio_unitario` | `number`  | Sí          | Debe ser mayor que `0`.           |
-| `tipo_precio`     | `string`  | Sí          | No puede estar vacío.             |
+| `precio_unitario` | `number`  | No          | Si se envía, el servidor lo reemplaza por el precio del catálogo. |
+| `tipo_precio`     | `string`  | Sí          | `detal_usd`, `detal_bs`, `Mayor` o `GranMayor`; debe existir en el producto. |
 
 ### Ejemplo de request
 
@@ -68,13 +68,11 @@ Content-Type: application/json
 {
   "nombre_cliente": "Comercial El Sol",
   "telefono_cliente": "04141234567",
-  "descuento": 50,
-  "total": 1250.5,
+  "descuento": 10,
   "detalles": [
     {
       "producto_id": "550e8400-e29b-41d4-a716-446655440000",
       "cantidad": 2,
-      "precio_unitario": 650.25,
       "tipo_precio": "Mayor"
     }
   ]
@@ -87,17 +85,20 @@ También se puede enviar un `id` propio:
 {
   "id": "7f1d4b8e-1a2b-4c3d-9e5f-60718293a4b5",
   "nombre_cliente": "Comercial El Sol",
-  "total": 1250.5,
   "detalles": [
     {
       "producto_id": "550e8400-e29b-41d4-a716-446655440000",
       "cantidad": 2,
-      "precio_unitario": 650.25,
       "tipo_precio": "Mayor"
     }
   ]
 }
 ```
+
+El servidor calcula el `precio_unitario` desde el catálogo según el tipo
+solicitado y recalcula `total` sumando los subtotales, con el porcentaje de
+descuento aplicado. No se utilizan los valores de `precio_unitario` ni `total`
+enviados por el cliente.
 
 ### Datos recibidos — `201 Created`
 
@@ -114,8 +115,8 @@ detalles anidados.
     "id": "7f1d4b8e-1a2b-4c3d-9e5f-60718293a4b5",
     "nombre_cliente": "Comercial El Sol",
     "telefono_cliente": "04141234567",
-    "descuento": 50,
-    "total": 1250.5,
+    "descuento": 10,
+    "total": 1170.45,
     "detalles": [
       {
         "producto_id": "550e8400-e29b-41d4-a716-446655440000",
@@ -132,7 +133,16 @@ detalles anidados.
 > relacionados por la base de datos. Los campos enviados por el cliente son
 > los descritos en las tablas anteriores.
 
-### Errores de creación — `500 Internal Server Error`
+### Tipo de precio no disponible — `400 Bad Request`
+
+Si el producto no tiene registrado en el catálogo el `tipo_precio` solicitado,
+el presupuesto no se crea.
+
+### Producto no encontrado — `404 Not Found`
+
+Si alguno de los productos no existe, el presupuesto no se crea.
+
+### Error de creación — `500 Internal Server Error`
 
 Si ocurre un error en el repositorio o en la creación de la cabecera o de sus
 detalles, el controlador responde:
@@ -169,8 +179,8 @@ No requiere body, parámetros de ruta ni query parameters.
       "id": "7f1d4b8e-1a2b-4c3d-9e5f-60718293a4b5",
       "nombre_cliente": "Comercial El Sol",
       "telefono_cliente": "04141234567",
-      "descuento": 50,
-      "total": 1250.5,
+      "descuento": 10,
+      "total": 1170.45,
       "detalles": [
         {
           "producto_id": "550e8400-e29b-41d4-a716-446655440000",
@@ -283,7 +293,7 @@ Content-Type: application/json
 | `nombre_cliente`   | `string`  | No          | Debe tener al menos 2 caracteres.                            |
 | `telefono_cliente` | `string`  | No          | Teléfono del cliente. Puede omitirse para conservar el actual. |
 | `descuento`        | `number`  | No          | Debe estar entre `0` y `100`.                                |
-| `total`            | `number`  | No          | Debe ser mayor que `0`.                                      |
+| `total`            | `number`  | No          | Se recalcula desde el catálogo si se envían detalles; si no, puede actualizarse. |
 | `estado`           | `string`  | No          | Solo acepta `proceso`, `vendido` o `cancelado`.              |
 | `detalles`         | `array`   | No          | Si se incluye, debe contener al menos un producto.           |
 
@@ -293,8 +303,8 @@ Cada elemento de `detalles` debe tener este formato:
 | ----------------- | --------- | ----------- | ---------------------------------------------------------------------- |
 | `producto_id`     | `string`  | Sí          | Identificador del producto.                                           |
 | `cantidad`        | `number`  | Sí          | Debe ser mayor que `0`.                                                |
-| `precio_unitario` | `number`  | No          | Precio alternativo enviado por el cliente. Puede ser `0` o mayor.      |
-| `tipo_precio`     | `string`  | No          | `detal_usd`, `detal_bs`, `Mayor` o `GranMayor`.                        |
+| `precio_unitario` | `number`  | No          | Se reemplaza por el precio del catálogo correspondiente a `tipo_precio`. |
+| `tipo_precio`     | `string`  | Sí, si se envían detalles | `detal_usd`, `detal_bs`, `Mayor` o `GranMayor`; debe existir en el producto. |
 
 Ejemplo con edición completa:
 
@@ -334,10 +344,13 @@ Comportamiento de `detalles`:
 
 - Si se envía `detalles`, reemplaza todos los detalles anteriores.
 - Antes de reemplazar los detalles, se verifica que exista cada producto.
-- El servidor obtiene el precio desde el catálogo según `tipo_precio` y
-  `cantidad` cuando el tipo solicitado tiene un precio disponible.
-- Si no se envía `total`, el servidor recalcula el total a partir de los
-  precios de los detalles y aplica el descuento enviado o el descuento actual.
+- El servidor obtiene el precio unitario desde el catálogo según el
+  `tipo_precio` solicitado. Si el producto no tiene ese tipo, la edición falla
+  con un error `400`; no se usa otro tipo como fallback.
+- Si se envían detalles, el servidor siempre recalcula el total a partir de los
+  precios del catálogo y aplica el descuento enviado o el descuento actual;
+  ignora el `total` del cliente.
+- Si no se envían detalles, se puede actualizar `total` directamente.
 
 ### Datos recibidos — `200 OK`
 
@@ -437,8 +450,8 @@ GET /presupuestos/7f1d4b8e-1a2b-4c3d-9e5f-60718293a4b5
     "id": "7f1d4b8e-1a2b-4c3d-9e5f-60718293a4b5",
     "nombre_cliente": "Comercial El Sol",
     "telefono_cliente": "04141234567",
-    "descuento": 50,
-    "total": 1250.5,
+    "descuento": 10,
+    "total": 1170.45,
     "detalles": [
       {
         "producto_id": "550e8400-e29b-41d4-a716-446655440000",

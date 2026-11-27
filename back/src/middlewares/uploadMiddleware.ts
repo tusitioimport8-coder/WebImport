@@ -1,14 +1,17 @@
 import { Request, Response } from "express";
 import storageService, { StorageFolder } from "../components/StorageComponent";
 
-// Tipos MIME permitidos según el destino
-const ALLOWED_MIME_TYPES = [
+const IMAGE_MIME_TYPES = [
   "image/jpeg",
   "image/png",
   "image/webp",
   "image/gif",
   "image/svg+xml",
 ];
+
+const VIDEO_MIME_TYPES = ["video/mp4", "video/webm"];
+
+const ALLOWED_MIME_TYPES = [...IMAGE_MIME_TYPES, ...VIDEO_MIME_TYPES];
 
 export async function solicitarPresignedUrl(req: Request, res: Response) {
   try {
@@ -30,8 +33,7 @@ export async function solicitarPresignedUrl(req: Request, res: Response) {
       });
     }
 
-    // 3. Mapear la carpeta de destino basada en el enum
-
+    // 3. Validar y mapear la carpeta de destino
     if (!destino) {
       return res.status(400).json({
         success: false,
@@ -44,10 +46,16 @@ export async function solicitarPresignedUrl(req: Request, res: Response) {
 
     if (destino === "banners" || destino === "banner") {
       carpeta = StorageFolder.IMAGENES_BANNER; // "banners/imagenes"
-    } else if (destino === "usuarios" || destino === "usuario") {
+    } else if (
+      destino === "usuarios" ||
+      destino === "usuario" ||
+      destino === "avatar"
+    ) {
       carpeta = StorageFolder.USUARIO_AVATAR; // "usuarios/avatars"
     } else if (destino === "productos" || destino === "producto") {
       carpeta = StorageFolder.PRODUCTO_IMAGEN; // "productos/imagenes"
+    } else if (destino === "video") {
+      carpeta = StorageFolder.PRODUCTO_VIDEO;
     } else {
       return res.status(400).json({
         success: false,
@@ -55,10 +63,16 @@ export async function solicitarPresignedUrl(req: Request, res: Response) {
       });
     }
 
-    if (destino === "avatar") carpeta = StorageFolder.USUARIO_AVATAR;
-    if (destino === "video") carpeta = StorageFolder.PRODUCTO_VIDEO;
+    // 4. Evitar mezclar videos con destinos exclusivos de imagen
+    if (VIDEO_MIME_TYPES.includes(tipoMime) && destino !== "video") {
+      return res.status(400).json({
+        success: false,
+        message:
+          "Los archivos de video solo se permiten cuando el destino es 'video'",
+      });
+    }
 
-    // 4. Generar la URL firmada
+    // 5. Generar la URL firmada
     const result = await storageService.generarPresignedUrl(
       nombreArchivo,
       tipoMime,
