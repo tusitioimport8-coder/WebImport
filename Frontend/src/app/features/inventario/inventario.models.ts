@@ -17,6 +17,8 @@ export interface InventoryProduct {
   wholesalePrice: number;
   bulkPrice: number;
   imageUrl?: string;
+  galleryUrls: string[];
+  videoUrl: string | null;
   quantity: number;
   minimumStock: number;
   status: InventoryStatus;

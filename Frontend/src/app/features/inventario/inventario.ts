@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { switchMap, map, of, finalize, forkJoin, catchError } from 'rxjs';
+import { switchMap, map, of, finalize, forkJoin } from 'rxjs';
 import { ProductPayload } from '../../services/product.service';
 import { AuthService } from '../../services/auth';
 import { BcvService } from '../../services/bcv.service';
@@ -132,6 +132,12 @@ readonly pageSize = signal<5 | 25 | 50>(5);
   readonly submitted = signal(false);
   readonly selectedImage = signal<string | null>(null);
   readonly selectedImageFile = signal<File | null>(null);
+  readonly galleryImages = signal<Array<{ file: File; previewUrl: string }>>([]);
+  readonly existingGalleryUrls = signal<string[]>([]);
+  readonly selectedVideoFile = signal<File | null>(null);
+  readonly selectedVideoPreview = signal<string | null>(null);
+  readonly existingVideoUrl = signal<string | null>(null);
+  readonly mediaError = signal<string | null>(null);
 readonly savingProduct = signal(false);
   readonly previewStatus = signal<InventoryStatus>('out-of-stock');
 
@@ -411,10 +417,12 @@ onImageSelected(event: Event): void {
   if (!file) return;
 
   if (!file.type.startsWith('image/')) {
-    console.error('El archivo seleccionado no es una imagen');
+    this.mediaError.set('Selecciona un archivo de imagen válido.');
+    input.value = '';
     return;
   }
 
+  this.mediaError.set(null);
   this.selectedImageFile.set(file);
 
   const reader = new FileReader();
@@ -424,7 +432,73 @@ onImageSelected(event: Event): void {
   };
 
   reader.readAsDataURL(file);
+  input.value = '';
 }
+
+onGalleryImagesSelected(event: Event): void {
+  const input = event.target as HTMLInputElement;
+  const files = Array.from(input.files ?? []);
+
+  if (!files.length) return;
+
+  if (files.some(file => !file.type.startsWith('image/'))) {
+    this.mediaError.set('Todos los archivos adicionales deben ser imágenes.');
+    input.value = '';
+    return;
+  }
+
+  this.mediaError.set(null);
+  this.galleryImages.update(current => [
+    ...current,
+    ...files.map(file => ({ file, previewUrl: URL.createObjectURL(file) })),
+  ]);
+  input.value = '';
+}
+
+onVideoSelected(event: Event): void {
+  const input = event.target as HTMLInputElement;
+  const file = input.files?.[0];
+
+  if (!file) return;
+
+  if (!file.type.startsWith('video/')) {
+    this.mediaError.set('Selecciona un archivo de video válido.');
+    input.value = '';
+    return;
+  }
+
+  const previousPreview = this.selectedVideoPreview();
+  if (previousPreview) URL.revokeObjectURL(previousPreview);
+
+  this.mediaError.set(null);
+  this.selectedVideoFile.set(file);
+  this.selectedVideoPreview.set(URL.createObjectURL(file));
+  input.value = '';
+}
+
+removeGalleryImage(index: number): void {
+  const image = this.galleryImages()[index];
+  if (image) URL.revokeObjectURL(image.previewUrl);
+  this.galleryImages.update(images => images.filter((_, itemIndex) => itemIndex !== index));
+}
+
+removeExistingGalleryImage(url: string): void {
+  this.existingGalleryUrls.update(urls => urls.filter(imageUrl => imageUrl !== url));
+}
+
+removeVideo(): void {
+  const preview = this.selectedVideoPreview();
+  if (preview) URL.revokeObjectURL(preview);
+
+  if (this.selectedVideoFile()) {
+    this.selectedVideoFile.set(null);
+    this.selectedVideoPreview.set(null);
+    return;
+  }
+
+  this.existingVideoUrl.set(null);
+}
+
   openCreate(): void {
     if (this.isMarketing()) return;
     this.prepareEditor('create');
@@ -465,6 +539,7 @@ openEdit(product: InventoryProduct): void {
   closeEditor(): void {
     this.editorOpen = false;
     this.submitted.set(false);
+    this.clearSelectedMedia();
   }
 
 saveProduct(): void {
@@ -474,28 +549,32 @@ saveProduct(): void {
 
   if (this.isMarketing()) {
     const editingId = this.editingProductId();
-    const file = this.selectedImageFile();
+    const currentProduct = this.products().find(product => product.id === editingId);
+    const currentGallery = currentProduct?.galleryUrls ?? [];
+    const galleryChanged =
+      this.existingGalleryUrls().length !== currentGallery.length ||
+      this.existingGalleryUrls().some((url, index) => url !== currentGallery[index]);
+    const videoChanged = this.existingVideoUrl() !== (currentProduct?.videoUrl ?? null);
 
-    if (!editingId || !file) {
+    if (
+      !editingId ||
+      (!this.selectedImageFile() &&
+        this.galleryImages().length === 0 &&
+        !this.selectedVideoFile() &&
+        !galleryChanged &&
+        !videoChanged)
+    ) {
       return;
     }
 
     this.savingProduct.set(true);
 
-    this.productService.getProductUploadUrl(file).pipe(
-      switchMap(response =>
-        this.productService.uploadProductImage(
-          response.data.uploadUrl,
-          file
-        ).pipe(
-          map(() => response.data.publicUrl)
-        )
-      ),
-      switchMap(imageUrl =>
-        this.productService.updateProduct(editingId, {
-          imagen_url: imageUrl
-        })
-      ),
+    this.uploadSelectedMedia().pipe(
+      switchMap(media => this.productService.updateProduct(editingId, {
+        imagen_url: media.coverUrl,
+        galeria: media.galleryUrls,
+        video_url: media.videoUrl,
+      })),
       finalize(() => this.savingProduct.set(false))
     ).subscribe({
       next: () => {
@@ -503,8 +582,8 @@ saveProduct(): void {
         this.loadProducts();
       },
       error: error => {
-        console.error('Error al actualizar imagen:', error);
-        this.errorMessage.set('No se pudo actualizar la imagen.');
+        console.error('Error al actualizar los medios del producto:', error);
+        this.mediaError.set('No se pudieron guardar las fotos o el video. Intenta nuevamente.');
       }
     });
 
@@ -523,31 +602,23 @@ saveProduct(): void {
   category => category.nombre === value.category
 )?.id;
   const editingId = this.editingProductId();
-  const file = this.selectedImageFile();
+
+  if (!editingId && !this.selectedImageFile()) {
+    this.mediaError.set('Agrega una imagen de portada para crear el producto.');
+    return;
+  }
 
   this.savingProduct.set(true);
 
-  const image$ = file
-    ? this.productService.getProductUploadUrl(file).pipe(
-        switchMap((response) =>
-          this.productService
-            .uploadProductImage(response.data.uploadUrl, file)
-            .pipe(map(() => response.data.publicUrl))
-        )
-      )
-    : of(
-    editingId
-      ? this.products().find(product => product.id === editingId)?.imageUrl ?? ''
-      : ''
-  );
-
-  image$
+  this.uploadSelectedMedia()
     .pipe(
-      switchMap((imageUrl) => {
+      switchMap((media) => {
         const payload: ProductPayload = {
           nombre: value.name.trim(),
           descripcion: value.description.trim(),
-          imagen_url: imageUrl,
+          imagen_url: media.coverUrl,
+          video_url: media.videoUrl,
+          galeria: media.galleryUrls,
           stock: Number(value.quantity),
 categorias_ids: categoryId !== undefined ? [Number(categoryId)] : [],
        precios: [
@@ -570,27 +641,11 @@ categorias_ids: categoryId !== undefined ? [Number(categoryId)] : [],
 ]
         };
 
-      console.log('MODO:', editingId ? 'EDITAR' : 'CREAR');
-console.log('ARCHIVO:', file?.name ?? 'SIN ARCHIVO');
-console.log('URL DE IMAGEN:', imageUrl);
-console.log('PAYLOAD DEL PRODUCTO:', payload);
-
 if (editingId) {
   return this.productService.updateProduct(editingId, payload);
 }
 
-return this.productService.createProduct(payload).pipe(
-  switchMap((response) => {
-    if (!imageUrl) {
-      return of(response);
-    }
-
-    return this.productService.updateProduct(
-      response.data.id,
-      { imagen_url: imageUrl }
-    );
-  })
-);
+return this.productService.createProduct(payload);
       }),
       finalize(() => this.savingProduct.set(false))
     )
@@ -602,14 +657,9 @@ return this.productService.createProduct(payload).pipe(
       },
       error: (error) => {
         console.error('Error al guardar producto:', error);
-
-console.log(
-  'DETALLE DE VALIDACIÓN:',
-  JSON.stringify(error.error?.error, null, 2)
-);
-        this.errorMessage.set(
-          'No se pudo guardar el producto. Revisa la consola.'
-        );
+          this.mediaError.set(
+            error.error?.message || 'No se pudo guardar el producto. Revisa los datos e intenta nuevamente.'
+          );
       }
     });
 }
@@ -667,13 +717,65 @@ pageRangeEnd(): number {
 }
 
   private prepareEditor(mode: InventoryEditorMode, product?: InventoryProduct): void {
+    this.clearSelectedMedia();
     this.selectedImageFile.set(null);
     this.productForm.enable({ emitEvent: false });
     this.productForm.markAsPristine();
     this.productForm.markAsUntouched();
     this.editorMode.set(mode);
     this.editingProductId.set(product?.id ?? null);
+    this.existingGalleryUrls.set(product?.galleryUrls ?? []);
+    this.existingVideoUrl.set(product?.videoUrl ?? null);
+    this.mediaError.set(null);
     this.submitted.set(false);
+  }
+
+  private uploadSelectedMedia() {
+    const product = this.products().find(item => item.id === this.editingProductId());
+    const coverFile = this.selectedImageFile();
+    const galleryFiles = this.galleryImages().map(image => image.file);
+    const videoFile = this.selectedVideoFile();
+
+    return forkJoin({
+      coverUrl: coverFile
+        ? this.uploadFile(coverFile)
+        : of(product?.imageUrl ?? ''),
+      uploadedGallery: galleryFiles.length
+        ? forkJoin(galleryFiles.map(file => this.uploadFile(file)))
+        : of([] as string[]),
+      videoUrl: videoFile
+        ? this.uploadFile(videoFile)
+        : of(this.existingVideoUrl()),
+    }).pipe(
+      map(media => ({
+        coverUrl: media.coverUrl,
+        galleryUrls: [...this.existingGalleryUrls(), ...media.uploadedGallery],
+        videoUrl: media.videoUrl,
+      }))
+    );
+  }
+
+  private uploadFile(file: File) {
+    return this.productService.getProductUploadUrl(file).pipe(
+      switchMap(response =>
+        this.productService.uploadProductImage(response.data.uploadUrl, file).pipe(
+          map(() => response.data.publicUrl)
+        )
+      )
+    );
+  }
+
+  private clearSelectedMedia(): void {
+    for (const image of this.galleryImages()) {
+      URL.revokeObjectURL(image.previewUrl);
+    }
+
+    const videoPreview = this.selectedVideoPreview();
+    if (videoPreview) URL.revokeObjectURL(videoPreview);
+
+    this.galleryImages.set([]);
+    this.selectedVideoFile.set(null);
+    this.selectedVideoPreview.set(null);
   }
 
   private mapApiProduct(product: ApiProduct): InventoryProduct {
@@ -712,6 +814,10 @@ bulkPrice: getPrice('GranMayor'),
     status: this.resolveStatus(quantity, minimumStock),
     description: product.descripcion ?? '',
     imageUrl: product.imagen_url,
+    galleryUrls: (product.galeria ?? []).map(image =>
+      typeof image === 'string' ? image : image.url
+    ),
+    videoUrl: product.video_url ?? null,
   };
 }
 
@@ -747,6 +853,8 @@ bulkPrice: Number(value.bulkPrice),
       status: this.resolveStatus(quantity, minimumStock),
       description: value.description.trim(),
       ...(this.selectedImage() ? { imageUrl: this.selectedImage()! } : {}),
+      galleryUrls: this.existingGalleryUrls(),
+      videoUrl: this.existingVideoUrl(),
     };
   }
 

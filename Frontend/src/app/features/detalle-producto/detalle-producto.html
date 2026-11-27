@@ -46,23 +46,84 @@
 
       <!-- GALERÍA -->
       <div class="product-gallery">
-        <div class="main-image-wrapper">
+        @if (selectedMedia(); as media) {
+          <div
+            class="product-gallery-layout"
+            [class.product-gallery-layout_single]="productMedia().length <= 1"
+          >
+            @if (productMedia().length > 1) {
+              <div
+                class="gallery-thumbnails"
+                role="group"
+                aria-label="Fotos y video del producto"
+              >
+                @for (item of productMedia(); track item.key) {
+                  <button
+                    type="button"
+                    class="gallery-thumbnail"
+                    [class.gallery-thumbnail_active]="selectedMedia()?.key === item.key"
+                    [attr.aria-label]="'Mostrar ' + item.label"
+                    [attr.aria-pressed]="selectedMedia()?.key === item.key"
+                    (mouseenter)="selectMedia(item)"
+                    (focus)="selectMedia(item)"
+                    (click)="selectMedia(item)"
+                  >
+                    @if (item.type === 'image') {
+                      <img [src]="item.url" [alt]="item.label" />
+                    } @else {
+                      @if (product.imagen_url) {
+                        <img [src]="product.imagen_url" alt="" />
+                      } @else {
+                        <span class="video-thumbnail-placeholder">
+                          <i class="pi pi-video" aria-hidden="true"></i>
+                        </span>
+                      }
+                      <span class="video-thumbnail-icon">
+                        <i class="pi pi-play" aria-hidden="true"></i>
+                      </span>
+                    }
+                  </button>
+                }
+              </div>
+            }
 
-          @if (product.imagen_url) {
-            <img
-              class="main-image"
-              [src]="product.imagen_url"
-              [alt]="product.nombre"
-              decoding="async"
-            />
-          } @else {
+            <div class="gallery-viewer">
+              <div class="main-image-wrapper">
+                @if (media.type === 'image') {
+                  <img
+                    class="main-image"
+                    [src]="media.url"
+                    [alt]="product.nombre + ' - ' + media.label"
+                    decoding="async"
+                  />
+                } @else {
+                  <video
+                    class="main-video"
+                    [src]="media.url"
+                    [poster]="product.imagen_url || null"
+                    controls
+                    playsinline
+                    preload="metadata"
+                    [attr.aria-label]="'Video de ' + product.nombre"
+                  ></video>
+                }
+              </div>
+              @if (productMedia().length > 1) {
+                <div class="gallery-caption">
+                  <span>{{ media.label }}</span>
+                  <span>{{ productMedia().indexOf(media) + 1 }} / {{ productMedia().length }}</span>
+                </div>
+              }
+            </div>
+          </div>
+        } @else {
+          <div class="main-image-wrapper">
             <div class="image-placeholder">
               <i class="pi pi-image"></i>
-              <span>Imagen no disponible</span>
+              <span>Imagen o video no disponible</span>
             </div>
-          }
-
-        </div>
+          </div>
+        }
       </div>
 
       <!-- INFORMACIÓN DEL PRODUCTO -->

@@ -3,11 +3,7 @@ import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment.development';
 
-export type ProductPriceType =
-  | 'detal_usd'
-  | 'detal_bs'
-  | 'Mayor'
-  | 'GranMayor';
+export type ProductPriceType = 'detal_usd' | 'detal_bs' | 'Mayor' | 'GranMayor';
 
 export interface ApiProductPrice {
   id_precio: string;
@@ -25,6 +21,14 @@ export interface ApiProductCategory {
   id_categoria: number;
   nombre_categoria: string;
 }
+
+export interface ApiProductGalleryImage {
+  id: number;
+  url: string;
+  es_principal: boolean;
+  creado_en: string;
+}
+
 export interface ApiProduct {
   id: string;
   sku?: string;
@@ -33,6 +37,7 @@ export interface ApiProduct {
   descuento_porcentaje: number | string;
   imagen_url?: string;
   video_url?: string | null;
+  galeria?: Array<string | ApiProductGalleryImage>;
   stock: number;
   estado: boolean;
   creado_en: string;
@@ -54,12 +59,13 @@ export interface ProductPayload {
   descripcion: string;
   imagen_url: string;
   video_url?: string | null;
+  galeria?: string[];
   stock: number;
   precios: {
     tipo_precio: ProductPriceType;
     precio: number;
   }[];
- categorias_ids?: number[];
+  categorias_ids?: number[];
 }
 export interface ProductMutationResponse {
   success: boolean;
@@ -103,18 +109,17 @@ export class ProductService {
   }
 
   deleteProduct(id: string): Observable<{ success: boolean; message?: string }> {
-  return this.http.delete<{ success: boolean; message?: string }>(
-    `${this.apiUrl}/${id}`,
-    { withCredentials: true }
-  );
-}
+    return this.http.delete<{ success: boolean; message?: string }>(`${this.apiUrl}/${id}`, {
+      withCredentials: true,
+    });
+  }
   getProductUploadUrl(file: File): Observable<ProductUploadUrlResponse> {
     return this.http.post<ProductUploadUrlResponse>(
       `${this.apiUrl}/upload-url`,
       {
         nombreArchivo: file.name,
         tipoMime: file.type,
-        destino: 'productos',
+        destino: file.type.startsWith('video/') ? 'video' : 'producto',
       },
       { withCredentials: true },
     );

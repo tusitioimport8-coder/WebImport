@@ -42,6 +42,13 @@ interface ProductPriceOption {
   available: boolean;
 }
 
+interface ProductMedia {
+  key: string;
+  url: string;
+  type: 'image' | 'video';
+  label: string;
+}
+
 @Component({
   selector: 'app-detalle-producto',
   standalone: true,
@@ -265,6 +272,49 @@ formatearBCV(precioUSD: number): string {
   readonly products = signal<ApiProduct[]>([]);
   readonly product = signal<ApiProduct | null>(null);
   readonly relatedSelection = signal<ApiProduct[]>([]);
+  readonly selectedMediaKey = signal('');
+
+  readonly productMedia = computed<ProductMedia[]>(() => {
+    const product = this.product();
+    if (!product) return [];
+
+    const galleryUrls = (product.galeria ?? []).map(image =>
+      typeof image === 'string' ? image : image.url
+    );
+    const imageUrls = [product.imagen_url, ...galleryUrls]
+      .filter((url): url is string => typeof url === 'string' && url.trim().length > 0)
+      .filter((url, index, urls) => urls.indexOf(url) === index);
+
+    const media: ProductMedia[] = imageUrls.map((url, index) => ({
+      key: `image:${url}`,
+      url,
+      type: 'image',
+      label: url === product.imagen_url
+        ? 'Imagen principal'
+        : `Foto adicional ${index + 1 - (product.imagen_url ? 1 : 0)}`,
+    }));
+
+    if (product.video_url) {
+      media.push({
+        key: `video:${product.video_url}`,
+        url: product.video_url,
+        type: 'video',
+        label: 'Video del producto',
+      });
+    }
+
+    return media;
+  });
+
+  readonly selectedMedia = computed(() => {
+    const media = this.productMedia();
+    const coverUrl = this.product()?.imagen_url;
+
+    return media.find(item => item.key === this.selectedMediaKey())
+      ?? media.find(item => item.type === 'image' && item.url === coverUrl)
+      ?? media[0]
+      ?? null;
+  });
 
  readonly selectedPriceType = signal<TipoPrecioVisual>('DetalBCV');
   readonly quantity = signal(1);
@@ -419,6 +469,31 @@ selectProduct(productId: string): void {
 
   this.product.set(product);
   this.quantity.set(1);
+  this.selectedMediaKey.set(product.imagen_url ? `image:${product.imagen_url}` : '');
+
+  if (product.galeria === undefined || product.video_url === undefined) {
+    this.productService.getProductById(product.id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: response => {
+          this.product.update(current => current?.id === product.id
+            ? {
+                ...current,
+                ...response.data,
+                imagen_url: response.data.imagen_url ?? current.imagen_url,
+                galeria: response.data.galeria ?? current.galeria,
+                video_url: response.data.video_url !== undefined
+                  ? response.data.video_url
+                  : current.video_url,
+              }
+            : current
+          );
+        },
+        error: error => {
+          console.error('Error al cargar las fotos y el video del producto:', error);
+        },
+      });
+  }
 
   const categoriasProducto = new Set(
     (product.categorias ?? []).map(
@@ -446,6 +521,10 @@ selectProduct(productId: string): void {
     top: 0,
     behavior: 'smooth'
   });
+}
+
+selectMedia(media: ProductMedia): void {
+  this.selectedMediaKey.set(media.key);
 }
   // PRECIOS
   selectPrice(type: TipoPrecioVisual): void {
