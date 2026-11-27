@@ -179,14 +179,19 @@ readonly errorEnvioPresupuesto = signal('');
     return `https://wa.me/${phone}?text=${encodeURIComponent(lines.join('\n'))}`;
   });
 
-  abrirFormulario(): void {
-    if (this.cartService.isEmpty() || this.esFuerzaVentas()) {
-      return;
-    }
-
-    this.errorPedido.set('');
-    this.mostrarFormulario.set(true);
+ abrirFormulario(): void {
+  if (this.cartService.isEmpty() || this.esFuerzaVentas()) {
+    return;
   }
+
+  this.datosPedido.metodo_pago =
+    this.cartService.priceMode() === 'detal_bs'
+      ? 'pago_movil'
+      : 'zelle';
+
+  this.errorPedido.set('');
+  this.mostrarFormulario.set(true);
+}
 
   cerrarFormulario(): void {
     if (this.procesandoPedido()) return;
@@ -208,6 +213,18 @@ readonly errorEnvioPresupuesto = signal('');
     }
 
     const datos = this.datosPedido;
+
+    const metodosPermitidos =
+  this.cartService.priceMode() === 'detal_bs'
+    ? ['pago_movil', 'transferencia', 'cashea']
+    : ['zelle', 'efectivo', 'binance'];
+
+if (!metodosPermitidos.includes(datos.metodo_pago)) {
+  this.errorPedido.set(
+    'Selecciona un método de pago válido para la moneda elegida.'
+  );
+  return;
+}
 
  if (
   !datos.nombre_completo.trim() ||

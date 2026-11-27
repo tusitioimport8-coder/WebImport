@@ -197,7 +197,7 @@
                     @if (tasaBCV(); as tasa) {
                       Bs.
                       {{
-                        getSubtotalBolivares(item.price, item.quantity, tasa)
+                        getSubtotalBolivares(item.price, 1, tasa)
                           | number: '1.2-2' : 'es-VE'
                       }}
                     } @else {
@@ -514,14 +514,24 @@
         <option value="retiro">Retiro en sede</option>
         <option value="domicilio">Envío a domicilio</option>
       </select>
+<label for="metodo-pago">Método de pago</label>
 
-      <label for="metodo-pago">Método de pago</label>
-
-      <select id="metodo-pago" name="metodo_pago" [(ngModel)]="datosPedido.metodo_pago">
-        <option value="transferencia">Transferencia</option>
-        <option value="efectivo">Efectivo</option>
-        <option value="pago_movil">Pago móvil</option>
-      </select>
+<select
+  id="metodo-pago"
+  name="metodo_pago"
+  [(ngModel)]="datosPedido.metodo_pago"
+  required
+>
+  @if (cartService.priceMode() === 'detal_bs') {
+    <option value="pago_movil">Pago Móvil</option>
+    <option value="transferencia">Transferencia bancaria</option>
+    <option value="cashea">Cashea</option>
+  } @else {
+    <option value="zelle">Zelle</option>
+    <option value="efectivo">Efectivo</option>
+    <option value="binance">Binance</option>
+  }
+</select>
 
       @if (errorPedido()) {
         <p class="pedido-error" role="alert">
